@@ -59,7 +59,7 @@ export const getRootLoader = async ({ request }: LoaderFunctionArgs) => {
       region,
       siteDetails: {
         store: {
-          name: 'BARRIO',
+          name: 'CHEF VELEZ',
         },
         settings: siteSettings,
         headerNavigationItems,

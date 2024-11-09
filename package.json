@@ -9,7 +9,8 @@
     "generate-env": "cp ./apps/medusa/.env.template ./apps/medusa/.env && cp ./apps/storefront/.env.template ./apps/storefront/.env",
     "medusa:init": "turbo run medusa:init --filter=medusa",
     "format": "turbo run format",
-    "clean": "rimraf \"**/node_modules\""
+    "clean": "find . -name \"node_modules\" -type d -prune -exec rm -rf '{}' \\;",
+    "clean:medusa": "rm -rf ./apps/medusa/node_modules"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.3",
