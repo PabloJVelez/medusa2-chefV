@@ -14,6 +14,7 @@
   ],
   "scripts": {
     "nukedb": "docker compose down -v && docker compose up -d",
+    "clean": "find . -name \"node_modules\" -type d -prune -exec rm -rf '{}' + && find . -name \"dist\" -type d -prune -exec rm -rf '{}' + && yarn",
     "build": "medusa build",
     "seed": "medusa exec ./src/scripts/seed.ts",
     "start": "medusa start",
