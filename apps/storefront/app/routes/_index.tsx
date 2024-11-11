@@ -128,35 +128,36 @@ export default function IndexRoute() {
       <Hero
         className="pb-10 min-h-[734px] !max-w-full"
         content={
-          <div className="text-center w-full space-y-9 pt-9">
-            <h4 className="font-italiana text-2xl">ELEVATE YOUR OCCASION</h4>
-            <h1 className="text-4xl lg:text-7xl font-italiana">
-              Let us create your next extraordinary&nbsp;dining&nbsp;experience
-            </h1>
+          <div className="text-center w-full pt-9">
+            <div className="space-y-9 px-4 md:px-6 lg:px-8">
+              <h4 className="font-italiana text-2xl">ELEVATE YOUR OCCASION</h4>
+              <h1 className="text-4xl lg:text-7xl font-italiana break-words">
+                Your Perfect Evening in Three Simple Steps
+              </h1>
           
-          
-            <ListItems
-              className="text-left w-full text-black justify-between p-0"
-              itemsClassName="rounded-3xl bg-highlight-900/70 p-10 text-sm"
-              useFillTitle
-              items={[
-                {
-                  title: 'Select your experience',
-                  description:
-                    'Choose from private dining events, cooking demonstrations, or custom culinary experiences.',
-                },
-                {
-                  title: 'Customize your evening',
-                  description:
-                    'Share your preferences and dietary needs. Chef Velez will craft the perfect menu for your occasion.',
-                },
-                {
-                  title: 'Savor the moment',
-                  description:
-                    'Immerse yourself in an exceptional dining experience where every detail creates lasting memories.',
-                },
-              ]}
-            />
+              <ListItems
+                className="text-left w-full text-black justify-between p-0"
+                itemsClassName="rounded-3xl bg-highlight-900/70 p-10 text-sm"
+                useFillTitle
+                items={[
+                  {
+                    title: '1. Select your experience',
+                    description:
+                      'Choose from private dining events, cooking demonstrations, or custom culinary experiences.',
+                  },
+                  {
+                    title: '2. Customize your evening',
+                    description:
+                      'Share your preferences and dietary needs. Chef Velez will craft the perfect menu for your occasion.',
+                  },
+                  {
+                    title: '3. Savor the moment',
+                    description:
+                      'Immerse yourself in an exceptional dining experience where every detail creates lasting memories.',
+                  },
+                ]}
+              />
+            </div>
           </div>
         }
         actions={[
