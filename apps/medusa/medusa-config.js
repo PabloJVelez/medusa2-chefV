@@ -56,6 +56,9 @@ module.exports = defineConfig({
         },
       },
     },
+    {
+      resolve: "./src/modules/menu",
+    }
   ],
   admin: {
     backendUrl: process.env.ADMIN_BACKEND_URL || 'http://localhost:9000',

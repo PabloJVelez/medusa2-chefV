@@ -1,0 +1,62 @@
+import { createWorkflow, transform, when, WorkflowResponse } from "@medusajs/framework/workflows-sdk"
+import { ProductDTO } from "@medusajs/framework/types"
+import { createRemoteLinkStep } from "@medusajs/medusa/core-flows"
+import { Modules } from "@medusajs/framework/utils"
+import { MENU_MODULE } from "../../modules/menu"
+import { createMenuStep } from "./steps/create-menu"
+
+export type CreateMenuFromProductWorkflowInput = {
+  product: ProductDTO
+  additional_data?: {
+    menu?: {
+      name: string
+      courses: {
+        name: string
+        dishes: {
+          name: string
+          description: string
+          ingredients: {
+            name: string
+            optional: boolean
+          }[]
+        }[]
+      }[]
+    }
+  }
+}
+
+
+
+export const createMenuFromProductWorkflow = createWorkflow(
+  "create-menu-from-product",
+  (input: CreateMenuFromProductWorkflowInput) => {
+    const menuToCreate = transform(
+      {
+        input
+      },
+      (data) => data.input.additional_data?.menu
+    )
+
+    console.log("MENU TO CREATE", menuToCreate)
+    const menu = createMenuStep({
+      menu: menuToCreate
+    })
+    console.log("MENU CREATED -------->>>>>", menu)
+
+    when(({ menu }), ({ menu }) => menu?.id !== undefined)
+      .then(() => {
+        createRemoteLinkStep([{
+          [Modules.PRODUCT]: {
+            product_id: input.product.id
+          },
+          [MENU_MODULE]: {
+            menu_id: menu.id
+          }
+        }])
+      })
+
+    return new WorkflowResponse({
+      menu
+    })
+  }
+)

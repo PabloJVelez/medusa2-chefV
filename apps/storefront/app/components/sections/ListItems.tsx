@@ -35,10 +35,10 @@ export const ListItems = ({ title, items = [], className, itemsClassName, useFil
   return (
     <Container className={clsx('p-14 pt-0 lg:px-16', className)}>
       {title && (
-        <>
-          <h3 className="text-xl font-italiana">{title}</h3>
+        <div className="flex flex-col items-center">
+          <h3 className="text-3xl font-italiana text-center">{title}</h3>
           <div className="w-full mt-1 mb-8 border-t border-primary" />
-        </>
+        </div>
       )}
 
       <div className="flex flex-col md:flex-row gap-6 lg:gap-16">

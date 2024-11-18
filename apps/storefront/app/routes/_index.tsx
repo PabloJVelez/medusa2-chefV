@@ -73,7 +73,17 @@ export default function IndexRoute() {
         />
       </Container>
 
-          
+      <ProductList
+        className="!pb-[100px]"
+        heading="Event Favorites"
+        actions={[
+          {
+            label: 'View all',
+            url: '/products',
+          },
+        ]}
+      />
+
       <ListItems
         itemsClassName="mb-2"
         title="Chef Velez's Core Values"
@@ -110,17 +120,6 @@ export default function IndexRoute() {
               width: 60,
               height: 60,
             },
-          },
-        ]}
-      />
-
-      <ProductList
-        className="!pb-[100px]"
-        heading="Event Favorites"
-        actions={[
-          {
-            label: 'View all',
-            url: '/products',
           },
         ]}
       />
