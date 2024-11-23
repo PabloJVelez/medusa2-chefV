@@ -11,7 +11,9 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   const region = await getSelectedRegion(request.headers);
   const { products, count, limit, offset } = await sdk.store.product.list({
     region_id: region?.id,
+    fields: "+menu.*",
   });
+  console.log("PRODUCTS RETREIVED", products)
 
   return { products, count, limit, offset };
 };

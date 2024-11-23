@@ -92,7 +92,14 @@ const getBreadcrumbs = (product: StoreProduct) => {
 };
 
 export interface ProductTemplateProps {
-  product: StoreProduct;
+  product: StoreProduct & { 
+    menu: {
+      name: string;
+      courses: {
+        name: string;
+      }[];
+    } 
+  };
 }
 
 const variantIsSoldOut: (variant: StoreProductVariant | undefined) => boolean = (variant) => {
@@ -319,15 +326,6 @@ export const ProductTemplate = ({ product }: ProductTemplateProps) => {
                             </div>
                           </div>
 
-                          {!!product.description && (
-                            <div className="mt-4">
-                              <h3 className="mb-2">Description</h3>
-                              <div className="whitespace-pre-wrap text-base text-primary-800">
-                                {product.description}
-                              </div>
-                            </div>
-                          )}
-
                           {product.categories && product.categories.length > 0 && (
                             <nav aria-label="Categories" className="mt-4">
                               <h3 className="mb-2">Categories</h3>
@@ -368,12 +366,43 @@ export const ProductTemplate = ({ product }: ProductTemplateProps) => {
                       </div>
                     </GridColumn>
                   </Grid>
+
+                  {!!product.menu && (
+                    <div className="mt-24">
+                      <div className="space-y-12">
+                        <div className="text-center space-y-4">
+                          <h4 className="font-italiana text-2xl">CULINARY JOURNEY</h4>
+                          <h2 className="text-4xl lg:text-5xl font-aboreto">{product.menu.name}</h2>
+                        </div>
+                        
+                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                          {product.menu.courses?.map((course, index) => (
+                            <div 
+                              key={index} 
+                              className="p-8 bg-highlight-900/70 rounded-xl"
+                            >
+                              <div className="flex items-center gap-4 mb-4">
+                                <span className="font-italiana text-xl text-accent-900">
+                                  Course {index + 1}
+                                </span>
+                                <div className="flex-1 border-b border-accent-900/20"></div>
+                              </div>
+                              <h3 className="font-aboreto text-2xl">
+                                {course.name}
+                              </h3>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </GridColumn>
             </Grid>
           </Container>
-        </Form>{' '}
+        </Form>
       </section>
+      
       <ProductList className="!pb-[100px] xl:px-9" heading="You may also like" />
     </>
   );

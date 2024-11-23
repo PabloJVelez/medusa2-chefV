@@ -8,7 +8,7 @@ import { StoreProduct } from '@medusajs/types';
 export const loader = async (args: LoaderFunctionArgs) => {
   const { products } = await fetchProducts(args.request, {
     handle: args.params.productHandle,
-    fields: '*categories',
+    fields: '*categories,+menu.*,menu.courses.*,'
   }).catch((e) => {
     return { products: [] };
   });
@@ -26,7 +26,12 @@ export const meta: MetaFunction<ProductPageLoaderData> = getMergedProductMeta;
 
 export default function ProductDetailRoute() {
   const { product } = useLoaderData<{
-    product: StoreProduct;
+    product: StoreProduct & { menu: {
+      name: string;
+      courses: {
+        name: string;
+      }[];
+    } };
   }>();
 
   if (!product) {
