@@ -34,6 +34,9 @@ import { QuantitySelector } from '@app/components/common/field-groups/QuantitySe
 import { StoreProduct, StoreProductOptionValue, StoreProductVariant } from '@medusajs/types';
 import { Validator } from 'remix-validated-form';
 import ProductList from '@app/components/sections/ProductList';
+import { DatePicker } from '@app/components/common/forms/fields/DatePicker';
+import { TimePicker } from '@app/components/common/forms/fields/TimePicker';
+import { Select } from '@app/components/common/forms/fields/Select';
 
 export interface AddToCartFormValues {
   productId: string;
@@ -41,6 +44,9 @@ export interface AddToCartFormValues {
   options: {
     [key: string]: string;
   };
+  requestedDate?: string;
+  requestedTime?: string;
+  partySize?: number;
 }
 
 export const getAddToCartValidator = (product: StoreProduct): Validator<AddToCartFormValues> => {
@@ -59,6 +65,12 @@ export const getAddToCartValidator = (product: StoreProduct): Validator<AddToCar
     productId: Yup.string().required('Product ID is required'),
     quantity: Yup.number().optional(),
     options: Yup.object().shape(optionsValidation),
+    requestedDate: Yup.string().required('Please select a date'),
+    requestedTime: Yup.string().required('Please select a time'),
+    partySize: Yup.number()
+      .required('Please specify party size')
+      .min(1, 'Minimum party size is 1')
+      .max(20, 'Maximum party size is 20'),
   };
 
   return withYup(Yup.object().shape(schemaShape)) as Validator<AddToCartFormValues>;
@@ -127,6 +139,9 @@ export const ProductTemplate = ({ product }: ProductTemplateProps) => {
         },
         {} as Record<string, string>,
       ) || {},
+    requestedDate: '',
+    requestedTime: '',
+    partySize: 2,
   };
 
   const breadcrumbs = getBreadcrumbs(product);
@@ -305,6 +320,49 @@ export const ProductTemplate = ({ product }: ProductTemplateProps) => {
                           </section>
                         )}
 
+                        {!!product.menu && (
+                          <section aria-labelledby="menu-booking-options" className="my-8 space-y-6">
+                            <h2 id="menu-booking-options" className="text-xl font-semibold">
+                              Booking Details
+                            </h2>
+                            
+                            <div className="grid gap-6 sm:grid-cols-2">
+                              <div>
+                                <FieldLabel>Date</FieldLabel>
+                                <DatePicker
+                                  name="requestedDate"
+                                  className="w-full"
+                                  minDate={new Date()}
+                                  maxDate={new Date(Date.now() + 90 * 24 * 60 * 60 * 1000)} // 90 days ahead
+                                />
+                              </div>
+                              
+                              <div>
+                                <FieldLabel>Time</FieldLabel>
+                                <TimePicker
+                                  name="requestedTime"
+                                  className="w-full"
+                                  startTime="17:00" // 5 PM
+                                  endTime="22:00"   // 10 PM
+                                  interval={30}     // 30-minute intervals
+                                />
+                              </div>
+                            </div>
+
+                            <div>
+                              <FieldLabel>Number of Guests</FieldLabel>
+                              <Select
+                                name="partySize"
+                                className="w-full"
+                                options={Array.from({ length: 20 }, (_, i) => ({
+                                  label: `${i + 1} ${i === 0 ? 'person' : 'people'}`,
+                                  value: (i + 1).toString(),
+                                }))}
+                              />
+                            </div>
+                          </section>
+                        )}
+
                         <FormError />
 
                         <div className="my-2 flex flex-col gap-2">
@@ -368,7 +426,7 @@ export const ProductTemplate = ({ product }: ProductTemplateProps) => {
                   </Grid>
 
                   {!!product.menu && (
-                    <div className="mt-24">
+                    <div className="mt-14">
                       <div className="space-y-12">
                         <div className="text-center space-y-4">
                           <h4 className="font-italiana text-2xl">CULINARY JOURNEY</h4>

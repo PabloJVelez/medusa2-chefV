@@ -13,7 +13,15 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     region_id: region?.id,
     fields: "+menu.*",
   });
-  console.log("PRODUCTS RETREIVED", products)
+
+  // Add query parameters for additional fields
+  const testClientCall = await sdk.client.fetch(
+    `/store/menus`,
+    {
+      method: 'GET',
+    }
+  );
+  console.log("TEST CLIENT CALL", testClientCall)
 
   return { products, count, limit, offset };
 };

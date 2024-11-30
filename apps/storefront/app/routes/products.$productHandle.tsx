@@ -12,6 +12,7 @@ export const loader = async (args: LoaderFunctionArgs) => {
   }).catch((e) => {
     return { products: [] };
   });
+  console.log('PRODUCTS------->', products);
 
   if (!products.length) {
     return redirect('/404');

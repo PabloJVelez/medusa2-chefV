@@ -8,6 +8,7 @@ import { SideBySide } from '@app/components/sections/SideBySide';
 import { GridCTA } from '@app/components/sections/GridCTA';
 import { ActionList } from '@app/components/common/actions-list/ActionList';
 import ProductList from '@app/components/sections/ProductList';
+import MenuList from '@app/components/sections/MenuList';
 
 export const loader = async (args: LoaderFunctionArgs) => {
   return {};
@@ -84,6 +85,18 @@ export default function IndexRoute() {
         ]}
       />
 
+      <MenuList
+        className="!pb-[100px]"
+        heading="Menu Favorites"
+        actions={[
+          {
+            label: 'View all',
+            url: '/menus',
+          },
+        ]}
+      />
+
+        //TODO: LIST REVIEWS HERE
       <ListItems
         itemsClassName="mb-2"
         title="Chef Velez's Core Values"
