@@ -19,7 +19,6 @@ import { withYup } from '@remix-validated-form/with-yup';
 import truncate from 'lodash/truncate';
 import { useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react';
 import * as Yup from 'yup';
-import { ProductOptionSelectorSelect } from '@app/components/product/ProductOptionSelectorSelect';
 import { LineItemActions } from '@app/routes/api.cart.line-items';
 import {
   getFilteredOptionValues,
@@ -29,7 +28,6 @@ import {
 } from '@libs/util/products';
 import { useProductInventory } from '@app/hooks/useProductInventory';
 import { FieldLabel } from '@app/components/common/forms/fields/FieldLabel';
-import { ProductOptionSelectorRadio } from '@app/components/product/ProductOptionSelectorRadio';
 import { QuantitySelector } from '@app/components/common/field-groups/QuantitySelector';
 import { StoreProduct, StoreProductOptionValue, StoreProductVariant } from '@medusajs/types';
 import { Validator } from 'remix-validated-form';
@@ -37,40 +35,77 @@ import ProductList from '@app/components/sections/ProductList';
 import { DatePicker } from '@app/components/common/forms/fields/DatePicker';
 import { TimePicker } from '@app/components/common/forms/fields/TimePicker';
 import { Select } from '@app/components/common/forms/fields/Select';
+import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
+
+interface EventType {
+  id: string;
+  label: string;
+  description: string;
+}
+
+const EVENT_TYPES: EventType[] = [
+  {
+    id: 'cooking_class',
+    label: "Chef's Cooking Class",
+    description: 'Interactive cooking experience where guests cook along with the chef'
+  },
+  {
+    id: 'plated_dinner',
+    label: 'Plated Dinner Service',
+    description: 'Formal dining experience with individually plated courses'
+  },
+  {
+    id: 'buffet_style',
+    label: 'Buffet Style Service',
+    description: 'Casual dining setup with self-service stations'
+  }
+];
+
+const LOCATION_TYPES = [
+  {
+    value: 'customer_location',
+    label: 'My Location',
+    description: 'Chef will come to your provided location',
+    image: '/images/customer-location.jpg'
+  },
+  {
+    value: 'chef_location',
+    label: "Chef's Location",
+    description: 'Event will be held at a location provided by the chef',
+    image: '/images/chef-location.jpg'
+  }
+];
 
 export interface AddToCartFormValues {
   productId: string;
-  quantity?: number;
-  options: {
-    [key: string]: string;
-  };
-  requestedDate?: string;
-  requestedTime?: string;
-  partySize?: number;
+  requestedDate: string;
+  requestedTime: string;
+  partySize: number;
+  eventType: string;
+  locationType: string;
+  locationAddress?: string;
 }
 
 export const getAddToCartValidator = (product: StoreProduct): Validator<AddToCartFormValues> => {
-  const optionsValidation = product.options!.reduce(
-    (acc, option) => {
-      if (!option.id) return acc;
-
-      acc[option.id] = Yup.string().required(`${option.title} is required`);
-
-      return acc;
-    },
-    {} as { [key: string]: Yup.Schema<string> },
-  );
-
   const schemaShape: Record<keyof AddToCartFormValues, Yup.AnySchema> = {
     productId: Yup.string().required('Product ID is required'),
-    quantity: Yup.number().optional(),
-    options: Yup.object().shape(optionsValidation),
     requestedDate: Yup.string().required('Please select a date'),
     requestedTime: Yup.string().required('Please select a time'),
     partySize: Yup.number()
       .required('Please specify party size')
       .min(1, 'Minimum party size is 1')
       .max(20, 'Maximum party size is 20'),
+    eventType: Yup.string()
+      .required('Please select an event type')
+      .oneOf(EVENT_TYPES.map(type => type.id), 'Invalid event type'),
+    locationType: Yup.string()
+      .required('Please select a location type')
+      .oneOf(LOCATION_TYPES.map(type => type.value), 'Invalid location type'),
+    locationAddress: Yup.string().when('locationType', {
+      is: 'customer_location',
+      then: (schema) => schema.required('Please provide the event location'),
+      otherwise: (schema) => schema.optional(),
+    }),
   };
 
   return withYup(Yup.object().shape(schemaShape)) as Validator<AddToCartFormValues>;
@@ -114,10 +149,6 @@ export interface ProductTemplateProps {
   };
 }
 
-const variantIsSoldOut: (variant: StoreProductVariant | undefined) => boolean = (variant) => {
-  return !!(variant?.manage_inventory && variant?.inventory_quantity! < 1);
-};
-
 export const ProductTemplate = ({ product }: ProductTemplateProps) => {
   const formRef = useRef<HTMLFormElement>(null);
   const addToCartFetcher = useFetcher<any>();
@@ -129,85 +160,34 @@ export const ProductTemplate = ({ product }: ProductTemplateProps) => {
 
   const defaultValues: AddToCartFormValues = {
     productId: product.id!,
-    quantity: 1,
-    options:
-      product.options?.reduce(
-        (acc, option) => {
-          if (!option.id || !option.values?.length) return acc;
-          acc[option.id] = option.values[0].value;
-          return acc;
-        },
-        {} as Record<string, string>,
-      ) || {},
     requestedDate: '',
     requestedTime: '',
     partySize: 2,
+    eventType: '',
+    locationType: '',
+    locationAddress: '',
   };
 
   const breadcrumbs = getBreadcrumbs(product);
   const currencyCode = region.currency_code;
-  const [controlledOptions, setControlledOptions] = useState<Record<string, string>>(defaultValues.options);
-  const selectedOptions = useMemo(
-    () => product.options?.map(({ id }) => controlledOptions[id]),
-    [product, controlledOptions],
-  );
 
-  const variantMatrix = useMemo(() => selectVariantMatrix(product), [product]);
-  const selectedVariant = useMemo(
-    () => selectVariantFromMatrixBySelectedOptions(variantMatrix, selectedOptions),
-    [variantMatrix, selectedOptions],
-  );
+  const isUnavailable = false;
 
-  const productSelectOptions = useMemo(
-    () =>
-      product.options?.map((option, index) => {
-        const filteredOptionValues = getFilteredOptionValues(product, controlledOptions, option.id);
-        const optionValues = option.values as unknown as (StoreProductOptionValue & {
-          disabled?: boolean;
-        })[];
+  const [locationType, setLocationType] = useState('');
+  const [currentLocationIndex, setCurrentLocationIndex] = useState(0);
 
-        optionValues.forEach((optionValue) => {
-          if (!filteredOptionValues.find((filteredOptionValue) => optionValue.value === filteredOptionValue.value)) {
-            (optionValue as any).disabled = true;
-          } else {
-            (optionValue as any).disabled = false;
-          }
-        });
-
-        const optionValuesWithLabels = getOptionValuesWithDiscountLabels(
-          index,
-          currencyCode,
-          optionValues,
-          variantMatrix,
-          selectedOptions,
-        );
-        return {
-          title: option.title,
-          product_id: option.product_id as string,
-          id: option.id,
-          values: optionValuesWithLabels.map(({ value, label }) => ({
-            value,
-            label,
-          })),
-        };
-      }),
-    [product, controlledOptions],
-  );
-
-  const productSoldOut = useProductInventory(product).averageInventory === 0;
-
-  const handleOptionChangeBySelect = (e: ChangeEvent<HTMLInputElement>) => {
-    setControlledOptions({
-      ...controlledOptions,
-      [e.target.name.replace('options.', '')]: e.target.value,
-    });
+  const handleLocationTypeChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setLocationType(e.target.value);
   };
 
-  const handleOptionChangeByRadio = (name: string, value: string) => {
-    setControlledOptions({
-      ...controlledOptions,
-      [name]: value,
-    });
+  const nextLocation = () => {
+    setCurrentLocationIndex((prev) => (prev + 1) % LOCATION_TYPES.length);
+    setLocationType(LOCATION_TYPES[(currentLocationIndex + 1) % LOCATION_TYPES.length].value);
+  };
+
+  const prevLocation = () => {
+    setCurrentLocationIndex((prev) => (prev - 1 + LOCATION_TYPES.length) % LOCATION_TYPES.length);
+    setLocationType(LOCATION_TYPES[(currentLocationIndex - 1 + LOCATION_TYPES.length) % LOCATION_TYPES.length].value);
   };
 
   useEffect(() => {
@@ -215,8 +195,6 @@ export const ProductTemplate = ({ product }: ProductTemplateProps) => {
       formRef.current?.reset();
     }
   }, [isSubmitting, hasErrors]);
-
-  const soldOut = variantIsSoldOut(selectedVariant) || productSoldOut;
 
   return (
     <>
@@ -275,56 +253,16 @@ export const ProductTemplate = ({ product }: ProductTemplateProps) => {
                           </h2>
 
                           <p className="text-lg text-gray-900 sm:text-xl">
-                            {selectedVariant ? (
-                              <ProductPrice product={product} variant={selectedVariant} currencyCode={currencyCode} />
-                            ) : (
-                              <ProductPriceRange product={product} currencyCode={currencyCode} />
-                            )}
+                            <ProductPrice product={product} currencyCode={currencyCode} />
                           </p>
                         </section>
-
-                        {productSelectOptions && productSelectOptions.length > 5 && (
-                          <section aria-labelledby="product-options" className="product-options">
-                            <h2 id="product-options" className="sr-only">
-                              Product options
-                            </h2>
-
-                            <FieldGroup>
-                              {productSelectOptions.map((option, optionIndex) => (
-                                <ProductOptionSelectorSelect
-                                  key={optionIndex}
-                                  option={option}
-                                  value={controlledOptions[option.id]}
-                                  onChange={handleOptionChangeBySelect}
-                                />
-                              ))}
-                            </FieldGroup>
-                          </section>
-                        )}
-
-                        {productSelectOptions && productSelectOptions.length <= 5 && (
-                          <section aria-labelledby="product-options" className="product-options my-6 grid gap-4">
-                            <h2 id="product-options" className="sr-only">
-                              Product options
-                            </h2>
-                            {productSelectOptions.map((option, optionIndex) => (
-                              <div key={optionIndex}>
-                                <FieldLabel className="mb-2">{option.title}</FieldLabel>
-                                <ProductOptionSelectorRadio
-                                  option={option}
-                                  value={controlledOptions[option.id]}
-                                  onChange={handleOptionChangeByRadio}
-                                />
-                              </div>
-                            ))}
-                          </section>
-                        )}
 
                         {!!product.menu && (
                           <section aria-labelledby="menu-booking-options" className="my-8 space-y-6">
                             <h2 id="menu-booking-options" className="text-xl font-semibold">
                               Booking Details
                             </h2>
+
                             
                             <div className="grid gap-6 sm:grid-cols-2">
                               <div>
@@ -333,7 +271,7 @@ export const ProductTemplate = ({ product }: ProductTemplateProps) => {
                                   name="requestedDate"
                                   className="w-full"
                                   minDate={new Date()}
-                                  maxDate={new Date(Date.now() + 90 * 24 * 60 * 60 * 1000)} // 90 days ahead
+                                  maxDate={new Date(Date.now() + 90 * 24 * 60 * 60 * 1000)}
                                 />
                               </div>
                               
@@ -342,9 +280,9 @@ export const ProductTemplate = ({ product }: ProductTemplateProps) => {
                                 <TimePicker
                                   name="requestedTime"
                                   className="w-full"
-                                  startTime="17:00" // 5 PM
-                                  endTime="22:00"   // 10 PM
-                                  interval={30}     // 30-minute intervals
+                                  startTime="17:00"
+                                  endTime="22:00"
+                                  interval={30}
                                 />
                               </div>
                             </div>
@@ -360,6 +298,78 @@ export const ProductTemplate = ({ product }: ProductTemplateProps) => {
                                 }))}
                               />
                             </div>
+
+                            <div>
+                              <FieldLabel>Location Type</FieldLabel>
+                              <div className="relative mt-2">
+                                <input
+                                  type="hidden"
+                                  name="locationType"
+                                  value={LOCATION_TYPES[currentLocationIndex].value}
+                                />
+                                
+                                <div className="relative overflow-hidden rounded-lg">
+                                  <div className="aspect-w-16 aspect-h-9">
+                                    <img
+                                      src={LOCATION_TYPES[currentLocationIndex].image}
+                                      alt={LOCATION_TYPES[currentLocationIndex].label}
+                                      className="w-full h-full object-cover"
+                                    />
+                                  </div>
+                                  
+                                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4">
+                                    <h3 className="text-white text-xl font-semibold">
+                                      {LOCATION_TYPES[currentLocationIndex].label}
+                                    </h3>
+                                    <p className="text-white/80 text-sm">
+                                      {LOCATION_TYPES[currentLocationIndex].description}
+                                    </p>
+                                  </div>
+                                </div>
+
+                                <button
+                                  type="button"
+                                  onClick={prevLocation}
+                                  className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-white/80 p-2 hover:bg-white"
+                                >
+                                  <ChevronLeftIcon className="h-5 w-5" />
+                                </button>
+                                
+                                <button
+                                  type="button"
+                                  onClick={nextLocation}
+                                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-white/80 p-2 hover:bg-white"
+                                >
+                                  <ChevronRightIcon className="h-5 w-5" />
+                                </button>
+
+                                <div className="mt-2 flex justify-center gap-2">
+                                  {LOCATION_TYPES.map((_, index) => (
+                                    <button
+                                      key={index}
+                                      type="button"
+                                      onClick={() => {
+                                        setCurrentLocationIndex(index);
+                                        setLocationType(LOCATION_TYPES[index].value);
+                                      }}
+                                      className={`h-2 w-2 rounded-full ${
+                                        index === currentLocationIndex ? 'bg-primary' : 'bg-gray-300'
+                                      }`}
+                                    />
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="location-address hidden data-[show=true]:block" data-show={locationType === 'customer_location'}>
+                              <FieldLabel>Event Location Address</FieldLabel>
+                              <textarea
+                                name="locationAddress"
+                                rows={3}
+                                className="w-full rounded-md border border-gray-300 px-4 py-2 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                placeholder="Please provide the full address where the event will take place"
+                              />
+                            </div>
                           </section>
                         )}
 
@@ -367,18 +377,17 @@ export const ProductTemplate = ({ product }: ProductTemplateProps) => {
 
                         <div className="my-2 flex flex-col gap-2">
                           <div className="flex items-center gap-4 py-2">
-                            {!soldOut && <QuantitySelector variant={selectedVariant} />}
                             <div className="flex-1">
-                              {!soldOut ? (
+                              {!isUnavailable ? (
                                 <SubmitButton className="!h-12 w-full whitespace-nowrap !text-base !font-bold">
-                                  {isSubmitting ? 'Adding...' : 'Add to cart'}
+                                  {isSubmitting ? 'Submitting Request...' : 'Request Booking'}
                                 </SubmitButton>
                               ) : (
                                 <SubmitButton
                                   disabled
                                   className="pointer-events-none !h-12 w-full !text-base !font-bold opacity-50"
                                 >
-                                  Sold out
+                                  Unavailable
                                 </SubmitButton>
                               )}
                             </div>

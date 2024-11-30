@@ -1,5 +1,6 @@
 import { forwardRef } from 'react';
 import { useField } from 'remix-validated-form';
+import { DateTime } from 'luxon';
 
 interface DatePickerProps extends React.InputHTMLAttributes<HTMLInputElement> {
   name: string;
@@ -11,9 +12,9 @@ export const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
   ({ name, minDate, maxDate, className = '', ...props }, ref) => {
     const { error, getInputProps } = useField(name);
     
-    const today = new Date().toISOString().split('T')[0];
-    const maxDateStr = maxDate?.toISOString().split('T')[0];
-    const minDateStr = minDate?.toISOString().split('T')[0] || today;
+    const today = DateTime.now().toISODate();
+    const maxDateStr = maxDate ? DateTime.fromJSDate(maxDate).toISODate() : undefined;
+    const minDateStr = minDate ? DateTime.fromJSDate(minDate).toISODate() : today;
 
     return (
       <div className="relative">

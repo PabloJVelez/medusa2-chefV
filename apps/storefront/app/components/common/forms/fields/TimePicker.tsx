@@ -1,5 +1,6 @@
 import { forwardRef } from 'react';
 import { useField } from 'remix-validated-form';
+import { DateTime } from 'luxon';
 
 interface TimePickerProps extends React.InputHTMLAttributes<HTMLSelectElement> {
   name: string;
@@ -9,29 +10,23 @@ interface TimePickerProps extends React.InputHTMLAttributes<HTMLSelectElement> {
 }
 
 export const TimePicker = forwardRef<HTMLSelectElement, TimePickerProps>(
-  ({ name, startTime = '09:00', endTime = '17:00', interval = 30, className = '', ...props }, ref) => {
+  ({ name, startTime = '17:00', endTime = '22:00', interval = 30, className = '', ...props }, ref) => {
     const { error, getInputProps } = useField(name);
 
     const generateTimeSlots = () => {
       const slots = [];
-      const [startHour, startMinute] = startTime.split(':').map(Number);
-      const [endHour, endMinute] = endTime.split(':').map(Number);
+      const format = { hour: 'numeric', minute: '2-digit', hour12: true };
       
-      let currentHour = startHour;
-      let currentMinute = startMinute;
+      let current = DateTime.fromFormat(startTime, 'HH:mm');
+      const end = DateTime.fromFormat(endTime, 'HH:mm');
 
-      while (
-        currentHour < endHour ||
-        (currentHour === endHour && currentMinute <= endMinute)
-      ) {
-        const timeString = `${currentHour.toString().padStart(2, '0')}:${currentMinute.toString().padStart(2, '0')}`;
-        slots.push(timeString);
+      while (current <= end) {
+        slots.push({
+          value: current.toFormat('HH:mm'),
+          label: current.toLocaleString(format)
+        });
 
-        currentMinute += interval;
-        if (currentMinute >= 60) {
-          currentHour += Math.floor(currentMinute / 60);
-          currentMinute = currentMinute % 60;
-        }
+        current = current.plus({ minutes: interval });
       }
 
       return slots;
@@ -47,9 +42,9 @@ export const TimePicker = forwardRef<HTMLSelectElement, TimePickerProps>(
           {...props}
         >
           <option value="">Select a time</option>
-          {timeSlots.map((time) => (
-            <option key={time} value={time}>
-              {time}
+          {timeSlots.map(({ value, label }) => (
+            <option key={value} value={value}>
+              {label}
             </option>
           ))}
         </select>
