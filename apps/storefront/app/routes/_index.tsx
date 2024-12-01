@@ -84,7 +84,7 @@ export default function IndexRoute() {
           },
         ]}
       />
-
+{/* 
       <MenuList
         className="!pb-[100px]"
         heading="Menu Favorites"
@@ -94,7 +94,7 @@ export default function IndexRoute() {
             url: '/menus',
           },
         ]}
-      />
+      /> */}
 
         //TODO: LIST REVIEWS HERE
       <ListItems

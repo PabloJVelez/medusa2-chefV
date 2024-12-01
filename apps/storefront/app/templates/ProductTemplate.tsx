@@ -128,7 +128,7 @@ const getBreadcrumbs = (product: StoreProduct) => {
       url: `/`,
     },
     {
-      label: 'All Products',
+      label: 'All Menus',
       url: '/products',
     },
   ];
@@ -149,9 +149,22 @@ export interface ProductTemplateProps {
       name: string;
       courses: {
         name: string;
+        dishes: {
+          name: string;
+          description?: string;
+        }[];
       }[];
     } 
   };
+}
+
+type Step = 'menu' | 'event' | 'location';
+type StepStatus = 'pending' | 'current' | 'completed';
+
+interface StepConfig {
+  id: Step;
+  label: string;
+  validate: (formData: FormData) => boolean;
 }
 
 export const ProductTemplate = ({ product }: ProductTemplateProps) => {
@@ -180,6 +193,105 @@ export const ProductTemplate = ({ product }: ProductTemplateProps) => {
 
   const [locationType, setLocationType] = useState('');
   const [currentLocationIndex, setCurrentLocationIndex] = useState(0);
+  const [currentStep, setCurrentStep] = useState<Step>('menu');
+  const [completedSteps, setCompletedSteps] = useState<Set<Step>>(new Set());
+  const [showValidationError, setShowValidationError] = useState(false);
+  const [validationMessage, setValidationMessage] = useState('');
+  const [isMenuExpanded, setIsMenuExpanded] = useState(false);
+
+  const steps: StepConfig[] = [
+    {
+      id: 'menu',
+      label: 'Menu Review',
+      validate: () => true // Menu review doesn't require validation
+    },
+    {
+      id: 'event',
+      label: 'Event Details',
+      validate: (formData: FormData) => {
+        const date = formData.get('requestedDate');
+        const time = formData.get('requestedTime');
+        const partySize = formData.get('partySize');
+        const eventType = formData.get('eventType');
+        return Boolean(date && time && partySize && eventType);
+      }
+    },
+    {
+      id: 'location',
+      label: 'Location Details',
+      validate: (formData: FormData) => {
+        const locationType = formData.get('locationType');
+        const locationAddress = formData.get('locationAddress');
+        return Boolean(locationType) && 
+          (locationType === 'chef_location' || Boolean(locationAddress));
+      }
+    }
+  ];
+
+  const getStepStatus = (stepId: Step): StepStatus => {
+    if (completedSteps.has(stepId)) return 'completed';
+    if (stepId === currentStep) return 'current';
+    return 'pending';
+  };
+
+  const handleStepComplete = (stepId: Step) => {
+    const formData = new FormData(formRef.current as HTMLFormElement);
+    const step = steps.find(s => s.id === stepId);
+    
+    if (step?.validate(formData)) {
+      setShowValidationError(false);
+      setValidationMessage('');
+      setCompletedSteps(prev => new Set([...prev, stepId]));
+      const currentIndex = steps.findIndex(s => s.id === stepId);
+      if (currentIndex < steps.length - 1) {
+        setCurrentStep(steps[currentIndex + 1].id);
+        if (stepId === 'menu') {
+          setIsMenuExpanded(false);
+        }
+      }
+    } else {
+      setShowValidationError(true);
+      if (stepId === 'event') {
+        const missing = [];
+        if (!formData.get('requestedDate')) missing.push('Date');
+        if (!formData.get('requestedTime')) missing.push('Time');
+        if (!formData.get('partySize')) missing.push('Party Size');
+        if (!formData.get('eventType')) missing.push('Event Type');
+        
+        const formattedList = missing.reduce((message, item, index) => {
+          if (index === 0) return item;
+          if (index === missing.length - 1) return `${message}, and ${item}`;
+          return `${message}, ${item}`;
+        }, '');
+        
+        setValidationMessage(
+          `Please complete the following: ${formattedList}`
+        );
+      } else if (stepId === 'location') {
+        const missing = [];
+        const locationType = formData.get('locationType');
+        const locationAddress = formData.get('locationAddress');
+
+        if (!locationType) {
+          missing.push('Location type');
+        } else if (locationType === 'customer_location' && !locationAddress?.toString().trim()) {
+          missing.push('Address');
+        }
+
+        if (missing.length > 0) {
+          const formattedList = missing.reduce((message, item, index) => {
+            if (index === 0) return item;
+            if (index === missing.length - 1) return `${message}, and ${item}`;
+            return `${message}, ${item}`;
+          }, '');
+          
+          setValidationMessage(
+            `Please complete the following: ${formattedList}`
+          );
+        }
+      }
+    }
+  };
 
   const handleLocationTypeChange = (e: ChangeEvent<HTMLInputElement>) => {
     setLocationType(e.target.value);
@@ -200,6 +312,15 @@ export const ProductTemplate = ({ product }: ProductTemplateProps) => {
       formRef.current?.reset();
     }
   }, [isSubmitting, hasErrors]);
+
+  const handleStepChange = (step: Step) => {
+    setCurrentStep(step);
+    setShowValidationError(false);
+    setValidationMessage('');
+    if (step !== 'menu') {
+      setIsMenuExpanded(false);
+    }
+  };
 
   return (
     <>
@@ -270,199 +391,439 @@ export const ProductTemplate = ({ product }: ProductTemplateProps) => {
                   </section>
 
                   {!!product.menu && (
-                    <div className="mt-8 space-y-4">
-                      <details className="group rounded-lg border border-gray-200 [&[open]>summary]:border-b">
-                        <summary className="flex cursor-pointer items-center justify-between p-4 font-semibold text-xl hover:bg-gray-50 rounded-t-lg">
-                          Menu
-                          <span className="text-2xl leading-none text-gray-500">
-                            <span className="group-open:hidden">+</span>
-                            <span className="hidden group-open:inline">−</span>
-                          </span>
-                        </summary>
-                        <div className="p-6 space-y-6">
-                          <div className="text-center space-y-4">
-                            <h4 className="font-italiana text-2xl text-gray-600">CULINARY JOURNEY</h4>
-                            <h2 className="text-3xl lg:text-4xl font-aboreto">{product.menu.name}</h2>
-                          </div>
-                          
-                          <div className="space-y-4">
-                            {product.menu.courses?.map((course, index) => (
-                              <div 
-                                key={index} 
-                                className="p-6 bg-highlight-900/70 rounded-lg"
-                              >
-                                <div className="flex items-center gap-4 mb-2">
-                                  <span className="font-italiana text-lg text-accent-900">
-                                    Course {index + 1}
-                                  </span>
-                                  <div className="flex-1 border-b border-accent-900/20"></div>
+                    <div className="mt-8 space-y-8">
+                      {/* Progress indicator */}
+                      <div className="flex items-center justify-between px-2">
+                        {steps.map((step, index) => {
+                          const status = getStepStatus(step.id);
+                          return (
+                            <div key={step.id} className="flex items-center">
+                              <div className="flex flex-col items-center">
+                                <div 
+                                  className={`
+                                    w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold
+                                    transition-colors duration-200
+                                    ${status === 'completed' ? 'bg-primary text-white' : 
+                                      status === 'current' ? 'bg-primary/20 text-primary border-2 border-primary' :
+                                      'bg-gray-100 text-gray-400'
+                                    }
+                                  `}
+                                >
+                                  {status === 'completed' ? '✓' : index + 1}
                                 </div>
-                                <h3 className="font-aboreto text-xl text-gray-800">
-                                  {course.name}
-                                </h3>
+                                <span className={`
+                                  mt-2 text-sm font-medium
+                                  ${status === 'pending' ? 'text-gray-400' : 'text-gray-900'}
+                                `}>
+                                  {step.label}
+                                </span>
                               </div>
-                            ))}
-                          </div>
-                        </div>
-                      </details>
-
-                      <details className="group rounded-lg border border-gray-200 [&[open]>summary]:border-b">
-                        <summary className="flex cursor-pointer items-center justify-between p-4 font-semibold text-xl hover:bg-gray-50 rounded-t-lg">
-                          Event Details
-                          <span className="text-2xl leading-none text-gray-500">
-                            <span className="group-open:hidden">+</span>
-                            <span className="hidden group-open:inline">−</span>
-                          </span>
-                        </summary>
-                        <div className="p-4 space-y-4">
-                          <div className="grid gap-6 sm:grid-cols-2">
-                            <div>
-                              <FieldLabel>Date</FieldLabel>
-                              <DatePicker
-                                name="requestedDate"
-                                className="w-full"
-                                minDate={new Date()}
-                                maxDate={new Date(Date.now() + 90 * 24 * 60 * 60 * 1000)}
-                              />
+                              {index < steps.length - 1 && (
+                                <div className={`
+                                  w-full h-px mx-4
+                                  ${completedSteps.has(step.id) ? 'bg-primary' : 'bg-gray-200'}
+                                `} />
+                              )}
                             </div>
-                            
-                            <div>
-                              <FieldLabel>Time</FieldLabel>
-                              <TimePicker
-                                name="requestedTime"
-                                className="w-full"
-                                startTime="17:00"
-                                endTime="22:00"
-                                interval={30}
-                              />
-                            </div>
+                          );
+                        })}
+                      </div>
+
+                      {/* Step content */}
+                      <div className="space-y-4">
+                        <div className={currentStep === 'menu' ? 'block' : 'hidden'}>
+                          {/* Menu content */}
+                          <div className="mb-4">
+                            <button
+                              type="button"
+                              onClick={() => handleStepComplete('menu')}
+                              className="w-full bg-primary text-white px-6 py-3 rounded-lg 
+                                        hover:bg-primary/90 transition-colors font-semibold"
+                            >
+                              Continue to Event Details →
+                            </button>
                           </div>
 
-                          <div>
-                            <FieldLabel>Number of Guests</FieldLabel>
-                            <Select
-                              name="partySize"
-                              className="w-full"
-                              options={Array.from({ length: 20 }, (_, i) => ({
-                                label: `${i + 1} ${i === 0 ? 'person' : 'people'}`,
-                                value: (i + 1).toString(),
-                              }))}
-                            />
-                          </div>
+                          {/* Menu display */}
+                          <div className="p-8 bg-cream-50">
+                            <div className="relative border-2 border-gray-800/20 p-8">
+                              <div className="absolute inset-0 border-2 border-gray-800/20 m-2"></div>
+                              
+                              {/* Menu Header */}
+                              <div className="text-center mb-12 relative">
+                                <div className="absolute left-0 right-0 top-1/2 h-px bg-gray-800/20"></div>
+                                <span className="relative inline-block px-4 bg-cream-50 font-italiana text-2xl text-gray-600">
+                                  CULINARY JOURNEY
+                                </span>
+                              </div>
+                              
+                              {/* Menu Title */}
+                              <div className="text-center mb-12">
+                                <h2 className="font-aboreto text-3xl lg:text-4xl text-gray-800 mb-3">
+                                  {product.menu.name}
+                                </h2>
+                                <div className="flex items-center justify-center gap-4">
+                                  <div className="h-px w-12 bg-gray-800/20"></div>
+                                  <div className="text-gray-600 font-serif italic">✦</div>
+                                  <div className="h-px w-12 bg-gray-800/20"></div>
+                                </div>
+                              </div>
+                              
+                              {/* Courses */}
+                              <div className="relative">
+                                <div className={`space-y-8 ${!isMenuExpanded ? 'max-h-[200px] overflow-hidden' : ''}`}>
+                                  {product.menu.courses?.map((course, index) => {
+                                    if (!isMenuExpanded && index > 1) return null;
+                                    
+                                    return (
+                                      <div key={index} className={`
+                                        relative
+                                        ${!isMenuExpanded && index === 1 ? 'opacity-60' : ''}
+                                      `}>
+                                        <div className="absolute -left-4 top-0 -translate-x-full 
+                                                    font-italiana text-4xl text-gray-300 opacity-50 hidden lg:block">
+                                          {(index + 1).toString().padStart(2, '0')}
+                                        </div>
+                                        
+                                        <div className="relative">
+                                          <div className="flex items-baseline gap-4 mb-4">
+                                            <h3 className="font-aboreto text-xl text-gray-800">
+                                              {course.name}
+                                            </h3>
+                                            <div className="flex-grow border-b border-dotted border-gray-400"></div>
+                                          </div>
+                                          
+                                          <div className="pl-4 space-y-3">
+                                            {course.dishes?.map((dish, dishIndex) => (
+                                              <div key={dishIndex} className="relative">
+                                                <div className="flex items-baseline gap-2">
+                                                  <span className="w-1.5 h-1.5 rounded-full bg-gray-400 mt-2"></span>
+                                                  <div className="flex-1">
+                                                    <h4 className="font-serif text-gray-800">
+                                                      {dish.name}
+                                                    </h4>
+                                                    {dish.description && (
+                                                      <p className="text-sm text-gray-600 italic mt-0.5">
+                                                        {dish.description}
+                                                      </p>
+                                                    )}
+                                                  </div>
+                                                </div>
+                                              </div>
+                                            ))}
+                                          </div>
+                                        </div>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
 
-                          <div>
-                            <FieldLabel>Event Type</FieldLabel>
-                            <Select
-                              name="eventType"
-                              className="w-full"
-                              options={EVENT_TYPES.map(type => ({
-                                value: type.id,
-                                label: type.label
-                              }))}
-                              placeholder="Select event type"
-                              onChange={(e) => {
-                                const selectedType = EVENT_TYPES.find(
-                                  type => type.id === e.target.value
-                                );
-                                const descriptionElement = formRef.current?.querySelector('.event-type-description');
-                                if (selectedType && descriptionElement instanceof HTMLElement) {
-                                  descriptionElement.textContent = selectedType.description;
-                                }
-                              }}
-                            />
-                            <p className="mt-1 text-sm text-gray-500 event-type-description">
-                              Select an event type to see description
-                            </p>
-                          </div>
-                        </div>
-                      </details>
-
-                      <details className="group rounded-lg border border-gray-200 [&[open]>summary]:border-b">
-                        <summary className="flex cursor-pointer items-center justify-between p-4 font-semibold text-xl hover:bg-gray-50 rounded-t-lg">
-                          Location Details
-                          <span className="text-2xl leading-none text-gray-500">
-                            <span className="group-open:hidden">+</span>
-                            <span className="hidden group-open:inline">−</span>
-                          </span>
-                        </summary>
-                        <div className="p-4 space-y-4">
-                          <div>
-                            <FieldLabel>Location Type</FieldLabel>
-                            <div className="grid grid-cols-2 gap-4 mt-2">
-                              {LOCATION_TYPES.map((type, index) => {
-                                const Icon = type.icon;
-                                return (
-                                  <label
-                                    key={type.value}
-                                    className={`
-                                      relative flex flex-col items-center p-4 cursor-pointer
-                                      rounded-lg border transition-all duration-200
-                                      ${type.value === locationType 
-                                        ? 'border-primary bg-primary/5 ring-2 ring-primary/20' 
-                                        : 'border-gray-200 hover:border-gray-300'
-                                      }
-                                    `}
-                                  >
-                                    <input
-                                      type="radio"
-                                      name="locationType"
-                                      value={type.value}
-                                      checked={type.value === locationType}
-                                      onChange={handleLocationTypeChange}
-                                      className="sr-only"
-                                    />
-                                    <Icon className={`w-12 h-12 mb-3 ${
-                                      type.value === locationType ? 'text-primary' : 'text-gray-400'
-                                    }`} />
-                                    <div className="text-center">
-                                      <p className="font-semibold">{type.label}</p>
-                                      <p className="text-sm text-gray-500 mt-1">
-                                        {type.description}
-                                      </p>
+                                {/* Updated gradient overlay and expand button */}
+                                {!isMenuExpanded && (
+                                  <div className="absolute bottom-0 left-0 right-0">
+                                    <div className="h-40 bg-gradient-to-t from-cream-50 via-cream-50/95 to-transparent"></div>
+                                    <div className="absolute bottom-0 left-0 right-0 flex justify-center">
+                                      <button
+                                        type="button"
+                                        onClick={() => setIsMenuExpanded(true)}
+                                        className="bg-primary text-white px-6 py-2 rounded-full 
+                                               hover:bg-primary/90 transition-colors
+                                               shadow-lg transform translate-y-1/2
+                                               flex items-center gap-2"
+                                      >
+                                        <span>View Full Menu</span>
+                                        <span className="text-sm">
+                                          ({product.menu.courses.length} Courses)
+                                        </span>
+                                      </button>
                                     </div>
-                                  </label>
-                                );
-                              })}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className={currentStep === 'event' ? 'block' : 'hidden'}>
+                          {/* Event details content */}
+                          <div className="flex justify-between items-center mb-4">
+                            <div className="flex items-center gap-4">
+                              <button
+                                type="button"
+                                onClick={() => handleStepChange('menu')}
+                                className="text-gray-500 hover:text-gray-700"
+                              >
+                                ← Back
+                              </button>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleStepComplete('event')}
+                              className={`
+                                text-primary hover:text-primary/80 transition-colors
+                                ${showValidationError ? 'animate-shake' : ''}
+                              `}
+                            >
+                              Continue to Location →
+                            </button>
+                          </div>
+
+                          {/* Validation error message */}
+                          {showValidationError && (
+                            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
+                              <div className="flex items-center gap-2">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
+                                        d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                {validationMessage}
+                              </div>
+                            </div>
+                          )}
+
+                          <div className="space-y-6" onChange={(e) => {
+                            if (!showValidationError) return;
+                            
+                            // Get all required fields
+                            const formData = new FormData(formRef.current as HTMLFormElement);
+                            const date = formData.get('requestedDate');
+                            const time = formData.get('requestedTime');
+                            const partySize = formData.get('partySize');
+                            const eventType = formData.get('eventType');
+                            
+                            // Create new missing fields array
+                            const missing = [];
+                            if (!date) missing.push('Date');
+                            if (!time) missing.push('Time');
+                            if (!partySize) missing.push('Party Size');
+                            if (!eventType) missing.push('Event Type');
+                            
+                            if (missing.length === 0) {
+                              // All fields are filled
+                              setShowValidationError(false);
+                              setValidationMessage('');
+                            } else {
+                              // Update validation message with remaining fields
+                              const formattedList = missing.reduce((message, item, index) => {
+                                if (index === 0) return item;
+                                if (index === missing.length - 1) return `${message}, and ${item}`;
+                                return `${message}, ${item}`;
+                              }, '');
+                              
+                              setValidationMessage(
+                                `Please complete the following: ${formattedList}`
+                              );
+                            }
+                          }}>
+                            <div className="grid gap-6 sm:grid-cols-2">
+                              <div>
+                                <FieldLabel>Date</FieldLabel>
+                                <DatePicker
+                                  name="requestedDate"
+                                  className="w-full"
+                                  minDate={new Date()}
+                                  maxDate={new Date(Date.now() + 90 * 24 * 60 * 60 * 1000)}
+                                />
+                              </div>
+                              
+                              <div>
+                                <FieldLabel>Time</FieldLabel>
+                                <TimePicker
+                                  name="requestedTime"
+                                  className="w-full"
+                                  startTime="17:00"
+                                  endTime="22:00"
+                                  interval={30}
+                                />
+                              </div>
+                            </div>
+
+                            <div>
+                              <FieldLabel>Number of Guests</FieldLabel>
+                              <Select
+                                name="partySize"
+                                className="w-full"
+                                options={Array.from({ length: 20 }, (_, i) => ({
+                                  label: `${i + 1} ${i === 0 ? 'person' : 'people'}`,
+                                  value: (i + 1).toString(),
+                                }))}
+                              />
+                            </div>
+
+                            <div>
+                              <FieldLabel>Event Type</FieldLabel>
+                              <Select
+                                name="eventType"
+                                className="w-full"
+                                options={EVENT_TYPES.map(type => ({
+                                  value: type.id,
+                                  label: type.label
+                                }))}
+                                placeholder="Select event type"
+                                onChange={(e) => {
+                                  const selectedType = EVENT_TYPES.find(
+                                    type => type.id === e.target.value
+                                  );
+                                  const descriptionElement = formRef.current?.querySelector('.event-type-description');
+                                  if (selectedType && descriptionElement instanceof HTMLElement) {
+                                    descriptionElement.textContent = selectedType.description;
+                                  }
+                                }}
+                              />
+                              <p className="mt-1 text-sm text-gray-500 event-type-description">
+                                Select an event type to see description
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className={currentStep === 'location' ? 'block' : 'hidden'}>
+                          {/* Location details content */}
+                          <div className="flex justify-between items-center mb-4">
+                            <div className="flex items-center gap-4">
+                              <button
+                                type="button"
+                                onClick={() => handleStepChange('event')}
+                                className="text-gray-500 hover:text-gray-700"
+                              >
+                                ← Back
+                              </button>
+                            
                             </div>
                           </div>
 
-                          <div 
-                            className="location-address hidden data-[show=true]:block" 
-                            data-show={locationType === 'customer_location'}
-                          >
-                            <FieldLabel>Event Location Address</FieldLabel>
-                            <textarea
-                              name="locationAddress"
-                              rows={3}
-                              className="w-full rounded-md border border-gray-300 px-4 py-2 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                              placeholder="Please provide the full address where the event will take place"
-                            />
+                          {/* Add validation error message */}
+                          {showValidationError && (
+                            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
+                              <div className="flex items-center gap-2">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
+                                        d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                {validationMessage}
+                              </div>
+                            </div>
+                          )}
+
+                          <div className="space-y-6" onChange={(e) => {
+                            if (!showValidationError) return;
+                            
+                            const formData = new FormData(formRef.current as HTMLFormElement);
+                            const locationType = formData.get('locationType');
+                            const locationAddress = formData.get('locationAddress');
+                            
+                            const isValid = Boolean(locationType) && 
+                              (locationType === 'chef_location' || Boolean(locationAddress));
+                            
+                            if (isValid) {
+                              setShowValidationError(false);
+                              setValidationMessage('');
+                            } else {
+                              const missing = [];
+                              if (!locationType) {
+                                missing.push('Location type');
+                              } else if (locationType === 'customer_location' && !locationAddress) {
+                                missing.push('Address');
+                              }
+
+                              const formattedList = missing.reduce((message, item, index) => {
+                                if (index === 0) return item;
+                                if (index === missing.length - 1) return `${message}, and ${item}`;
+                                return `${message}, ${item}`;
+                              }, '');
+                              
+                              setValidationMessage(
+                                `Please complete the following: ${formattedList}`
+                              );
+                            }
+                          }}>
+                            <div>
+                              <FieldLabel>Location Type</FieldLabel>
+                              <div className="grid grid-cols-2 gap-4 mt-2">
+                                {LOCATION_TYPES.map((type) => {
+                                  const Icon = type.icon;
+                                  return (
+                                    <label
+                                      key={type.value}
+                                      className={`
+                                        relative flex flex-col items-center p-4 cursor-pointer
+                                        rounded-lg border transition-all duration-200
+                                        ${type.value === locationType 
+                                          ? 'border-primary bg-primary/5 ring-2 ring-primary/20' 
+                                          : 'border-gray-200 hover:border-gray-300'
+                                        }
+                                      `}
+                                    >
+                                      <input
+                                        type="radio"
+                                        name="locationType"
+                                        value={type.value}
+                                        checked={type.value === locationType}
+                                        onChange={handleLocationTypeChange}
+                                        className="sr-only"
+                                      />
+                                      <Icon className={`w-12 h-12 mb-3 ${
+                                        type.value === locationType ? 'text-primary' : 'text-gray-400'
+                                      }`} />
+                                      <div className="text-center">
+                                        <p className="font-semibold">{type.label}</p>
+                                        <p className="text-sm text-gray-500 mt-1">
+                                          {type.description}
+                                        </p>
+                                      </div>
+                                    </label>
+                                  );
+                                })}
+                              </div>
+                            </div>
+
+                            <div 
+                              className="location-address hidden data-[show=true]:block" 
+                              data-show={locationType === 'customer_location'}
+                            >
+                              <FieldLabel>Event Location Address</FieldLabel>
+                              <textarea
+                                name="locationAddress"
+                                rows={3}
+                                className="w-full rounded-md border border-gray-300 px-4 py-2 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                placeholder="Please provide the full address where the event will take place"
+                              />
+                            </div>
+
+                            {/* Add the final step button */}
+                            <div className="pt-4 border-t">
+                              <SubmitButton 
+                                onClick={(e) => {
+                                  const formData = new FormData(formRef.current as HTMLFormElement);
+                                  const locationType = formData.get('locationType');
+                                  const locationAddress = formData.get('locationAddress');
+
+                                  if (!locationType || (locationType === 'customer_location' && !locationAddress?.toString().trim())) {
+                                    e.preventDefault();
+                                    handleStepComplete('location');
+                                  }
+                                }}
+                                className={`
+                                  w-full bg-primary text-white px-6 py-3 rounded-lg 
+                                  hover:bg-primary/90 transition-colors
+                                  font-semibold text-base
+                                  ${showValidationError ? 'animate-shake' : ''}
+                                  ${isUnavailable ? 'opacity-50 cursor-not-allowed' : ''}
+                                `}
+                                disabled={isUnavailable}
+                              >
+                                {isSubmitting ? 'Submitting Request...' : 'Complete Booking Request'}
+                              </SubmitButton>
+                            </div>
                           </div>
                         </div>
-                      </details>
+                      </div>
                     </div>
                   )}
 
                   <FormError />
 
                   <div className="my-2 flex flex-col gap-2">
-                    <div className="flex items-center gap-4 py-2">
-                      <div className="flex-1">
-                        {!isUnavailable ? (
-                          <SubmitButton className="!h-12 w-full whitespace-nowrap !text-base !font-bold">
-                            {isSubmitting ? 'Submitting Request...' : 'Request Booking'}
-                          </SubmitButton>
-                        ) : (
-                          <SubmitButton
-                            disabled
-                            className="pointer-events-none !h-12 w-full !text-base !font-bold opacity-50"
-                          >
-                            Unavailable
-                          </SubmitButton>
-                        )}
-                      </div>
-                    </div>
-
                     {product.categories && product.categories.length > 0 && (
                       <nav aria-label="Categories" className="mt-4">
                         <h3 className="mb-2">Categories</h3>

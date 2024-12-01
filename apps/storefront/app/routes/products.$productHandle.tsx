@@ -8,11 +8,16 @@ import { StoreProduct } from '@medusajs/types';
 export const loader = async (args: LoaderFunctionArgs) => {
   const { products } = await fetchProducts(args.request, {
     handle: args.params.productHandle,
-    fields: '*categories,+menu.*,menu.courses.*,'
+    fields: '*categories,+menu.*,menu.courses.*, menu.courses.dishes.*,'
   }).catch((e) => {
     return { products: [] };
   });
   console.log('PRODUCTS------->', products);
+  //FOR each course list all the dishes
+  products[0].menu?.courses.forEach((course) => {
+    console.log('COURSE------->', course.name);
+    console.log('DISHES------->', course.dishes);
+  });
 
   if (!products.length) {
     return redirect('/404');
