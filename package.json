@@ -29,6 +29,7 @@
     "packages/*"
   ],
   "dependencies": {
+    "@headlessui/react": "^2.2.0",
     "luxon": "^3.5.0"
   }
 }

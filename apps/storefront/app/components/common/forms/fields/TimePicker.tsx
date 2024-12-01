@@ -23,7 +23,7 @@ export const TimePicker = forwardRef<HTMLSelectElement, TimePickerProps>(
       while (current <= end) {
         slots.push({
           value: current.toFormat('HH:mm'),
-          label: current.toLocaleString(format)
+          label: current.toLocaleString(DateTime.TIME_SIMPLE)
         });
 
         current = current.plus({ minutes: interval });

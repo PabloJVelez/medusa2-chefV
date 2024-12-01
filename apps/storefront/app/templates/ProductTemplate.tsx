@@ -36,6 +36,8 @@ import { DatePicker } from '@app/components/common/forms/fields/DatePicker';
 import { TimePicker } from '@app/components/common/forms/fields/TimePicker';
 import { Select } from '@app/components/common/forms/fields/Select';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
+import { DateTime } from 'luxon';
+import { HomeIcon, BuildingStorefrontIcon } from '@heroicons/react/24/outline';
 
 interface EventType {
   id: string;
@@ -66,13 +68,13 @@ const LOCATION_TYPES = [
     value: 'customer_location',
     label: 'My Location',
     description: 'Chef will come to your provided location',
-    image: '/images/customer-location.jpg'
+    icon: HomeIcon
   },
   {
     value: 'chef_location',
     label: "Chef's Location",
     description: 'Event will be held at a location provided by the chef',
-    image: '/images/chef-location.jpg'
+    icon: BuildingStorefrontIcon
   }
 ];
 
@@ -97,7 +99,10 @@ export const getAddToCartValidator = (product: StoreProduct): Validator<AddToCar
       .max(20, 'Maximum party size is 20'),
     eventType: Yup.string()
       .required('Please select an event type')
-      .oneOf(EVENT_TYPES.map(type => type.id), 'Invalid event type'),
+      .oneOf(
+        EVENT_TYPES.map(type => type.id), 
+        'Please select a valid event type'
+      ),
     locationType: Yup.string()
       .required('Please select a location type')
       .oneOf(LOCATION_TYPES.map(type => type.value), 'Invalid location type'),
@@ -209,260 +214,292 @@ export const ProductTemplate = ({ product }: ProductTemplateProps) => {
           subaction={LineItemActions.CREATE}
           defaultValues={defaultValues}
           validator={validator}
-          onSubmit={() => {
-            toggleCartDrawer(true);
+          onSubmit={(values) => {
+            console.log('Form submitted with values:', {
+              menu: product.menu.name,
+              ...values,
+              requestedDate: values.requestedDate ? 
+                DateTime.fromISO(values.requestedDate).toLocaleString(DateTime.DATE_FULL) : 
+                'No date selected',
+              requestedTime: values.requestedTime ? 
+                DateTime.fromFormat(values.requestedTime, 'HH:mm').toLocaleString(DateTime.TIME_SIMPLE) :
+                'No time selected'
+            });
+
+            const formData = new FormData(formRef.current as HTMLFormElement);
+            console.log('Raw form data:', Object.fromEntries(formData.entries()));
           }}
         >
           <input type="hidden" name="productId" value={product.id} />
 
           <Container className="px-0 sm:px-6 md:px-8">
             <Grid>
-              <GridColumn>
-                <div className="md:py-6">
-                  <Grid className="!gap-0">
-                    <GridColumn className="mb-8 md:col-span-6 lg:col-span-7 xl:pr-16 xl:pl-9">
-                      <ProductImageGallery product={product} />
-                    </GridColumn>
+              <GridColumn className="mb-8 md:col-span-6 lg:col-span-7 xl:pr-16 xl:pl-9">
+                <ProductImageGallery product={product} />
+              </GridColumn>
 
-                    <GridColumn className="flex flex-col md:col-span-6 lg:col-span-5">
-                      <div className="px-0 sm:px-6 md:p-10 md:pt-0">
-                        <div>
-                          <Breadcrumbs className="mb-6 text-primary" breadcrumbs={breadcrumbs} />
+              <GridColumn className="flex flex-col md:col-span-6 lg:col-span-5">
+                <div className="px-0 sm:px-6 md:p-10 md:pt-0">
+                  <div>
+                    <Breadcrumbs className="mb-6 text-primary" breadcrumbs={breadcrumbs} />
+                    <header className="flex gap-4">
+                      <h1 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl sm:tracking-tight">
+                        {product.title}
+                      </h1>
+                      <div className="flex-1" />
+                      <Share
+                        itemType="product"
+                        shareData={{
+                          title: product.title,
+                          text: truncate(product.description || 'Check out this product', {
+                            length: 200,
+                            separator: ' ',
+                          }),
+                        }}
+                      />
+                    </header>
+                  </div>
 
-                          <header className="flex gap-4">
-                            <h1 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl sm:tracking-tight">
-                              {product.title}
-                            </h1>
-                            <div className="flex-1" />
-                            <Share
-                              itemType="product"
-                              shareData={{
-                                title: product.title,
-                                text: truncate(product.description || 'Check out this product', {
-                                  length: 200,
-                                  separator: ' ',
-                                }),
-                              }}
-                            />
-                          </header>
+                  <section aria-labelledby="product-information" className="mt-4">
+                    <h2 id="product-information" className="sr-only">
+                      Product information
+                    </h2>
+                    <p className="text-lg text-gray-900 sm:text-xl">
+                      <ProductPrice product={product} currencyCode={currencyCode} />
+                    </p>
+                  </section>
+
+                  {!!product.menu && (
+                    <div className="mt-8 space-y-4">
+                      <details className="group rounded-lg border border-gray-200 [&[open]>summary]:border-b">
+                        <summary className="flex cursor-pointer items-center justify-between p-4 font-semibold text-xl hover:bg-gray-50 rounded-t-lg">
+                          Menu
+                          <span className="text-2xl leading-none text-gray-500">
+                            <span className="group-open:hidden">+</span>
+                            <span className="hidden group-open:inline">−</span>
+                          </span>
+                        </summary>
+                        <div className="p-6 space-y-6">
+                          <div className="text-center space-y-4">
+                            <h4 className="font-italiana text-2xl text-gray-600">CULINARY JOURNEY</h4>
+                            <h2 className="text-3xl lg:text-4xl font-aboreto">{product.menu.name}</h2>
+                          </div>
+                          
+                          <div className="space-y-4">
+                            {product.menu.courses?.map((course, index) => (
+                              <div 
+                                key={index} 
+                                className="p-6 bg-highlight-900/70 rounded-lg"
+                              >
+                                <div className="flex items-center gap-4 mb-2">
+                                  <span className="font-italiana text-lg text-accent-900">
+                                    Course {index + 1}
+                                  </span>
+                                  <div className="flex-1 border-b border-accent-900/20"></div>
+                                </div>
+                                <h3 className="font-aboreto text-xl text-gray-800">
+                                  {course.name}
+                                </h3>
+                              </div>
+                            ))}
+                          </div>
                         </div>
+                      </details>
 
-                        <section aria-labelledby="product-information" className="mt-4">
-                          <h2 id="product-information" className="sr-only">
-                            Product information
-                          </h2>
-
-                          <p className="text-lg text-gray-900 sm:text-xl">
-                            <ProductPrice product={product} currencyCode={currencyCode} />
-                          </p>
-                        </section>
-
-                        {!!product.menu && (
-                          <section aria-labelledby="menu-booking-options" className="my-8 space-y-6">
-                            <h2 id="menu-booking-options" className="text-xl font-semibold">
-                              Booking Details
-                            </h2>
-
-                            
-                            <div className="grid gap-6 sm:grid-cols-2">
-                              <div>
-                                <FieldLabel>Date</FieldLabel>
-                                <DatePicker
-                                  name="requestedDate"
-                                  className="w-full"
-                                  minDate={new Date()}
-                                  maxDate={new Date(Date.now() + 90 * 24 * 60 * 60 * 1000)}
-                                />
-                              </div>
-                              
-                              <div>
-                                <FieldLabel>Time</FieldLabel>
-                                <TimePicker
-                                  name="requestedTime"
-                                  className="w-full"
-                                  startTime="17:00"
-                                  endTime="22:00"
-                                  interval={30}
-                                />
-                              </div>
-                            </div>
-
+                      <details className="group rounded-lg border border-gray-200 [&[open]>summary]:border-b">
+                        <summary className="flex cursor-pointer items-center justify-between p-4 font-semibold text-xl hover:bg-gray-50 rounded-t-lg">
+                          Event Details
+                          <span className="text-2xl leading-none text-gray-500">
+                            <span className="group-open:hidden">+</span>
+                            <span className="hidden group-open:inline">−</span>
+                          </span>
+                        </summary>
+                        <div className="p-4 space-y-4">
+                          <div className="grid gap-6 sm:grid-cols-2">
                             <div>
-                              <FieldLabel>Number of Guests</FieldLabel>
-                              <Select
-                                name="partySize"
+                              <FieldLabel>Date</FieldLabel>
+                              <DatePicker
+                                name="requestedDate"
                                 className="w-full"
-                                options={Array.from({ length: 20 }, (_, i) => ({
-                                  label: `${i + 1} ${i === 0 ? 'person' : 'people'}`,
-                                  value: (i + 1).toString(),
-                                }))}
+                                minDate={new Date()}
+                                maxDate={new Date(Date.now() + 90 * 24 * 60 * 60 * 1000)}
                               />
                             </div>
-
+                            
                             <div>
-                              <FieldLabel>Location Type</FieldLabel>
-                              <div className="relative mt-2">
-                                <input
-                                  type="hidden"
-                                  name="locationType"
-                                  value={LOCATION_TYPES[currentLocationIndex].value}
-                                />
-                                
-                                <div className="relative overflow-hidden rounded-lg">
-                                  <div className="aspect-w-16 aspect-h-9">
-                                    <img
-                                      src={LOCATION_TYPES[currentLocationIndex].image}
-                                      alt={LOCATION_TYPES[currentLocationIndex].label}
-                                      className="w-full h-full object-cover"
-                                    />
-                                  </div>
-                                  
-                                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4">
-                                    <h3 className="text-white text-xl font-semibold">
-                                      {LOCATION_TYPES[currentLocationIndex].label}
-                                    </h3>
-                                    <p className="text-white/80 text-sm">
-                                      {LOCATION_TYPES[currentLocationIndex].description}
-                                    </p>
-                                  </div>
-                                </div>
-
-                                <button
-                                  type="button"
-                                  onClick={prevLocation}
-                                  className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-white/80 p-2 hover:bg-white"
-                                >
-                                  <ChevronLeftIcon className="h-5 w-5" />
-                                </button>
-                                
-                                <button
-                                  type="button"
-                                  onClick={nextLocation}
-                                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-white/80 p-2 hover:bg-white"
-                                >
-                                  <ChevronRightIcon className="h-5 w-5" />
-                                </button>
-
-                                <div className="mt-2 flex justify-center gap-2">
-                                  {LOCATION_TYPES.map((_, index) => (
-                                    <button
-                                      key={index}
-                                      type="button"
-                                      onClick={() => {
-                                        setCurrentLocationIndex(index);
-                                        setLocationType(LOCATION_TYPES[index].value);
-                                      }}
-                                      className={`h-2 w-2 rounded-full ${
-                                        index === currentLocationIndex ? 'bg-primary' : 'bg-gray-300'
-                                      }`}
-                                    />
-                                  ))}
-                                </div>
-                              </div>
-                            </div>
-
-                            <div className="location-address hidden data-[show=true]:block" data-show={locationType === 'customer_location'}>
-                              <FieldLabel>Event Location Address</FieldLabel>
-                              <textarea
-                                name="locationAddress"
-                                rows={3}
-                                className="w-full rounded-md border border-gray-300 px-4 py-2 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                                placeholder="Please provide the full address where the event will take place"
+                              <FieldLabel>Time</FieldLabel>
+                              <TimePicker
+                                name="requestedTime"
+                                className="w-full"
+                                startTime="17:00"
+                                endTime="22:00"
+                                interval={30}
                               />
-                            </div>
-                          </section>
-                        )}
-
-                        <FormError />
-
-                        <div className="my-2 flex flex-col gap-2">
-                          <div className="flex items-center gap-4 py-2">
-                            <div className="flex-1">
-                              {!isUnavailable ? (
-                                <SubmitButton className="!h-12 w-full whitespace-nowrap !text-base !font-bold">
-                                  {isSubmitting ? 'Submitting Request...' : 'Request Booking'}
-                                </SubmitButton>
-                              ) : (
-                                <SubmitButton
-                                  disabled
-                                  className="pointer-events-none !h-12 w-full !text-base !font-bold opacity-50"
-                                >
-                                  Unavailable
-                                </SubmitButton>
-                              )}
                             </div>
                           </div>
 
-                          {product.categories && product.categories.length > 0 && (
-                            <nav aria-label="Categories" className="mt-4">
-                              <h3 className="mb-2">Categories</h3>
+                          <div>
+                            <FieldLabel>Number of Guests</FieldLabel>
+                            <Select
+                              name="partySize"
+                              className="w-full"
+                              options={Array.from({ length: 20 }, (_, i) => ({
+                                label: `${i + 1} ${i === 0 ? 'person' : 'people'}`,
+                                value: (i + 1).toString(),
+                              }))}
+                            />
+                          </div>
 
-                              <ol className="flex flex-wrap items-center gap-2 text-xs text-gray-500">
-                                {product.categories.map((category, categoryIndex) => (
-                                  <li key={categoryIndex}>
-                                    <Button
-                                      as={(buttonProps) => (
-                                        <Link to={`/categories/${category.handle}`} {...buttonProps} />
-                                      )}
-                                      className="!h-auto whitespace-nowrap !rounded !px-2 !py-1 !text-xs !font-bold"
-                                    >
-                                      {category.name}
-                                    </Button>
-                                  </li>
-                                ))}
-                              </ol>
-                            </nav>
-                          )}
-
-                          {product.tags && product.tags.length > 0 && (
-                            <nav aria-label="Tags" className="mt-4">
-                              <h3 className="mb-2">Tags</h3>
-
-                              <ol className="flex flex-wrap items-center gap-2 text-xs text-primary">
-                                {product.tags.map((tag, tagIndex) => (
-                                  <li key={tagIndex}>
-                                    <Button className="!h-auto whitespace-nowrap !rounded !px-2 !py-1 !text-xs !font-bold bg-accent-900 cursor-default">
-                                      {tag.value}
-                                    </Button>
-                                  </li>
-                                ))}
-                              </ol>
-                            </nav>
-                          )}
+                          <div>
+                            <FieldLabel>Event Type</FieldLabel>
+                            <Select
+                              name="eventType"
+                              className="w-full"
+                              options={EVENT_TYPES.map(type => ({
+                                value: type.id,
+                                label: type.label
+                              }))}
+                              placeholder="Select event type"
+                              onChange={(e) => {
+                                const selectedType = EVENT_TYPES.find(
+                                  type => type.id === e.target.value
+                                );
+                                const descriptionElement = formRef.current?.querySelector('.event-type-description');
+                                if (selectedType && descriptionElement instanceof HTMLElement) {
+                                  descriptionElement.textContent = selectedType.description;
+                                }
+                              }}
+                            />
+                            <p className="mt-1 text-sm text-gray-500 event-type-description">
+                              Select an event type to see description
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                    </GridColumn>
-                  </Grid>
+                      </details>
 
-                  {!!product.menu && (
-                    <div className="mt-14">
-                      <div className="space-y-12">
-                        <div className="text-center space-y-4">
-                          <h4 className="font-italiana text-2xl">CULINARY JOURNEY</h4>
-                          <h2 className="text-4xl lg:text-5xl font-aboreto">{product.menu.name}</h2>
-                        </div>
-                        
-                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                          {product.menu.courses?.map((course, index) => (
-                            <div 
-                              key={index} 
-                              className="p-8 bg-highlight-900/70 rounded-xl"
-                            >
-                              <div className="flex items-center gap-4 mb-4">
-                                <span className="font-italiana text-xl text-accent-900">
-                                  Course {index + 1}
-                                </span>
-                                <div className="flex-1 border-b border-accent-900/20"></div>
-                              </div>
-                              <h3 className="font-aboreto text-2xl">
-                                {course.name}
-                              </h3>
+                      <details className="group rounded-lg border border-gray-200 [&[open]>summary]:border-b">
+                        <summary className="flex cursor-pointer items-center justify-between p-4 font-semibold text-xl hover:bg-gray-50 rounded-t-lg">
+                          Location Details
+                          <span className="text-2xl leading-none text-gray-500">
+                            <span className="group-open:hidden">+</span>
+                            <span className="hidden group-open:inline">−</span>
+                          </span>
+                        </summary>
+                        <div className="p-4 space-y-4">
+                          <div>
+                            <FieldLabel>Location Type</FieldLabel>
+                            <div className="grid grid-cols-2 gap-4 mt-2">
+                              {LOCATION_TYPES.map((type, index) => {
+                                const Icon = type.icon;
+                                return (
+                                  <label
+                                    key={type.value}
+                                    className={`
+                                      relative flex flex-col items-center p-4 cursor-pointer
+                                      rounded-lg border transition-all duration-200
+                                      ${type.value === locationType 
+                                        ? 'border-primary bg-primary/5 ring-2 ring-primary/20' 
+                                        : 'border-gray-200 hover:border-gray-300'
+                                      }
+                                    `}
+                                  >
+                                    <input
+                                      type="radio"
+                                      name="locationType"
+                                      value={type.value}
+                                      checked={type.value === locationType}
+                                      onChange={handleLocationTypeChange}
+                                      className="sr-only"
+                                    />
+                                    <Icon className={`w-12 h-12 mb-3 ${
+                                      type.value === locationType ? 'text-primary' : 'text-gray-400'
+                                    }`} />
+                                    <div className="text-center">
+                                      <p className="font-semibold">{type.label}</p>
+                                      <p className="text-sm text-gray-500 mt-1">
+                                        {type.description}
+                                      </p>
+                                    </div>
+                                  </label>
+                                );
+                              })}
                             </div>
-                          ))}
+                          </div>
+
+                          <div 
+                            className="location-address hidden data-[show=true]:block" 
+                            data-show={locationType === 'customer_location'}
+                          >
+                            <FieldLabel>Event Location Address</FieldLabel>
+                            <textarea
+                              name="locationAddress"
+                              rows={3}
+                              className="w-full rounded-md border border-gray-300 px-4 py-2 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                              placeholder="Please provide the full address where the event will take place"
+                            />
+                          </div>
                         </div>
-                      </div>
+                      </details>
                     </div>
                   )}
+
+                  <FormError />
+
+                  <div className="my-2 flex flex-col gap-2">
+                    <div className="flex items-center gap-4 py-2">
+                      <div className="flex-1">
+                        {!isUnavailable ? (
+                          <SubmitButton className="!h-12 w-full whitespace-nowrap !text-base !font-bold">
+                            {isSubmitting ? 'Submitting Request...' : 'Request Booking'}
+                          </SubmitButton>
+                        ) : (
+                          <SubmitButton
+                            disabled
+                            className="pointer-events-none !h-12 w-full !text-base !font-bold opacity-50"
+                          >
+                            Unavailable
+                          </SubmitButton>
+                        )}
+                      </div>
+                    </div>
+
+                    {product.categories && product.categories.length > 0 && (
+                      <nav aria-label="Categories" className="mt-4">
+                        <h3 className="mb-2">Categories</h3>
+
+                        <ol className="flex flex-wrap items-center gap-2 text-xs text-gray-500">
+                          {product.categories.map((category, categoryIndex) => (
+                            <li key={categoryIndex}>
+                              <Button
+                                as={(buttonProps) => (
+                                  <Link to={`/categories/${category.handle}`} {...buttonProps} />
+                                )}
+                                className="!h-auto whitespace-nowrap !rounded !px-2 !py-1 !text-xs !font-bold"
+                              >
+                                {category.name}
+                              </Button>
+                            </li>
+                          ))}
+                        </ol>
+                      </nav>
+                    )}
+
+                    {product.tags && product.tags.length > 0 && (
+                      <nav aria-label="Tags" className="mt-4">
+                        <h3 className="mb-2">Tags</h3>
+
+                        <ol className="flex flex-wrap items-center gap-2 text-xs text-primary">
+                          {product.tags.map((tag, tagIndex) => (
+                            <li key={tagIndex}>
+                              <Button className="!h-auto whitespace-nowrap !rounded !px-2 !py-1 !text-xs !font-bold bg-accent-900 cursor-default">
+                                {tag.value}
+                              </Button>
+                            </li>
+                          ))}
+                        </ol>
+                      </nav>
+                    )}
+                  </div>
                 </div>
               </GridColumn>
             </Grid>

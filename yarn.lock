@@ -2835,6 +2835,21 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@headlessui/react@npm:^2.2.0":
+  version: 2.2.0
+  resolution: "@headlessui/react@npm:2.2.0"
+  dependencies:
+    "@floating-ui/react": "npm:^0.26.16"
+    "@react-aria/focus": "npm:^3.17.1"
+    "@react-aria/interactions": "npm:^3.21.3"
+    "@tanstack/react-virtual": "npm:^3.8.1"
+  peerDependencies:
+    react: ^18 || ^19 || ^19.0.0-rc
+    react-dom: ^18 || ^19 || ^19.0.0-rc
+  checksum: 10c0/af64ef2868405e629f55925d06ab6723b40a9d0802c1bd91e8ae834b6d50e51e0942bcdee44f4b51ce3b82be7c23df49e93713a29486a899d0d56b7ddce78039
+  languageName: node
+  linkType: hard
+
 "@heroicons/react@npm:^2.0.18":
   version: 2.1.5
   resolution: "@heroicons/react@npm:2.1.5"
@@ -24890,6 +24905,7 @@ __metadata:
   resolution: "root@workspace:."
   dependencies:
     "@biomejs/biome": "npm:1.9.3"
+    "@headlessui/react": "npm:^2.2.0"
     "@types/luxon": "npm:^3.4.2"
     luxon: "npm:^3.5.0"
     prettier: "npm:^3.2.5"
