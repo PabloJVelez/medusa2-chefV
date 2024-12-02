@@ -14,8 +14,8 @@ import * as Yup from 'yup';
 export const addCartItemValidation = withYup(
   Yup.object().shape({
     productId: Yup.string().required(),
-    options: Yup.object().default({}),
-    quantity: Yup.number().required(),
+    options: Yup.object().default({}).optional(),
+    quantity: Yup.number().optional(),
   }),
 );
 
@@ -51,7 +51,7 @@ const createItem: ActionHandler<StoreCartResponse> = async (payload: CreateLineI
 
   if (result.error) throw new FormValidationError(result.error);
 
-  const { productId, options, quantity } = payload;
+  const { productId, options, quantity = '1' } = payload;
 
   const region = await getSelectedRegion(request.headers);
 
@@ -65,8 +65,9 @@ const createItem: ActionHandler<StoreCartResponse> = async (payload: CreateLineI
       fieldErrors: { formError: 'Product not found.' },
     });
 
-  const variant = getVariantBySelectedOptions(product.variants || [], options);
+  //const variant = getVariantBySelectedOptions(product.variants || [], options);
 
+  const variant = product.variants?.[0];
   if (!variant)
     throw new FormValidationError({
       fieldErrors: {
