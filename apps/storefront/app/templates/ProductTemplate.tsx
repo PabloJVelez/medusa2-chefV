@@ -38,6 +38,7 @@ import { Select } from '@app/components/common/forms/fields/Select';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
 import { DateTime } from 'luxon';
 import { HomeIcon, BuildingStorefrontIcon } from '@heroicons/react/24/outline';
+import { Input } from '@app/components/common/forms/Input';
 
 interface EventType {
   id: string;
@@ -198,6 +199,7 @@ export const ProductTemplate = ({ product }: ProductTemplateProps) => {
   const [showValidationError, setShowValidationError] = useState(false);
   const [validationMessage, setValidationMessage] = useState('');
   const [isMenuExpanded, setIsMenuExpanded] = useState(false);
+  const [showContactDetails, setShowContactDetails] = useState(false);
 
   const steps: StepConfig[] = [
     {
@@ -319,6 +321,14 @@ export const ProductTemplate = ({ product }: ProductTemplateProps) => {
     setValidationMessage('');
     if (step !== 'menu') {
       setIsMenuExpanded(false);
+    }
+  };
+
+  const showSubmitButton = () => {
+    const submitButton = formRef.current?.querySelector('.submit-button-container') as HTMLElement;
+    if (submitButton) {
+      submitButton.style.maxHeight = '100px';
+      submitButton.style.opacity = '1';
     }
   };
 
@@ -678,7 +688,6 @@ export const ProductTemplate = ({ product }: ProductTemplateProps) => {
                         </div>
 
                         <div className={currentStep === 'location' ? 'block' : 'hidden'}>
-                          {/* Location details content */}
                           <div className="flex justify-between items-center mb-4">
                             <div className="flex items-center gap-4">
                               <button
@@ -688,11 +697,10 @@ export const ProductTemplate = ({ product }: ProductTemplateProps) => {
                               >
                                 ← Back
                               </button>
-                            
                             </div>
                           </div>
 
-                          {/* Add validation error message */}
+                          {/* Validation error message */}
                           {showValidationError && (
                             <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
                               <div className="flex items-center gap-2">
@@ -705,115 +713,324 @@ export const ProductTemplate = ({ product }: ProductTemplateProps) => {
                             </div>
                           )}
 
-                          <div className="space-y-6" onChange={(e) => {
-                            if (!showValidationError) return;
-                            
-                            const formData = new FormData(formRef.current as HTMLFormElement);
-                            const locationType = formData.get('locationType');
-                            const locationAddress = formData.get('locationAddress');
-                            
-                            const isValid = Boolean(locationType) && 
-                              (locationType === 'chef_location' || Boolean(locationAddress));
-                            
-                            if (isValid) {
-                              setShowValidationError(false);
-                              setValidationMessage('');
-                            } else {
-                              const missing = [];
-                              if (!locationType) {
-                                missing.push('Location type');
-                              } else if (locationType === 'customer_location' && !locationAddress) {
-                                missing.push('Address');
-                              }
-
-                              const formattedList = missing.reduce((message, item, index) => {
-                                if (index === 0) return item;
-                                if (index === missing.length - 1) return `${message}, and ${item}`;
-                                return `${message}, ${item}`;
-                              }, '');
-                              
-                              setValidationMessage(
-                                `Please complete the following: ${formattedList}`
-                              );
-                            }
-                          }}>
-                            <div>
-                              <FieldLabel>Location Type</FieldLabel>
-                              <div className="grid grid-cols-2 gap-4 mt-2">
-                                {LOCATION_TYPES.map((type) => {
-                                  const Icon = type.icon;
-                                  return (
-                                    <label
-                                      key={type.value}
-                                      className={`
-                                        relative flex flex-col items-center p-4 cursor-pointer
-                                        rounded-lg border transition-all duration-200
-                                        ${type.value === locationType 
-                                          ? 'border-primary bg-primary/5 ring-2 ring-primary/20' 
-                                          : 'border-gray-200 hover:border-gray-300'
-                                        }
-                                      `}
-                                    >
-                                      <input
-                                        type="radio"
-                                        name="locationType"
-                                        value={type.value}
-                                        checked={type.value === locationType}
-                                        onChange={handleLocationTypeChange}
-                                        className="sr-only"
-                                      />
-                                      <Icon className={`w-12 h-12 mb-3 ${
-                                        type.value === locationType ? 'text-primary' : 'text-gray-400'
-                                      }`} />
-                                      <div className="text-center">
-                                        <p className="font-semibold">{type.label}</p>
-                                        <p className="text-sm text-gray-500 mt-1">
-                                          {type.description}
-                                        </p>
-                                      </div>
-                                    </label>
-                                  );
-                                })}
-                              </div>
-                            </div>
-
-                            <div 
-                              className="location-address hidden data-[show=true]:block" 
-                              data-show={locationType === 'customer_location'}
-                            >
-                              <FieldLabel>Event Location Address</FieldLabel>
-                              <textarea
-                                name="locationAddress"
-                                rows={3}
-                                className="w-full rounded-md border border-gray-300 px-4 py-2 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                                placeholder="Please provide the full address where the event will take place"
-                              />
-                            </div>
-
-                            {/* Add the final step button */}
-                            <div className="pt-4 border-t">
-                              <SubmitButton 
-                                onClick={(e) => {
-                                  const formData = new FormData(formRef.current as HTMLFormElement);
-                                  const locationType = formData.get('locationType');
-                                  const locationAddress = formData.get('locationAddress');
-
-                                  if (!locationType || (locationType === 'customer_location' && !locationAddress?.toString().trim())) {
-                                    e.preventDefault();
-                                    handleStepComplete('location');
-                                  }
-                                }}
-                                className={`
-                                  w-full bg-primary text-white px-6 py-3 rounded-lg 
-                                  hover:bg-primary/90 transition-colors
-                                  font-semibold text-base
-                                  ${showValidationError ? 'animate-shake' : ''}
-                                  ${isUnavailable ? 'opacity-50 cursor-not-allowed' : ''}
-                                `}
-                                disabled={isUnavailable}
+                          <div className="space-y-6">
+                            {/* Location/Contact Carousel Navigation */}
+                            <div className="flex border-b border-gray-200">
+                              <button
+                                type="button"
+                                className={`flex-1 py-4 text-center relative ${
+                                  !showContactDetails 
+                                    ? 'text-primary font-medium' 
+                                    : 'text-gray-500'
+                                }`}
+                                onClick={() => setShowContactDetails(false)}
                               >
-                                {isSubmitting ? 'Submitting Request...' : 'Complete Booking Request'}
-                              </SubmitButton>
+                                Location Details
+                                {!showContactDetails && (
+                                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
+                                )}
+                              </button>
+                              <button
+                                type="button"
+                                className={`flex-1 py-4 text-center relative ${
+                                  showContactDetails 
+                                    ? 'text-primary font-medium' 
+                                    : 'text-gray-500'
+                                }`}
+                                onClick={() => setShowContactDetails(true)}
+                              >
+                                Contact Information
+                                {showContactDetails && (
+                                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
+                                )}
+                              </button>
+                            </div>
+
+                            {/* Carousel Container */}
+                            <div className="relative overflow-hidden">
+                              <div 
+                                className="flex transition-transform duration-300 ease-in-out"
+                                style={{ transform: `translateX(${showContactDetails ? '-100%' : '0'})` }}
+                              >
+                                {/* Location Details Panel */}
+                                <div className="w-full flex-shrink-0">
+                                  <div className="space-y-6">
+                                    <div>
+                                      <FieldLabel>Location Type</FieldLabel>
+                                      <div className="relative grid grid-cols-2 gap-4 mt-2">
+                                        {LOCATION_TYPES.map((type) => {
+                                          const Icon = type.icon;
+                                          return (
+                                            <label
+                                              key={type.value}
+                                              className={`
+                                                relative flex flex-col items-center p-4 cursor-pointer
+                                                rounded-lg border transition-all duration-200
+                                                overflow-hidden
+                                                ${type.value === locationType 
+                                                  ? 'border-primary bg-primary/5 ring-2 ring-primary/20' 
+                                                  : 'border-gray-200 hover:border-gray-300'
+                                                }
+                                              `}
+                                            >
+                                              <input
+                                                type="radio"
+                                                name="locationType"
+                                                value={type.value}
+                                                checked={type.value === locationType}
+                                                onChange={handleLocationTypeChange}
+                                                className="sr-only"
+                                              />
+                                              <Icon className={`w-12 h-12 mb-3 ${
+                                                type.value === locationType ? 'text-primary' : 'text-gray-400'
+                                              }`} />
+                                              <div className="text-center">
+                                                <p className="font-semibold">{type.label}</p>
+                                                <p className="text-sm text-gray-500 mt-1">
+                                                  {type.description}
+                                                </p>
+                                              </div>
+                                            </label>
+                                          );
+                                        })}
+                                      </div>
+                                    </div>
+
+                                    <div 
+                                      className="location-address hidden data-[show=true]:block" 
+                                      data-show={locationType === 'customer_location'}
+                                    >
+                                      <FieldLabel>Event Location Address</FieldLabel>
+                                      <textarea
+                                        name="locationAddress"
+                                        rows={3}
+                                        className="w-full rounded-md border border-gray-300 px-4 py-2 
+                                                   focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20
+                                                   appearance-none"
+                                        placeholder="Please provide the full address where the event will take place"
+                                      />
+                                    </div>
+
+                                    <div className="flex justify-end">
+                                      <Button
+                                        type="button"
+                                        variant="primary"
+                                        onClick={() => setShowContactDetails(true)}
+                                      >
+                                        Continue to Contact Details →
+                                      </Button>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* Contact Details Panel */}
+                                <div className="w-full flex-shrink-0">
+                                  <div className="space-y-8">
+                                    {/* Contact Info Header */}
+                                    <div className="text-center">
+                                      <h3 className="text-xl font-serif text-gray-900">Contact Information</h3>
+                                      <p className="mt-2 text-sm text-gray-500">
+                                        Please provide your details so we can contact you about your booking
+                                      </p>
+                                    </div>
+
+                                    <div className="space-y-6">
+                                      {/* Progressive Form Fields */}
+                                      <div className="space-y-6">
+                                        {/* Name Field */}
+                                        <div className="relative">
+                                          <Input
+                                            label="Full Name"
+                                            name="fullName"
+                                            type="text"
+                                            required
+                                            autoComplete="name"
+                                            placeholder="John Doe"
+                                            wrapperClassName="relative"
+                                            onChange={(e) => {
+                                              const value = e.target.value;
+                                              const [firstName, ...lastNameParts] = value.split(' ');
+                                              const lastName = lastNameParts.join(' ');
+                                              
+                                              // Update hidden fields
+                                              const firstNameInput = formRef.current?.querySelector('input[name="firstName"]') as HTMLInputElement;
+                                              const lastNameInput = formRef.current?.querySelector('input[name="lastName"]') as HTMLInputElement;
+                                              if (firstNameInput) firstNameInput.value = firstName || '';
+                                              if (lastNameInput) lastNameInput.value = lastName || '';
+                                              
+                                              // Show email field if name is entered
+                                              const emailField = formRef.current?.querySelector('.email-field') as HTMLElement;
+                                              if (emailField && value.includes(' ')) {
+                                                emailField.style.maxHeight = '200px';
+                                                emailField.style.opacity = '1';
+                                              }
+                                            }}
+                                          />
+                                          <input type="hidden" name="firstName" />
+                                          <input type="hidden" name="lastName" />
+                                        </div>
+
+                                        {/* Email Field */}
+                                        <div className="email-field overflow-hidden transition-all duration-300 max-h-0 opacity-0">
+                                          <Input
+                                            label="Email Address"
+                                            name="email"
+                                            type="email"
+                                            required
+                                            autoComplete="email"
+                                            placeholder="john.doe@example.com"
+                                            wrapperClassName="relative"
+                                            onChange={(e) => {
+                                              const value = e.target.value;
+                                              const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+                                              
+                                              // Show phone field if email is valid
+                                              const phoneField = formRef.current?.querySelector('.phone-field') as HTMLElement;
+                                              if (phoneField && isValid) {
+                                                phoneField.style.maxHeight = '200px';
+                                                phoneField.style.opacity = '1';
+                                              }
+                                            }}
+                                          />
+                                        </div>
+
+                                        {/* Phone Field */}
+                                        <div className="phone-field overflow-hidden transition-all duration-300 max-h-0 opacity-0">
+                                          <div className="relative">
+                                            <div className="flex justify-between items-start gap-4">
+                                              <Input
+                                                label="Phone Number (Optional)"
+                                                name="phone"
+                                                type="tel"
+                                                autoComplete="tel"
+                                                placeholder="+1 (555) 000-0000"
+                                                wrapperClassName="relative flex-1"
+                                                onChange={(e) => {
+                                                  const value = e.target.value;
+                                                  const isValid = value.length >= 10;
+                                                  const skipButton = formRef.current?.querySelector('.skip-phone-button') as HTMLButtonElement;
+                                                  
+                                                  // Show/hide skip button based on field being empty
+                                                  if (skipButton) {
+                                                    skipButton.style.display = value.length === 0 ? 'flex' : 'none';
+                                                  }
+                                                  
+                                                  // Show notes field if phone is valid
+                                                  const notesField = formRef.current?.querySelector('.notes-field') as HTMLElement;
+                                                  if (notesField && isValid) {
+                                                    notesField.style.maxHeight = '300px';
+                                                    notesField.style.opacity = '1';
+                                                    showSubmitButton();
+                                                  }
+                                                }}
+                                              />
+                                              <button
+                                                type="button"
+                                                className="skip-phone-button mt-[30px] px-3 py-1.5 text-sm text-gray-500 hover:text-gray-700 
+                                                           border border-gray-200 rounded-md hover:border-gray-300
+                                                           transition-colors duration-200 bg-white
+                                                           flex items-center gap-1.5"
+                                                onClick={(e) => {
+                                                  const button = e.currentTarget;
+                                                  const phoneInput = formRef.current?.querySelector('input[name="phone"]') as HTMLInputElement;
+                                                  if (phoneInput) {
+                                                    phoneInput.value = '';
+                                                  }
+                                                  
+                                                  // Show notes field when skipped
+                                                  const notesField = formRef.current?.querySelector('.notes-field') as HTMLElement;
+                                                  if (notesField) {
+                                                    notesField.style.maxHeight = '300px';
+                                                    notesField.style.opacity = '1';
+                                                    showSubmitButton();
+                                                  }
+                                                }}
+                                              >
+                                                Skip
+                                                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                                </svg>
+                                              </button>
+                                            </div>
+                                            <p className="mt-1 text-xs text-gray-500">
+                                              We'll only use this to contact you about your booking if needed
+                                            </p>
+                                          </div>
+                                        </div>
+
+                                        {/* Notes Field */}
+                                        <div className="notes-field overflow-hidden transition-all duration-300 max-h-0 opacity-0">
+                                          <div className="relative">
+                                            <label
+                                              htmlFor="notes"
+                                              className="block text-sm font-medium text-gray-600 mb-2"
+                                            >
+                                              Special Requests or Notes (Optional)
+                                            </label>
+                                            <textarea
+                                              id="notes"
+                                              name="notes"
+                                              rows={4}
+                                              className="w-full rounded-lg border border-gray-300 
+                                                               py-3 px-4 transition-colors
+                                                               focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/20 
+                                                               placeholder:text-gray-400 text-gray-900
+                                                               resize-none bg-transparent"
+                                              placeholder="Any dietary restrictions, allergies, or special accommodations we should know about?"
+                                              onFocus={() => showSubmitButton()}
+                                            />
+                                          </div>
+                                        </div>
+                                      </div>
+
+                                      {/* Submit Button Container */}
+                                      <div className="submit-button-container overflow-hidden transition-all duration-300 max-h-0 opacity-0 mt-6">
+                                        <div className="flex justify-between gap-4">
+                                          <Button
+                                            type="button"
+                                            variant="ghost"
+                                            onClick={() => setShowContactDetails(false)}
+                                            className="flex items-center gap-2 px-6 py-2.5 text-gray-600 hover:text-gray-900
+                                                           transition-colors duration-200"
+                                          >
+                                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                            </svg>
+                                            Back to Location
+                                          </Button>
+                                          <SubmitButton 
+                                            className={`
+                                              flex items-center gap-2 px-8 py-2.5 rounded-lg 
+                                              bg-primary text-white font-medium
+                                              hover:bg-primary/90 transition-all duration-200
+                                              disabled:opacity-50 disabled:cursor-not-allowed
+                                              ${showValidationError ? 'animate-shake' : ''}
+                                            `}
+                                            disabled={isUnavailable}
+                                          >
+                                            {isSubmitting ? (
+                                              <>
+                                                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+                                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                                </svg>
+                                                Processing...
+                                              </>
+                                            ) : (
+                                              <>
+                                                Complete Booking
+                                                <svg className="w-5 h-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                                </svg>
+                                              </>
+                                            )}
+                                          </SubmitButton>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
                             </div>
                           </div>
                         </div>
