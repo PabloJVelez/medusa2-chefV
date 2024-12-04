@@ -3,6 +3,7 @@ import { getVariantBySelectedOptions } from '@libs/util/products';
 import { setCartId } from '@libs/util/server/cookies.server';
 import { addToCart, deleteLineItem, retrieveCart, updateLineItem } from '@libs/util/server/data/cart.server';
 import { getProductsById } from '@libs/util/server/data/products.server';
+import { requestChefEvent } from '@libs/util/server/data/chefEvent.server';
 import { getSelectedRegion } from '@libs/util/server/data/regions.server';
 import { FormValidationError } from '@libs/util/validation/validation-error';
 import { StoreCart, StoreCartResponse } from '@medusajs/types';
@@ -23,6 +24,14 @@ export enum LineItemActions {
   CREATE = 'createItem',
   UPDATE = 'updateItem',
   DELETE = 'deleteItem',
+  CREATE_CHEF_EVENT = 'createChefEvent',
+}
+
+export interface CreateChefEventPayload {
+  requestedDate: string;
+  requestedTime: string;
+  productId: string;
+
 }
 
 export interface CreateLineItemPayLoad {
@@ -44,6 +53,11 @@ export interface DeleteLineItemRequestPayload {
 }
 
 export interface LineItemRequestResponse extends StoreCartResponse {}
+
+const createChefEvent: ActionHandler = async (payload: CreateChefEventPayload, { request }) => {
+  const result = await requestChefEvent();
+  console.log('RESULT FROM CHEF EVENT REQUEST', result);
+}
 
 const createItem: ActionHandler<StoreCartResponse> = async (payload: CreateLineItemPayLoad, { request }) => {
   console.log('RUNNING CREATE ITEM WITH PAYLOAD', payload);
@@ -112,6 +126,7 @@ const actions = {
   createItem,
   updateItem,
   deleteItem,
+  createChefEvent,
 };
 
 export async function action(actionArgs: ActionFunctionArgs) {

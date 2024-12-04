@@ -335,14 +335,14 @@ export const ProductTemplate = ({ product }: ProductTemplateProps) => {
   return (
     <>
       <section className="pb-12 pt-12 xl:pt-24 min-h-screen">
-        <Form<AddToCartFormValues, LineItemActions.CREATE>
+        <Form<AddToCartFormValues, LineItemActions.CREATE_CHEF_EVENT>
           id="addToCartForm"
           formRef={formRef}
           fetcher={addToCartFetcher}
           encType="multipart/form-data"
           method="post"
           action={`/api/cart/line-items`}
-          subaction={LineItemActions.CREATE}
+          subaction={LineItemActions.CREATE_CHEF_EVENT}
           defaultValues={defaultValues}
           validator={validator}
           onSubmit={(values) => {
