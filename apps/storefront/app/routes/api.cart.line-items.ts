@@ -28,10 +28,14 @@ export enum LineItemActions {
 }
 
 export interface CreateChefEventPayload {
-  requestedDate: string;
-  requestedTime: string;
   productId: string;
-
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone?: string;
+  notes?: string;
+  date: string;
+  time: string;
 }
 
 export interface CreateLineItemPayLoad {
@@ -55,9 +59,14 @@ export interface DeleteLineItemRequestPayload {
 export interface LineItemRequestResponse extends StoreCartResponse {}
 
 const createChefEvent: ActionHandler = async (payload: CreateChefEventPayload, { request }) => {
-  const result = await requestChefEvent();
-  console.log('RESULT FROM CHEF EVENT REQUEST', result);
-}
+  const result = await requestChefEvent(payload);
+  
+  if (!result.success) {
+    throw new Error('Failed to create chef event');
+  }
+
+  return result;
+};
 
 const createItem: ActionHandler<StoreCartResponse> = async (payload: CreateLineItemPayLoad, { request }) => {
   console.log('RUNNING CREATE ITEM WITH PAYLOAD', payload);

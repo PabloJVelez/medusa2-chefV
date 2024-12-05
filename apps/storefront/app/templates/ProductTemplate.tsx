@@ -332,6 +332,47 @@ export const ProductTemplate = ({ product }: ProductTemplateProps) => {
     }
   };
 
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+
+    try {
+      const response = await fetch('/api/cart/line-items', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          action: 'createChefEvent',
+          payload: {
+            productId: product.id,
+            firstName: formData.get('firstName'),
+            lastName: formData.get('lastName'),
+            email: formData.get('email'),
+            phone: formData.get('phone'),
+            notes: formData.get('notes'),
+            date: formData.get('date'),
+            time: formData.get('time'),
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to submit booking request');
+      }
+
+      const result = await response.json();
+      
+      // Handle successful booking
+      // You might want to redirect to a confirmation page or show a success message
+      
+    } catch (error) {
+      console.error('Error submitting booking:', error);
+      // Handle error - show error message to user
+    }
+  };
+
   return (
     <>
       <section className="pb-12 pt-12 xl:pt-24 min-h-screen">

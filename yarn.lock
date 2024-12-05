@@ -1325,7 +1325,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/plugin-transform-classes@npm:^7.0.0":
+"@babel/plugin-transform-classes@npm:^7.0.0, @babel/plugin-transform-classes@npm:^7.9.5":
   version: 7.25.9
   resolution: "@babel/plugin-transform-classes@npm:7.25.9"
   dependencies:
@@ -9168,6 +9168,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@sendgrid/client@npm:^7.7.0":
+  version: 7.7.0
+  resolution: "@sendgrid/client@npm:7.7.0"
+  dependencies:
+    "@sendgrid/helpers": "npm:^7.7.0"
+    axios: "npm:^0.26.0"
+  checksum: 10c0/acf1db2dcc5181f6f9befba811ba6acb31e50051ab6bded952cb073f117c9237d86013602cdf523b91582c40545e1085a413f1e9e490a46b1d664a5c956c1f3f
+  languageName: node
+  linkType: hard
+
 "@sendgrid/client@npm:^8.1.4":
   version: 8.1.4
   resolution: "@sendgrid/client@npm:8.1.4"
@@ -9178,12 +9188,31 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@sendgrid/helpers@npm:^7.7.0":
+  version: 7.7.0
+  resolution: "@sendgrid/helpers@npm:7.7.0"
+  dependencies:
+    deepmerge: "npm:^4.2.2"
+  checksum: 10c0/14dfe9af191dd9ad18f0b2744d6d12dbc80f830507b6112d8c4c1c4741ff282393a06e4b4559c0f404d33971639ecadb1017e0cc3b7187e56ec64ab9ee5ff21c
+  languageName: node
+  linkType: hard
+
 "@sendgrid/helpers@npm:^8.0.0":
   version: 8.0.0
   resolution: "@sendgrid/helpers@npm:8.0.0"
   dependencies:
     deepmerge: "npm:^4.2.2"
   checksum: 10c0/e7f341099c63915eb095102f8c7ec220a8f2fb66a0cd836ab91e7424005e7c5fd27b65e3a5ed43654f5b2b3608fa7d14ebba924ff86e5d0bdfeaf0248f836a50
+  languageName: node
+  linkType: hard
+
+"@sendgrid/mail@npm:^7.1.1":
+  version: 7.7.0
+  resolution: "@sendgrid/mail@npm:7.7.0"
+  dependencies:
+    "@sendgrid/client": "npm:^7.7.0"
+    "@sendgrid/helpers": "npm:^7.7.0"
+  checksum: 10c0/5a1d617f1e3f8d47d4fe188ff08f18fca63e3006545ad1f954bf30887806c810f6c0dea7d8850c24de03b3aca75f70f4324369ed2497d957870b8a65f1451127
   languageName: node
   linkType: hard
 
@@ -13382,7 +13411,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"awilix@npm:^8.0.1":
+"awilix@npm:^8.0.0, awilix@npm:^8.0.1":
   version: 8.0.1
   resolution: "awilix@npm:8.0.1"
   dependencies:
@@ -13415,6 +13444,15 @@ __metadata:
   dependencies:
     follow-redirects: "npm:^1.14.0"
   checksum: 10c0/fbcff55ec68f71f02d3773d467db2fcecdf04e749826c82c2427a232f9eba63242150a05f15af9ef15818352b814257541155de0281f8fb2b7e8a5b79f7f2142
+  languageName: node
+  linkType: hard
+
+"axios@npm:^0.26.0":
+  version: 0.26.1
+  resolution: "axios@npm:0.26.1"
+  dependencies:
+    follow-redirects: "npm:^1.14.8"
+  checksum: 10c0/77ad7f1e6ca04fcd3fa8af1795b09d8b7c005b71a31f28d99ba40cda0bdcc12a4627801d7fac5efa62b9f667a8402bd54c669039694373bc8d44f6be611f785c
   languageName: node
   linkType: hard
 
@@ -13739,7 +13777,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"body-parser@npm:1.20.3":
+"body-parser@npm:1.20.3, body-parser@npm:^1.19.0":
   version: 1.20.3
   resolution: "body-parser@npm:1.20.3"
   dependencies:
@@ -16973,7 +17011,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"express@npm:^4.20.0, express@npm:^4.21.0":
+"express@npm:^4.17.1, express@npm:^4.20.0, express@npm:^4.21.0":
   version: 4.21.1
   resolution: "express@npm:4.21.1"
   dependencies:
@@ -17331,7 +17369,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"follow-redirects@npm:^1.14.0, follow-redirects@npm:^1.15.6":
+"follow-redirects@npm:^1.14.0, follow-redirects@npm:^1.14.8, follow-redirects@npm:^1.15.6":
   version: 1.15.9
   resolution: "follow-redirects@npm:1.15.9"
   peerDependenciesMeta:
@@ -21190,6 +21228,31 @@ __metadata:
   languageName: node
   linkType: hard
 
+"medusa-core-utils@npm:^1.2.3":
+  version: 1.2.3
+  resolution: "medusa-core-utils@npm:1.2.3"
+  dependencies:
+    awilix: "npm:^8.0.0"
+  checksum: 10c0/8547b2bd6cf51e155885bdbb622b2897035b1369a7b758158a2c71df0b349f5dc23d664a23db1a8654306bf08226d483efd75829cbc232980574af8097147e02
+  languageName: node
+  linkType: hard
+
+"medusa-plugin-sendgrid@npm:^1.3.13":
+  version: 1.3.13
+  resolution: "medusa-plugin-sendgrid@npm:1.3.13"
+  dependencies:
+    "@babel/plugin-transform-classes": "npm:^7.9.5"
+    "@sendgrid/mail": "npm:^7.1.1"
+    body-parser: "npm:^1.19.0"
+    express: "npm:^4.17.1"
+    medusa-core-utils: "npm:^1.2.3"
+  peerDependencies:
+    medusa-interfaces: ^1.3.7
+    typeorm: ^0.3.16
+  checksum: 10c0/a0c39e40ae3657ccce0f4009131683e4d29dab8ebdcd0fe91198a3370fbfddac219273c3947e9e24e10f4b449b32a0e7155b7e4ae1f45a2923827d89b26c3e8a
+  languageName: node
+  linkType: hard
+
 "medusa@workspace:apps/medusa":
   version: 0.0.0-use.local
   resolution: "medusa@workspace:apps/medusa"
@@ -24908,6 +24971,7 @@ __metadata:
     "@headlessui/react": "npm:^2.2.0"
     "@types/luxon": "npm:^3.4.2"
     luxon: "npm:^3.5.0"
+    medusa-plugin-sendgrid: "npm:^1.3.13"
     prettier: "npm:^3.2.5"
     rimraf: "npm:^5.0.5"
     turbo: "npm:^2.1.2"
