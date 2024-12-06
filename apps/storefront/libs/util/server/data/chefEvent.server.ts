@@ -1,18 +1,22 @@
 import { sdk } from '@libs/util/server/client.server';
 
-interface EventRequest {
+export interface EventRequest {
   productId: string;
+  menuId: string;
+  requestedDate: string;
+  requestedTime: string;
+  partySize: number;
+  eventType: string;
+  locationType: string;
+  locationAddress?: string;
   firstName: string;
   lastName: string;
   email: string;
   phone?: string;
   notes?: string;
-  requestedDate: string;
-  requestedTime: string;
-  productName?: string;
 }
 
-interface EventResponse {
+export interface EventResponse {
   success: boolean;
   message: string;
   data?: {
@@ -46,6 +50,7 @@ export const requestChefEvent = async (data: EventRequest): Promise<EventRespons
         'Content-Type': 'application/json',
       },
     });
+    console.log("RESPONSE FROM REQUEST CHEF EVENT", response)
 
     return response as EventResponse;
   } catch (error) {

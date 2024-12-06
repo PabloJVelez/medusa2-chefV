@@ -1,4 +1,5 @@
-import HomeIcon from '@heroicons/react/24/solid/HomeIcon';
+import { HomeIcon as HomeIconSolid } from '@heroicons/react/24/solid';
+import { HomeIcon, BuildingStorefrontIcon } from '@heroicons/react/24/outline';
 import { useCart } from '@app/hooks/useCart';
 import { useRegion } from '@app/hooks/useRegion';
 import { ProductImageGallery } from '@app/components/product/ProductImageGallery';
@@ -37,7 +38,6 @@ import { TimePicker } from '@app/components/common/forms/fields/TimePicker';
 import { Select } from '@app/components/common/forms/fields/Select';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
 import { DateTime } from 'luxon';
-import { HomeIcon, BuildingStorefrontIcon } from '@heroicons/react/24/outline';
 import { Input } from '@app/components/common/forms/Input';
 
 interface EventType {
@@ -69,7 +69,7 @@ const LOCATION_TYPES = [
     value: 'customer_location',
     label: 'My Location',
     description: 'Chef will come to your provided location',
-    icon: HomeIcon
+    icon: HomeIconSolid
   },
   {
     value: 'chef_location',
@@ -81,6 +81,7 @@ const LOCATION_TYPES = [
 
 export interface AddToCartFormValues {
   productId: string;
+  menuId: string;
   requestedDate: string;
   requestedTime: string;
   partySize: number;
@@ -92,6 +93,7 @@ export interface AddToCartFormValues {
 export const getAddToCartValidator = (product: StoreProduct): Validator<AddToCartFormValues> => {
   const schemaShape: Record<keyof AddToCartFormValues, Yup.AnySchema> = {
     productId: Yup.string().required('Product ID is required'),
+    menuId: Yup.string().required('Menu ID is required'),
     requestedDate: Yup.string().required('Please select a date'),
     requestedTime: Yup.string().required('Please select a time'),
     partySize: Yup.number()
@@ -122,7 +124,7 @@ const getBreadcrumbs = (product: StoreProduct) => {
     {
       label: (
         <span className="flex whitespace-nowrap">
-          <HomeIcon className="inline h-4 w-4" />
+          <HomeIconSolid className="inline h-4 w-4" />
           <span className="sr-only">Home</span>
         </span>
       ),
@@ -144,18 +146,29 @@ const getBreadcrumbs = (product: StoreProduct) => {
   return breadcrumbs;
 };
 
+// Define the menu-related types
+interface MenuDish {
+  id: string;
+  name: string;
+  description?: string;
+}
+
+interface MenuCourse {
+  id: string;
+  name: string;
+  dishes: MenuDish[];
+}
+
+// Simplified Menu interface that matches what we actually use
+interface MenuData {
+  id: string;
+  name: string;
+  courses: MenuCourse[];
+}
+
 export interface ProductTemplateProps {
   product: StoreProduct & { 
-    menu: {
-      name: string;
-      courses: {
-        name: string;
-        dishes: {
-          name: string;
-          description?: string;
-        }[];
-      }[];
-    } 
+    menu: MenuData; // Use the simplified interface that matches our usage
   };
 }
 
@@ -179,6 +192,7 @@ export const ProductTemplate = ({ product }: ProductTemplateProps) => {
 
   const defaultValues: AddToCartFormValues = {
     productId: product.id!,
+    menuId: product.menu?.id || '',
     requestedDate: '',
     requestedTime: '',
     partySize: 2,
@@ -332,46 +346,39 @@ export const ProductTemplate = ({ product }: ProductTemplateProps) => {
     }
   };
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const form = event.currentTarget;
-    const formData = new FormData(form);
-
+  const handleSubmit = async (values: AddToCartFormValues) => {
     try {
-      const response = await fetch('/api/cart/line-items', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          action: 'createChefEvent',
-          payload: {
-            productId: product.id,
-            firstName: formData.get('firstName'),
-            lastName: formData.get('lastName'),
-            email: formData.get('email'),
-            phone: formData.get('phone'),
-            notes: formData.get('notes'),
-            date: formData.get('date'),
-            time: formData.get('time'),
-          },
-        }),
+      const formData = new FormData();
+      Object.entries(values).forEach(([key, value]) => {
+        formData.append(key, value.toString());
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to submit booking request');
-      }
+      addToCartFetcher.submit(formData, {
+        method: "post",
+        action: "/api/cart/line-items?action=createChefEvent",
+      });
 
-      const result = await response.json();
-      
-      // Handle successful booking
-      // You might want to redirect to a confirmation page or show a success message
-      
+      if (!addToCartFetcher.data?.error) {
+        toggleCartDrawer();
+        console.log("Event created successfully");
+      } else {
+        console.error("Failed to create event:", addToCartFetcher.data.error);
+      }
     } catch (error) {
-      console.error('Error submitting booking:', error);
-      // Handle error - show error message to user
+      console.error("Error submitting form:", error);
     }
   };
+
+  useEffect(() => {
+    if (addToCartFetcher.state === "idle" && addToCartFetcher.data) {
+      if (addToCartFetcher.data.chefEvent) {
+        toggleCartDrawer();
+        console.log("Event created successfully:", addToCartFetcher.data.chefEvent);
+      } else if (addToCartFetcher.data.error) {
+        console.error("Failed to create event:", addToCartFetcher.data.error);
+      }
+    }
+  }, [addToCartFetcher.state, addToCartFetcher.data]);
 
   return (
     <>
@@ -382,27 +389,14 @@ export const ProductTemplate = ({ product }: ProductTemplateProps) => {
           fetcher={addToCartFetcher}
           encType="multipart/form-data"
           method="post"
-          action={`/api/cart/line-items`}
+          action="/api/cart/line-items"
           subaction={LineItemActions.CREATE_CHEF_EVENT}
           defaultValues={defaultValues}
           validator={validator}
-          onSubmit={(values) => {
-            console.log('Form submitted with values:', {
-              menu: product.menu.name,
-              ...values,
-              requestedDate: values.requestedDate ? 
-                DateTime.fromISO(values.requestedDate).toLocaleString(DateTime.DATE_FULL) : 
-                'No date selected',
-              requestedTime: values.requestedTime ? 
-                DateTime.fromFormat(values.requestedTime, 'HH:mm').toLocaleString(DateTime.TIME_SIMPLE) :
-                'No time selected'
-            });
-
-            const formData = new FormData(formRef.current as HTMLFormElement);
-            console.log('Raw form data:', Object.fromEntries(formData.entries()));
-          }}
+          onSubmit={handleSubmit}
         >
           <input type="hidden" name="productId" value={product.id} />
+          <input type="hidden" name="menuId" value={product.menu?.id || ''} />
 
           <Container className="px-0 sm:px-6 md:px-8">
             <Grid>

@@ -3,7 +3,7 @@ import { getVariantBySelectedOptions } from '@libs/util/products';
 import { setCartId } from '@libs/util/server/cookies.server';
 import { addToCart, deleteLineItem, retrieveCart, updateLineItem } from '@libs/util/server/data/cart.server';
 import { getProductsById } from '@libs/util/server/data/products.server';
-import { requestChefEvent } from '@libs/util/server/data/chefEvent.server';
+import { requestChefEvent, EventRequest, EventResponse } from '@libs/util/server/data/chefEvent.server';
 import { getSelectedRegion } from '@libs/util/server/data/regions.server';
 import { FormValidationError } from '@libs/util/validation/validation-error';
 import { StoreCart, StoreCartResponse } from '@medusajs/types';
@@ -27,16 +27,7 @@ export enum LineItemActions {
   CREATE_CHEF_EVENT = 'createChefEvent',
 }
 
-export interface CreateChefEventPayload {
-  productId: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone?: string;
-  notes?: string;
-  date: string;
-  time: string;
-}
+export interface CreateChefEventPayload extends EventRequest {}
 
 export interface CreateLineItemPayLoad {
   cartId: string;
@@ -58,13 +49,9 @@ export interface DeleteLineItemRequestPayload {
 
 export interface LineItemRequestResponse extends StoreCartResponse {}
 
-const createChefEvent: ActionHandler = async (payload: CreateChefEventPayload, { request }) => {
+const createChefEvent: ActionHandler<EventResponse> = async (payload: CreateChefEventPayload, { request }) => {
   const result = await requestChefEvent(payload);
   
-  if (!result.success) {
-    throw new Error('Failed to create chef event');
-  }
-
   return result;
 };
 

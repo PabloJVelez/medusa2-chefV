@@ -3,18 +3,37 @@ import {
   createMenuFromProductWorkflow, 
   CreateMenuFromProductWorkflowInput
 } from "../create-menu-from-product"
+import {
+  linkEventToProductWorkflow,
+  LinkEventToProductWorkflowInput
+} from "../link-event-to-product"
 
 createProductsWorkflow.hooks.productsCreated(
 	async ({ products, additional_data }, { container }) => {
-    const workflow = createMenuFromProductWorkflow(container)
+    const menuWorkflow = createMenuFromProductWorkflow(container)
+    const chefEventWorkflow = linkEventToProductWorkflow(container)
+    console.log('NEW PRODUCT WAS CREATED FROM STORE REQUEST')
+    console.log("MENU DATA", additional_data?.menu)
+    console.log("CHEF EVENT DATA", additional_data?.chefEvent)
     
     for (let product of products) {
-      await workflow.run({
-        input: {
-          product,
-          additional_data
-        } as CreateMenuFromProductWorkflowInput
-      })
+      if (additional_data?.menu) {
+        await menuWorkflow.run({
+          input: {
+            product,
+            additional_data
+          } as CreateMenuFromProductWorkflowInput
+        })
+      }
+
+      if (additional_data?.chefEvent) {
+        await chefEventWorkflow.run({
+          input: {
+            product,
+            chefEvent: additional_data?.chefEvent
+          } as LinkEventToProductWorkflowInput
+        })
+      }
     }
 	}
 )

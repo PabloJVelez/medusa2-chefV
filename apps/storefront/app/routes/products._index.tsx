@@ -11,8 +11,9 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   const region = await getSelectedRegion(request.headers);
   const { products, count, limit, offset } = await sdk.store.product.list({
     region_id: region?.id,
-    fields: "+menu.*",
+    fields: "+menu.*, chef_event.*",
   });
+  console.log("PRODUCTS WE GOT BACK ARE RIGHT HERE ---->>>>", products)
 
   // Add query parameters for additional fields
   const testClientCall = await sdk.client.fetch(

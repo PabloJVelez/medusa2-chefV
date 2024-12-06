@@ -76,7 +76,10 @@ module.exports = defineConfig({
 
     {
       resolve: "./src/modules/menu",
-    }
+    },
+    {
+      resolve: "./src/modules/chef-event",
+    },
   ],
   admin: {
     backendUrl: process.env.ADMIN_BACKEND_URL || 'http://localhost:9000',
