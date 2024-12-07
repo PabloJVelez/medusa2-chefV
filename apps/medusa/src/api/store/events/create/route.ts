@@ -2,8 +2,11 @@ import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { linkEventToProductWorkflow } from "../../../../workflows/link-event-to-product"
 import { Modules } from "@medusajs/framework/utils"
 import { DateTime } from "luxon"
-import { CreateProductDTO, CreateProductOptionDTO, CreateProductVariantDTO, INotificationModuleService, CreateNotificationDTO } from "@medusajs/types"
-
+import { CreateProductDTO, CreateProductOptionDTO, CreateProductVariantDTO, INotificationModuleService, CreateNotificationDTO, ProductDTO } from "@medusajs/types"
+import { Menu } from "../../../../modules/menu/models/menu"
+import {ContainerRegistrationKeys} from "@medusajs/framework/utils"
+import { linkMenuToEventProductWorkflow, LinkMenuToEventProductWorkflowInput } from "../../../../workflows/link-menu-to-eventProduct"
+import { MENU_MODULE } from "src/modules/menu"
 
 interface CreateChefEventBody {
   productId: string
@@ -19,6 +22,10 @@ interface CreateChefEventBody {
   phone?: string
   notes?: string
   productName?: string
+}
+
+interface ExtendedProductDTO extends ProductDTO {
+  menu?: typeof Menu
 }
 
 export async function POST(
@@ -44,9 +51,16 @@ export async function POST(
   try {
     const productService = req.scope.resolve(Modules.PRODUCT);
     const notificationService = req.scope.resolve(Modules.NOTIFICATION);
-    // Get the template product
-    const templateProduct = await productService.retrieveProduct(productId);
-    console.log("TEMPLATE PRODUCT RETRIEVED", templateProduct.id);
+    const query = req.scope.resolve(ContainerRegistrationKeys.QUERY)
+
+    const {data: [templateProduct]} = await query.graph({
+      entity: "product",
+      fields: ["id", "title", "description", "menu.*", "menu.courses.*", "menu.courses.dishes.*"],
+      filters: {
+        id: productId
+      }
+    })
+
 
     if (!templateProduct) {
       res.status(404).json({
@@ -122,6 +136,14 @@ ${notes ? `\nSpecial Notes:\n${notes}` : ''}
 
     // Create new product for this specific event
     const [createdProduct] = await productService.createProducts([productDTO]);
+    
+    // Link the menu to the new product
+    await linkMenuToEventProductWorkflow(req.scope).run({
+      input: {
+        productId: createdProduct.id as string,
+        menuId: templateProduct.menu?.id as string
+      }
+    })
 
     const workflowInput = {
       input: {
@@ -147,17 +169,11 @@ ${notes ? `\nSpecial Notes:\n${notes}` : ''}
         }
       }
     };
-
-    
-    
-
-
     console.log("GOING TO RUN WORKFLOW")
     const { result } = await linkEventToProductWorkflow(req.scope).run(workflowInput)
 
-    // Send notification to chef
     await notificationService.createNotifications({
-      to: email,
+      to: "pablo_3@icloud.com",
       channel: "email",
       template: "d-c693ecebe49048d88e46d4dc26d30a19",
       data: {
@@ -182,38 +198,9 @@ ${notes ? `\nSpecial Notes:\n${notes}` : ''}
           status: "pending",
           total_price: result.chefEvent.totalPrice,
           deposit_paid: false
-        }
-      }
-    } as CreateNotificationDTO);
-
-    // Also send a copy to the chef
-    await notificationService.createNotifications({
-      to: "pabsv003@gmail.com",
-      channel: "email",
-      template: "d-c693ecebe49048d88e46d4dc26d30a19",
-      data: {
-        customer: {
-          first_name: firstName,
-          last_name: lastName,
-          email: email,
-          phone: phone || 'No phone provided'
         },
-        booking: {
-          date: formattedDate,
-          time: formattedTime,
-          menu: productName || templateProduct.title,
-          event_type: eventTypeMap[eventType],
-          location_type: locationTypeMap[locationType],
-          location_address: locationAddress || 'At chef\'s location',
-          party_size: partySize,
-          notes: notes || 'No special requests'
-        },
-        event: {
-          id: result.chefEvent.id,
-          status: "pending",
-          total_price: result.chefEvent.totalPrice,
-          deposit_paid: false
-        }
+        acceptUrl: `${process.env.ADMIN_BACKEND_URL}/admin/events/accept?eventId=${result.chefEvent.id}`,
+        rejectUrl: `${process.env.ADMIN_BACKEND_URL}/admin/events/reject?eventId=${result.chefEvent.id}`
       }
     } as CreateNotificationDTO);
 

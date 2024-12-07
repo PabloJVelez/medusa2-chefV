@@ -5,6 +5,8 @@ import { Modules } from "@medusajs/framework/utils"
 import { MENU_MODULE } from "../../modules/menu"
 import { createMenuStep } from "./steps/create-menu"
 
+//TODO: This does not need to create a new menu, additional_data should come in with a menuId and we use that Id to link the menu to the product??
+
 export type CreateMenuFromProductWorkflowInput = {
   product: ProductDTO
   additional_data?: {
