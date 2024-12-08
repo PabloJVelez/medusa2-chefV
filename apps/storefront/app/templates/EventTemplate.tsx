@@ -10,6 +10,8 @@ import { Share } from '@app/components/share';
 import { Link } from '@remix-run/react';
 import truncate from 'lodash/truncate';
 import { ProductWithMenu } from '@app/types/events';
+import { useState } from 'react';
+import { ChevronDownIcon } from '@heroicons/react/24/outline';
 
 // Define the event interface
 export interface Event {
@@ -32,12 +34,38 @@ export interface Event {
     email: string;
     phone?: string;
   };
-  notes?: string;
 }
 
 export interface EventTemplateProps {
   event: Event;
 }
+
+interface ExpandableSectionProps {
+  title: string;
+  defaultOpen?: boolean;
+  children: React.ReactNode;
+}
+
+const ExpandableSection = ({ title, defaultOpen = false, children }: ExpandableSectionProps) => {
+  const [isOpen, setIsOpen] = useState(defaultOpen);
+
+  return (
+    <div className="border-t border-gray-200 py-6">
+      <button
+        className="flex w-full items-center justify-between text-left"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <h3 className="text-lg font-medium text-gray-900">{title}</h3>
+        <ChevronDownIcon
+          className={`h-5 w-5 text-gray-500 transition-transform ${
+            isOpen ? 'rotate-180' : ''
+          }`}
+        />
+      </button>
+      {isOpen && <div className="mt-4">{children}</div>}
+    </div>
+  );
+};
 
 const getBreadcrumbs = (event: Event) => {
   const breadcrumbs: Breadcrumb[] = [
@@ -89,14 +117,7 @@ export const EventTemplate = ({ event }: EventTemplateProps) => {
     return types[type as keyof typeof types] || type;
   };
 
-  const getStatusBadgeClass = (status: Event['status']) => {
-    const classes = {
-      pending: 'bg-yellow-100 text-yellow-800',
-      confirmed: 'bg-green-100 text-green-800',
-      cancelled: 'bg-red-100 text-red-800',
-    };
-    return classes[status];
-  };
+  const [currentTab, setCurrentTab] = useState<'menu' | 'event'>('menu');
 
   return (
     <section className="pb-12 pt-12 xl:pt-24">
@@ -112,13 +133,10 @@ export const EventTemplate = ({ event }: EventTemplateProps) => {
               
               <header className="flex gap-4">
                 <div>
-                  <div className="flex items-center gap-3">
+                  <div>
                     <h1 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
                       {event.title}
                     </h1>
-                    <span className={`px-3 py-1 text-sm font-medium rounded-full ${getStatusBadgeClass(event.status)}`}>
-                      {event.status.charAt(0).toUpperCase() + event.status.slice(1)}
-                    </span>
                   </div>
                   <p className="mt-2 text-lg text-gray-600">
                     <ProductPrice product={event.product} currencyCode={currencyCode} />
@@ -126,7 +144,7 @@ export const EventTemplate = ({ event }: EventTemplateProps) => {
                 </div>
                 <div className="flex-1" />
                 <Share
-                  itemType="event"
+                  itemType="product"
                   shareData={{
                     title: event.title,
                     text: truncate(event.description || 'Check out this event', {
@@ -137,58 +155,51 @@ export const EventTemplate = ({ event }: EventTemplateProps) => {
                 />
               </header>
 
-              <div className="mt-8 space-y-8">
-                {/* Event Details */}
-                <div className="space-y-6">
-                  <div className="border-t border-b border-gray-200 py-6 space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <h3 className="text-sm font-medium text-gray-500">Date</h3>
-                        <p className="mt-1 text-lg font-medium text-gray-900">
-                          {formatDate(event.date)}
-                        </p>
-                      </div>
-                      <div>
-                        <h3 className="text-sm font-medium text-gray-500">Time</h3>
-                        <p className="mt-1 text-lg font-medium text-gray-900">
-                          {formatTime(event.time)}
-                        </p>
-                      </div>
-                    </div>
+              <div className="mt-8 space-y-6">
+                {/* Tab Navigation */}
+                <div className="flex border-b border-gray-200">
+                  <button
+                    type="button"
+                    className={`flex-1 py-4 text-center relative ${
+                      currentTab === 'menu' 
+                        ? 'text-primary font-medium' 
+                        : 'text-gray-500'
+                    }`}
+                    onClick={() => setCurrentTab('menu')}
+                  >
+                    Menu Details
+                    {currentTab === 'menu' && (
+                      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    className={`flex-1 py-4 text-center relative ${
+                      currentTab === 'event' 
+                        ? 'text-primary font-medium' 
+                        : 'text-gray-500'
+                    }`}
+                    onClick={() => setCurrentTab('event')}
+                  >
+                    Event Details
+                    {currentTab === 'event' && (
+                      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
+                    )}
+                  </button>
+                </div>
 
-                    <div>
-                      <h3 className="text-sm font-medium text-gray-500">Event Type</h3>
-                      <p className="mt-1 text-lg font-medium text-gray-900">
-                        {getEventTypeLabel(event.eventType)}
-                      </p>
-                    </div>
-
-                    <div>
-                      <h3 className="text-sm font-medium text-gray-500">Party Size</h3>
-                      <p className="mt-1 text-lg font-medium text-gray-900">
-                        {event.partySize} {event.partySize === 1 ? 'person' : 'people'}
-                      </p>
-                    </div>
-
-                    <div>
-                      <h3 className="text-sm font-medium text-gray-500">Location</h3>
-                      <p className="mt-1 text-lg font-medium text-gray-900">
-                        {event.location.type === 'customer_location' ? 'Customer Location' : "Chef's Location"}
-                      </p>
-                      {event.location.address && (
-                        <p className="mt-1 text-gray-500">{event.location.address}</p>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Menu Details */}
-                  {event.product.menu && (
-                    <div className="space-y-4">
-                      <h3 className="text-lg font-medium text-gray-900">Menu Details</h3>
+                {/* Tab Content */}
+                <div className="relative overflow-hidden">
+                  <div 
+                    className="flex transition-transform duration-300 ease-in-out"
+                    style={{ transform: `translateX(${currentTab === 'event' ? '-100%' : '0'})` }}
+                  >
+                    {/* Menu Details Panel */}
+                    <div className="w-full flex-shrink-0">
                       <div className="bg-gray-50 p-6 rounded-lg">
                         <h4 className="font-medium text-gray-900 mb-4">{event.product.menu.name}</h4>
                         <div className="space-y-6">
-                          {event.product.menu.courses?.map((course, index) => (
+                          {event.product.menu.courses?.map((course) => (
                             <div key={course.id} className="space-y-2">
                               <h5 className="font-medium text-gray-900">{course.name}</h5>
                               <ul className="list-disc list-inside space-y-1 text-gray-600">
@@ -201,15 +212,51 @@ export const EventTemplate = ({ event }: EventTemplateProps) => {
                         </div>
                       </div>
                     </div>
-                  )}
 
-                  {/* Notes */}
-                  {event.notes && (
-                    <div className="space-y-2">
-                      <h3 className="text-lg font-medium text-gray-900">Special Notes</h3>
-                      <p className="text-gray-600">{event.notes}</p>
+                    {/* Event Details Panel */}
+                    <div className="w-full flex-shrink-0">
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <h3 className="text-sm font-medium text-gray-500">Date</h3>
+                            <p className="mt-1 text-lg font-medium text-gray-900">
+                              {formatDate(event.date)}
+                            </p>
+                          </div>
+                          <div>
+                            <h3 className="text-sm font-medium text-gray-500">Time</h3>
+                            <p className="mt-1 text-lg font-medium text-gray-900">
+                              {formatTime(event.time)}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div>
+                          <h3 className="text-sm font-medium text-gray-500">Event Type</h3>
+                          <p className="mt-1 text-lg font-medium text-gray-900">
+                            {getEventTypeLabel(event.eventType)}
+                          </p>
+                        </div>
+
+                        <div>
+                          <h3 className="text-sm font-medium text-gray-500">Party Size</h3>
+                          <p className="mt-1 text-lg font-medium text-gray-900">
+                            {event.partySize} {event.partySize === 1 ? 'person' : 'people'}
+                          </p>
+                        </div>
+
+                        <div>
+                          <h3 className="text-sm font-medium text-gray-500">Location</h3>
+                          <p className="mt-1 text-lg font-medium text-gray-900">
+                            {event.location.type === 'customer_location' ? 'Customer Location' : "Chef's Location"}
+                          </p>
+                          {event.location.address && (
+                            <p className="mt-1 text-gray-500">{event.location.address}</p>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                  )}
+                  </div>
                 </div>
               </div>
             </div>

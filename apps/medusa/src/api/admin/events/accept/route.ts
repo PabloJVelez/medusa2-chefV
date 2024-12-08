@@ -86,7 +86,7 @@ export async function GET(
         },
         payment: {
           deposit_amount: event.totalPrice * 0.3,
-          payment_link: `${process.env.FRONTEND_URL}/events/${event.id}` // Use environment variable for frontend URL
+          payment_link: `${process.env.STORE_FRONT}/events/${event.id}` // Use environment variable for frontend URL
         }
       }
     } as CreateNotificationDTO);
