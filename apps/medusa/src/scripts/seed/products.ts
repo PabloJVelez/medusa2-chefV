@@ -34,7 +34,7 @@ const buildBaseProductData = ({
         Grind: 'Whole Bean',
         Size: '16oz',
       },
-      manage_inventory: false,
+      manage_inventory: true,
       prices: [
         {
           amount: cad,

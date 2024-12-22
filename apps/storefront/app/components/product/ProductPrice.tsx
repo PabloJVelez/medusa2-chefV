@@ -11,6 +11,7 @@ export interface ProductPriceProps {
 }
 
 export const ProductPrice: FC<ProductPriceProps> = ({ product, currencyCode, ...props }) => {
+  console.log("PRODUCT IN THE PRODUCT PRICE --------------]]]]]]]", product)
   const variant = useMemo(
     () => props.variant || getCheapestProductVariant(product),
     [props.variant, product, currencyCode],

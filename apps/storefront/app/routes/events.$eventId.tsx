@@ -14,6 +14,7 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
 
   try {
     const response = await sdk.client.fetch<EventResponse>(`/admin/events/${params.eventId}`);
+    console.log("RESPONSE FROM EVENT LOADER", response)
 
     if (!response.chefEvent) {
       console.log('No event found');
@@ -30,13 +31,42 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
       date: chefEvent.date || new Date().toISOString(),
       time: chefEvent.time || '19:00',
       location: chefEvent.location || {
-        type: 'chef_location',
+        type: 'chef_location' as const,
         address: '123 Chef Street, Culinary City, CC 12345'
       },
       partySize: chefEvent.partySize || 4,
       eventType: chefEvent.eventType || 'plated_dinner',
-      status: chefEvent.status,
-      product: chefEvent.product,
+      status: chefEvent.status || 'pending' as const,
+      product: {
+        ...chefEvent.product,
+        variants: chefEvent.product.variants || [],
+        options: [],
+        images: [],
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        deleted_at: null,
+        profile_id: '',
+        collection_id: null,
+        type_id: null,
+        type: null,
+        tags: [],
+        discountable: true,
+        external_id: null,
+        sales_channels: [],
+        handle: chefEvent.product.handle || '',
+        is_giftcard: false,
+        status: 'published',
+        thumbnail: '',
+        weight: null,
+        length: null,
+        height: null,
+        width: null,
+        hs_code: null,
+        origin_country: null,
+        mid_code: null,
+        material: null,
+        metadata: null,
+      },
       customer: chefEvent.customer || {
         firstName: 'John',
         lastName: 'Doe',

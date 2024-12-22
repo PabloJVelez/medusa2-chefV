@@ -2,10 +2,13 @@ import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { linkEventToProductWorkflow } from "../../../../workflows/link-event-to-product"
 import { Modules } from "@medusajs/framework/utils"
 import { DateTime } from "luxon"
-import { CreateProductDTO, CreateProductOptionDTO, CreateProductVariantDTO, INotificationModuleService, CreateNotificationDTO, ProductDTO } from "@medusajs/types"
+import { CreateProductDTO, CreateProductOptionDTO, CreateProductVariantDTO, INotificationModuleService, CreateNotificationDTO, ProductDTO, CreateProductWorkflowInputDTO } from "@medusajs/types"
+import { ProductStatus } from "@medusajs/utils"
 import { Menu } from "../../../../modules/menu/models/menu"
 import {ContainerRegistrationKeys} from "@medusajs/framework/utils"
 import { linkMenuToEventProductWorkflow, LinkMenuToEventProductWorkflowInput } from "../../../../workflows/link-menu-to-eventProduct"
+import { linkSalesChannelsToStockLocationWorkflow, createProductsWorkflow } from "@medusajs/medusa/core-flows"
+
 import { MENU_MODULE } from "src/modules/menu"
 
 interface CreateChefEventBody {
@@ -51,6 +54,11 @@ export async function POST(
   try {
     const productService = req.scope.resolve(Modules.PRODUCT);
     const notificationService = req.scope.resolve(Modules.NOTIFICATION);
+    const inventoryService = req.scope.resolve(Modules.INVENTORY);
+    const stockLocationModuleService = req.scope.resolve(Modules.STOCK_LOCATION)
+    const salesChannelModuleService = req.scope.resolve(Modules.SALES_CHANNEL)
+    const remoteLink = req.scope.resolve(ContainerRegistrationKeys.REMOTE_LINK);
+
     const query = req.scope.resolve(ContainerRegistrationKeys.QUERY)
 
     const {data: [templateProduct]} = await query.graph({
@@ -107,36 +115,96 @@ ${notes ? `\nSpecial Notes:\n${notes}` : ''}
     `.trim();
 
     // Convert product options to CreateProductOptionDTO format
-    const options: CreateProductOptionDTO[] = templateProduct.options?.map(option => ({
-      title: option.title,
-      values: option.values.map(value => value.value)
-    })) || [];
+    //TODO: we only need one option for the event product which will be the event type
+    
 
-    // Calculate inventory based on party size
-    const inventoryQuantity = Math.ceil(Number(partySize) / 4); // 1 unit per 4 guests
-
-    // Create the product DTO
-    const productDTO: CreateProductDTO = {
+    const options: CreateProductOptionDTO[] = [{
+      title: "Event Type",
+      values: ["Chef Event"]
+    }];
+    // Create the product input
+    const productInput: CreateProductWorkflowInputDTO = {
       title: newProductTitle,
       description: newProductDescription,
-      status: 'published',
+      status: ProductStatus.PUBLISHED,
       collection_id: templateProduct.collection_id,
       type_id: templateProduct.type_id,
-      options,
+      options: [{
+        title: "Event Type",
+        values: ["Chef Event"]
+      }],
       variants: [{
-        title: templateProduct.variants?.[0]?.title || 'Default Variant',
+        title: 'Chef Event',
+        manage_inventory: true,
+        allow_backorder: false,
+        options: {
+          "Event Type": "Chef Event"
+        },
+        prices: [{
+          amount: 1800,
+          currency_code: "USD"
+        }]
       }],
       metadata: {
         template_product_id: templateProduct.id,
         event_type: eventType,
         event_date: requestedDate,
         event_time: requestedTime,
+        party_size: partySize
       }
     };
 
-    // Create new product for this specific event
-    const [createdProduct] = await productService.createProducts([productDTO]);
-    
+    console.log("PRODUCT DTO ====>>>", productInput)
+
+    // Use createProductsWorkflow with correct input structure
+    const { result: [createdProduct] } = await createProductsWorkflow(req.scope).run({
+      input: {
+        products: [productInput]
+      }
+    });
+
+    const variantId = createdProduct.variants?.[0]?.id;
+
+    // Create a unique location ID for this event
+    const eventLocationId = `loc_event_${createdProduct.id}`;
+
+    // First create the inventory item
+    const [inventoryItem] = await inventoryService.createInventoryItems([{
+      sku: `${createdProduct.id}-${variantId}`
+    }]);
+
+    // Then create inventory level with the location, using party size as the quantity
+    await inventoryService.createInventoryLevels({
+      inventory_item_id: inventoryItem.id,
+      location_id: eventLocationId,
+      stocked_quantity: Number(partySize)  // Set to party size to track guest capacity
+    });
+
+    // Link the inventory item to the variant using remote link
+    await remoteLink.create({
+      [Modules.PRODUCT]: {
+        variant_id: variantId
+      },
+      [Modules.INVENTORY]: {
+        inventory_item_id: inventoryItem.id
+      }
+    });
+
+    const salesChannel = await salesChannelModuleService.listSalesChannels()
+    console.log("SALES CHANNEL #######################", salesChannel)
+
+    const stockLocation = await stockLocationModuleService.listStockLocations({})
+    console.log("STOCK LOCATION #######################", stockLocation)
+
+    const test = await linkSalesChannelsToStockLocationWorkflow(req.scope).run({
+      input: {
+        id: stockLocation[0].id,
+        add: [salesChannel[0].id]
+      }
+    })
+
+    console.log("TEST RESULT #######################", test)
+
     // Link the menu to the new product
     await linkMenuToEventProductWorkflow(req.scope).run({
       input: {
@@ -172,6 +240,7 @@ ${notes ? `\nSpecial Notes:\n${notes}` : ''}
     console.log("GOING TO RUN WORKFLOW")
     const { result } = await linkEventToProductWorkflow(req.scope).run(workflowInput)
 
+    console.log("SENDING NOTIFICATION")
     await notificationService.createNotifications({
       to: "pablo_3@icloud.com",
       channel: "email",

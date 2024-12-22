@@ -5,18 +5,27 @@ import { getMergedProductMeta } from '@libs/util/products';
 import { fetchProducts } from '@libs/util/server/products.server';
 import { StoreProduct } from '@medusajs/types';
 
+// Update the interface for MenuData to match what we defined in ProductTemplate
+interface MenuData {
+  id: string;
+  name: string;
+  courses: {
+    id: string;
+    name: string;
+    dishes: {
+      id: string;
+      name: string;
+      description?: string;
+    }[];
+  }[];
+}
+
 export const loader = async (args: LoaderFunctionArgs) => {
   const { products } = await fetchProducts(args.request, {
     handle: args.params.productHandle,
     fields: '*categories,+menu.*,menu.courses.*, menu.courses.dishes.*,'
   }).catch((e) => {
     return { products: [] };
-  });
-  console.log('PRODUCTS------->', products);
-  //FOR each course list all the dishes
-  products[0].menu?.courses.forEach((course) => {
-    console.log('COURSE------->', course.name);
-    console.log('DISHES------->', course.dishes);
   });
 
   if (!products.length) {
@@ -32,12 +41,7 @@ export const meta: MetaFunction<ProductPageLoaderData> = getMergedProductMeta;
 
 export default function ProductDetailRoute() {
   const { product } = useLoaderData<{
-    product: StoreProduct & { menu: {
-      name: string;
-      courses: {
-        name: string;
-      }[];
-    } };
+    product: StoreProduct & { menu: MenuData };
   }>();
 
   if (!product) {

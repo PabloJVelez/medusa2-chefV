@@ -5,14 +5,15 @@ import {
 import {
   ContainerRegistrationKeys,
 } from "@medusajs/framework/utils"
+import { Modules } from "@medusajs/framework/utils"
 
 export async function GET(
   req: MedusaRequest,
   res: MedusaResponse
 ) {
   const query = req.scope.resolve(ContainerRegistrationKeys.QUERY)
+  const inventoryModuleService = req.scope.resolve(Modules.INVENTORY)
 
-  // Get the chef event with all necessary fields
   const { data: chefEvent } = await query.graph({
     entity: "chef_event",
     fields: [
@@ -27,8 +28,6 @@ export async function GET(
   if (!chefEvent) {
     return res.status(404).json({ message: "Event not found" });
   }
-
-  // Get the product with all menu details
   const { data: product } = await query.graph({
     entity: "product",
     fields: [
@@ -38,7 +37,26 @@ export async function GET(
       "handle",
       "thumbnail",
       "status",
+      "variants.*",
+      "options.*",
+      "images.*",
       "collection_id",
+      "profile_id",
+      "type_id",
+      "type.*",
+      "tags.*",
+      "discountable",
+      "external_id",
+      "sales_channels.*",
+      "is_giftcard",
+      "weight",
+      "length",
+      "height",
+      "width",
+      "hs_code",
+      "origin_country",
+      "mid_code",
+      "material",
       "created_at",
       "updated_at",
       "deleted_at",
@@ -56,7 +74,18 @@ export async function GET(
     }
   })
 
-  // Transform the data to match the frontend expectations
+
+  //TODO: Apply this fix to lambdacurry starter
+  const inventoryItem = await inventoryModuleService.listInventoryItems({
+    sku: `${chefEvent[0].product.id}-${product[0].variants[0].id}`
+  })
+
+  const inventoryLevel = await inventoryModuleService.listInventoryLevels({
+    inventory_item_id: inventoryItem[0].id
+  })
+
+  product[0].variants[0].inventory_quantity = inventoryLevel[0].stocked_quantity
+
   const fullChefEvent = {
     id: chefEvent[0].id,
     status: chefEvent[0].status,

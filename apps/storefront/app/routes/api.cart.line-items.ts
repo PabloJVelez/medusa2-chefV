@@ -2,7 +2,7 @@ import { type ActionHandler, handleAction } from '@libs/util/handleAction.server
 import { getVariantBySelectedOptions } from '@libs/util/products';
 import { setCartId } from '@libs/util/server/cookies.server';
 import { addToCart, deleteLineItem, retrieveCart, updateLineItem } from '@libs/util/server/data/cart.server';
-import { getProductsById } from '@libs/util/server/data/products.server';
+import { getProductByHandle, getProductsById } from '@libs/util/server/data/products.server';
 import { requestChefEvent, EventRequest, EventResponse } from '@libs/util/server/data/chefEvent.server';
 import { getSelectedRegion } from '@libs/util/server/data/regions.server';
 import { FormValidationError } from '@libs/util/validation/validation-error';
@@ -32,6 +32,7 @@ export interface CreateChefEventPayload extends EventRequest {}
 export interface CreateLineItemPayLoad {
   cartId: string;
   productId: string;
+  handle: string;
   options: { [key: string]: string };
   quantity: string;
 }
@@ -61,21 +62,16 @@ const createItem: ActionHandler<StoreCartResponse> = async (payload: CreateLineI
 
   if (result.error) throw new FormValidationError(result.error);
 
-  const { productId, options, quantity = '1' } = payload;
+  const { productId, handle, options, quantity = '1' } = payload;
 
   const region = await getSelectedRegion(request.headers);
 
-  const [product] = await getProductsById({
-    ids: [productId],
-    regionId: region.id,
-  }).catch(() => []);
+  const product = await getProductByHandle(handle, region.id)
 
   if (!product)
     throw new FormValidationError({
       fieldErrors: { formError: 'Product not found.' },
     });
-
-  //const variant = getVariantBySelectedOptions(product.variants || [], options);
 
   const variant = product.variants?.[0];
   if (!variant)
