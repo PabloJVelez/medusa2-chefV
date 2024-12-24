@@ -104,11 +104,13 @@ const getBreadcrumbs = (event: Event) => {
 export interface AddToCartFormValues {
   productId: string;
   quantity?: number;
+  handle: string;
 }
 
 export const getAddToCartValidator = (): Validator<AddToCartFormValues> => {
   const schemaShape: Record<keyof AddToCartFormValues, Yup.AnySchema> = {
     productId: Yup.string().required('Product ID is required'),
+    handle: Yup.string().required('Product handle is required'),
     quantity: Yup.number().optional(),
   };
 
@@ -156,8 +158,12 @@ export const EventTemplate = ({ event }: EventTemplateProps) => {
 
   const defaultValues: AddToCartFormValues = {
     productId: event.product.id,
+    handle: event.product.handle,
     quantity: 1,
   };
+
+  console.log("Event Template - Product ID:", event.product.id);
+  console.log("Event Template - Default Values:", defaultValues);
 
   const productInventory = useProductInventory(event.product);
   console.log("EVENT", event)
@@ -188,6 +194,7 @@ export const EventTemplate = ({ event }: EventTemplateProps) => {
         }}
       >
         <input type="hidden" name="productId" value={event.product.id} />
+        <input type="hidden" name="handle" value={event.product.handle} />
 
         <Container>
           <Grid>

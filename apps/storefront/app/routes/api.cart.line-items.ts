@@ -15,6 +15,7 @@ import * as Yup from 'yup';
 export const addCartItemValidation = withYup(
   Yup.object().shape({
     productId: Yup.string().required(),
+    handle: Yup.string().required(),
     options: Yup.object().default({}).optional(),
     quantity: Yup.number().optional(),
   }),
@@ -67,7 +68,6 @@ const createItem: ActionHandler<StoreCartResponse> = async (payload: CreateLineI
   const region = await getSelectedRegion(request.headers);
 
   const product = await getProductByHandle(handle, region.id)
-
   if (!product)
     throw new FormValidationError({
       fieldErrors: { formError: 'Product not found.' },
@@ -114,7 +114,7 @@ const deleteItem: ActionHandler<StoreCartResponse> = async (
   return { cart };
 };
 
-const actions = {
+const actions: { [key: string]: ActionHandler<StoreCartResponse | EventResponse> } = {
   createItem,
   updateItem,
   deleteItem,
@@ -122,7 +122,7 @@ const actions = {
 };
 
 export async function action(actionArgs: ActionFunctionArgs) {
-  return await handleAction({
+  return await handleAction<StoreCartResponse | EventResponse>({
     actionArgs,
     actions,
   });
