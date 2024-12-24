@@ -16,7 +16,7 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
     const response = await sdk.client.fetch<EventResponse>(`/admin/events/${params.eventId}`);
     const productData = await fetchProducts(request, {
       id: response.chefEvent.product_id,
-      fields: '*categories,+menu.*,menu.courses.*, menu.courses.dishes.*'
+      fields: '*categories,+menu.*,menu.courses.*, menu.courses.dishes.*, +variants.inventory_quantity'
     })
     if (!response.chefEvent) {
       console.log('No event found');
