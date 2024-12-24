@@ -4,9 +4,9 @@ import { EventTemplate } from '@app/templates/EventTemplate';
 import type { Event } from '@app/templates/EventTemplate';
 import { sdk } from '@libs/util/server/client.server';
 import type { EventResponse, ChefEvent } from '@app/types/events';
+import { fetchProducts } from '@libs/util/server/products.server';
 
 export const loader = async ({ params, request }: LoaderFunctionArgs) => {
-  console.log('Event ID:', params.eventId);
 
   if (!params.eventId) {
     return redirect('/404');
@@ -14,8 +14,10 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
 
   try {
     const response = await sdk.client.fetch<EventResponse>(`/admin/events/${params.eventId}`);
-    console.log("RESPONSE FROM EVENT LOADER", response)
-
+    const productData = await fetchProducts(request, {
+      id: response.chefEvent.product_id,
+      fields: '*categories,+menu.*,menu.courses.*, menu.courses.dishes.*'
+    })
     if (!response.chefEvent) {
       console.log('No event found');
       return redirect('/404');
@@ -26,8 +28,8 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
     // Transform ChefEvent into Event format for the template
     const event: Event = {
       id: chefEvent.id,
-      title: chefEvent.product.title,
-      description: chefEvent.product.description || undefined,
+      title: productData.products[0].title,
+      description: productData.products[0].description || undefined,
       date: chefEvent.date || new Date().toISOString(),
       time: chefEvent.time || '19:00',
       location: chefEvent.location || {
@@ -36,37 +38,8 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
       },
       partySize: chefEvent.partySize || 4,
       eventType: chefEvent.eventType || 'plated_dinner',
-      status: chefEvent.status || 'pending' as const,
-      product: {
-        ...chefEvent.product,
-        variants: chefEvent.product.variants || [],
-        options: [],
-        images: [],
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        deleted_at: null,
-        profile_id: '',
-        collection_id: null,
-        type_id: null,
-        type: null,
-        tags: [],
-        discountable: true,
-        external_id: null,
-        sales_channels: [],
-        handle: chefEvent.product.handle || '',
-        is_giftcard: false,
-        status: 'published',
-        thumbnail: '',
-        weight: null,
-        length: null,
-        height: null,
-        width: null,
-        hs_code: null,
-        origin_country: null,
-        mid_code: null,
-        material: null,
-        metadata: null,
-      },
+      status: chefEvent.status || 'pending',
+      product: productData.products[0],
       customer: chefEvent.customer || {
         firstName: 'John',
         lastName: 'Doe',
@@ -75,6 +48,7 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
       },
       notes: chefEvent.notes || 'No special notes provided.'
     };
+
     return { event };
 
   } catch (error) {

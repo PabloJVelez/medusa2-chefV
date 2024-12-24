@@ -47,11 +47,11 @@ export interface ChefEvent {
 export type EventResponse = {
   chefEvent: {
     id: string;
-    status: string;
+    status: 'pending' | 'confirmed' | 'cancelled';
     date: string;
     time: string;
     location: {
-      type: string;
+      type: 'customer_location' | 'chef_location';
       address: string;
     };
     partySize: number;
@@ -64,10 +64,6 @@ export type EventResponse = {
       phone: string;
     };
     product: {
-      id: string;
-      title: string;
-      description: string;
-      // ... other product fields
       menu?: {
         id: string;
         name: string;
@@ -81,6 +77,7 @@ export type EventResponse = {
           }>;
         }>;
       };
-    };
+    } & StoreProduct;
+    product_id: string;
   };
 }; 

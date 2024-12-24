@@ -24,6 +24,7 @@ import * as Yup from 'yup';
 import { LineItemActions } from '@app/routes/api.cart.line-items';
 import { useProductInventory } from '@app/hooks/useProductInventory';
 import type { Validator } from 'remix-validated-form';
+import { StoreProduct } from '@medusajs/types';
 
 // Define the event interface
 export interface Event {
@@ -39,13 +40,14 @@ export interface Event {
   partySize: number;
   eventType: string;
   status: 'pending' | 'confirmed' | 'cancelled';
-  product: ProductWithMenu;
+  product: StoreProduct;
   customer?: {
     firstName: string;
     lastName: string;
     email: string;
     phone?: string;
   };
+  notes?: string;
 }
 
 export interface EventTemplateProps {

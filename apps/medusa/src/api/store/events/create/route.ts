@@ -57,18 +57,18 @@ export async function POST(
     const inventoryService = req.scope.resolve(Modules.INVENTORY);
     const stockLocationModuleService = req.scope.resolve(Modules.STOCK_LOCATION)
     const salesChannelModuleService = req.scope.resolve(Modules.SALES_CHANNEL)
+    const pricingService = req.scope.resolve(Modules.PRICING)
     const remoteLink = req.scope.resolve(ContainerRegistrationKeys.REMOTE_LINK);
 
     const query = req.scope.resolve(ContainerRegistrationKeys.QUERY)
 
     const {data: [templateProduct]} = await query.graph({
       entity: "product",
-      fields: ["id", "title", "description", "menu.*", "menu.courses.*", "menu.courses.dishes.*"],
+      fields: ["id", "title", "description", "menu.*", "menu.courses.*", "menu.courses.dishes.*", "variants.id", "variants.prices.*"],
       filters: {
         id: productId
       }
     })
-
 
     if (!templateProduct) {
       res.status(404).json({
@@ -76,6 +76,19 @@ export async function POST(
       });
       return;
     }
+
+    // Get the template product's price
+    const templateVariant = templateProduct.variants?.[0];
+    if (!templateVariant || !templateVariant.prices?.length) {
+      res.status(400).json({
+        message: "Template product has no price information"
+      });
+      return;
+    }
+
+    const templatePrice = templateVariant.prices[0];
+    const pricePerPerson = templatePrice.amount;
+    const totalPrice = pricePerPerson * Number(partySize);
 
     // Format the date and time for display
     const formattedDate = DateTime.fromISO(requestedDate).toFormat('LLL d, yyyy');
@@ -106,6 +119,8 @@ Event Details:
 • Location: ${locationTypeMap[locationType]}
 ${locationAddress ? `• Address: ${locationAddress}` : ''}
 • Party Size: ${partySize} guests
+• Price per Ticket: ${(pricePerPerson / 100).toFixed(2)} ${templatePrice.currency_code}
+• Total Price: ${(totalPrice / 100).toFixed(2)} ${templatePrice.currency_code}
 
 Customer Information:
 • Name: ${firstName} ${lastName}
@@ -115,13 +130,11 @@ ${notes ? `\nSpecial Notes:\n${notes}` : ''}
     `.trim();
 
     // Convert product options to CreateProductOptionDTO format
-    //TODO: we only need one option for the event product which will be the event type
-    
-
     const options: CreateProductOptionDTO[] = [{
       title: "Event Type",
       values: ["Chef Event"]
     }];
+
     // Create the product input
     const productInput: CreateProductWorkflowInputDTO = {
       title: newProductTitle,
@@ -134,15 +147,15 @@ ${notes ? `\nSpecial Notes:\n${notes}` : ''}
         values: ["Chef Event"]
       }],
       variants: [{
-        title: 'Chef Event',
+        title: 'Chef Event Ticket',
         manage_inventory: true,
         allow_backorder: false,
         options: {
           "Event Type": "Chef Event"
         },
         prices: [{
-          amount: 1800,
-          currency_code: "USD"
+          amount: pricePerPerson,
+          currency_code: templatePrice.currency_code
         }]
       }],
       metadata: {
@@ -150,7 +163,9 @@ ${notes ? `\nSpecial Notes:\n${notes}` : ''}
         event_type: eventType,
         event_date: requestedDate,
         event_time: requestedTime,
-        party_size: partySize
+        party_size: partySize,
+        price_per_person: pricePerPerson,
+        is_event_product: true
       }
     };
 
@@ -229,7 +244,7 @@ ${notes ? `\nSpecial Notes:\n${notes}` : ''}
           email,
           phone: phone || "",
           notes: notes || "",
-          totalPrice: 1800,
+          totalPrice: totalPrice,
           depositPaid: false,
           specialRequirements: "",
           estimatedDuration: 180,
@@ -260,12 +275,16 @@ ${notes ? `\nSpecial Notes:\n${notes}` : ''}
           location_type: locationTypeMap[locationType],
           location_address: locationAddress || 'At chef\'s location',
           party_size: partySize,
-          notes: notes || 'No special requests'
+          notes: notes || 'No special requests',
+          price_per_person: (pricePerPerson / 100).toFixed(2),
+          total_price: (totalPrice / 100).toFixed(2),
+          currency_code: templatePrice.currency_code
         },
         event: {
           id: result.chefEvent.id,
           status: "pending",
-          total_price: result.chefEvent.totalPrice,
+          total_price: totalPrice,
+          price_per_person: pricePerPerson,
           deposit_paid: false
         },
         acceptUrl: `${process.env.ADMIN_BACKEND_URL}/admin/events/accept?eventId=${result.chefEvent.id}`,
