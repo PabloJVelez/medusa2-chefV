@@ -347,7 +347,7 @@ export const ProductTemplate = ({ product }: ProductTemplateProps) => {
   };
 
   const handleSubmit = async (values: AddToCartFormValues) => {
-    try {
+  
       const formData = new FormData();
       Object.entries(values).forEach(([key, value]) => {
         formData.append(key, value.toString());
@@ -360,23 +360,15 @@ export const ProductTemplate = ({ product }: ProductTemplateProps) => {
 
       if (!addToCartFetcher.data?.error) {
         toggleCartDrawer();
-        console.log("Event created successfully");
-      } else {
-        console.error("Failed to create event:", addToCartFetcher.data.error);
       }
-    } catch (error) {
-      console.error("Error submitting form:", error);
-    }
+    
   };
 
   useEffect(() => {
     if (addToCartFetcher.state === "idle" && addToCartFetcher.data) {
       if (addToCartFetcher.data.chefEvent) {
         toggleCartDrawer();
-        console.log("Event created successfully:", addToCartFetcher.data.chefEvent);
-      } else if (addToCartFetcher.data.error) {
-        console.error("Failed to create event:", addToCartFetcher.data.error);
-      }
+      } 
     }
   }, [addToCartFetcher.state, addToCartFetcher.data]);
 

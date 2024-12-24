@@ -22,9 +22,7 @@ type CreateMenuStepInput = {
 export const createMenuStep = createStep(
   "create-menu",
   async (data: CreateMenuStepInput, { container }) => {
-    console.log("TRIGGERING MENU CREATION with data", JSON.stringify(data, null, 2))
     if (!data?.menu) {
-      console.log("NO MENU DATA PROVIDED")
       return
     }
 
@@ -34,10 +32,8 @@ export const createMenuStep = createStep(
 
     try {
       const menu = await menuModuleService.createMenus(data.menu)
-      console.log("MENU CREATED SUCCESSFULLY:", JSON.stringify(menu, null, 2))
       return new StepResponse(menu, menu)
     } catch (error) {
-      console.error("ERROR CREATING MENU:", error)
       throw error
     }
   },

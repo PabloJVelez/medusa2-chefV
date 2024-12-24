@@ -39,7 +39,6 @@ export const requestChefEvent = async (data: EventRequest): Promise<EventRespons
     });
 
     const productName = products[0]?.title || 'Unknown Menu';
-
     const response = await sdk.client.fetch('/store/events/create', {
       method: 'POST',
       body: {
@@ -50,11 +49,8 @@ export const requestChefEvent = async (data: EventRequest): Promise<EventRespons
         'Content-Type': 'application/json',
       },
     });
-    console.log("RESPONSE FROM REQUEST CHEF EVENT", response)
-
     return response as EventResponse;
   } catch (error) {
-    console.error('Error creating chef event:', error);
     throw error;
   }
 };

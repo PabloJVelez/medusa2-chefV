@@ -38,12 +38,9 @@ export const createMenuFromProductWorkflow = createWorkflow(
       },
       (data) => data.input.additional_data?.menu
     )
-
-    console.log("MENU TO CREATE", menuToCreate)
     const menu = createMenuStep({
       menu: menuToCreate
     })
-    console.log("MENU CREATED -------->>>>>", menu)
 
     when(({ menu }), ({ menu }) => menu?.id !== undefined)
       .then(() => {

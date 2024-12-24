@@ -38,13 +38,9 @@ const MenuListBase: FC<{}> = () => {
   }>();
 
   const { category_tabs, menus } = fetcher.data || {};
-  console.log("MENUS AT THE LOADER STAGE ====> ", menus)
 
   const hasCategoryTabs = !!category_tabs?.length;
   const hasMenus = isInitialized && !menus?.length;
-  console.log("HAS CATEGORY =====>", hasCategoryTabs)
-  console.log("HAS MENUS", hasMenus)
-  console.log("FETCHER DATA", fetcher.data)
 
   const fetchData = (filters?: { category_id?: string[] }) => {
     const queryString = buildSearchParamsFromObject({

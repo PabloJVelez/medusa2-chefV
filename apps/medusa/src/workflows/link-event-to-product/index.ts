@@ -31,7 +31,6 @@ export type LinkEventToProductWorkflowInput = {
 export const linkEventToProductWorkflow = createWorkflow(
   "link-event-to-product",
   (input: LinkEventToProductWorkflowInput) => {
-    console.log("GOING TO TRANSFORM EVENT")
     const eventToCreate = transform(
       {
         input

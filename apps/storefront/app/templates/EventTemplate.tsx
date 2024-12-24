@@ -162,13 +162,7 @@ export const EventTemplate = ({ event }: EventTemplateProps) => {
     quantity: 1,
   };
 
-  console.log("Event Template - Product ID:", event.product.id);
-  console.log("Event Template - Default Values:", defaultValues);
-
   const productInventory = useProductInventory(event.product);
-  console.log("EVENT", event)
-  console.log("EVENT PRODUCT", event.product)
-  console.log("PRODUCT INVENTORY ====>", productInventory);
   const soldOut = productInventory.averageInventory === 0;
 
   useEffect(() => {
