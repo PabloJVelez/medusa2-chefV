@@ -12,9 +12,6 @@ createProductsWorkflow.hooks.productsCreated(
 	async ({ products, additional_data }, { container }) => {
     const menuWorkflow = createMenuFromProductWorkflow(container)
     const chefEventWorkflow = linkEventToProductWorkflow(container)
-    console.log('NEW PRODUCT WAS CREATED FROM STORE REQUEST')
-    console.log("MENU DATA", additional_data?.menu)
-    console.log("CHEF EVENT DATA", additional_data?.chefEvent)
     
     for (let product of products) {
       if (additional_data?.menu) {

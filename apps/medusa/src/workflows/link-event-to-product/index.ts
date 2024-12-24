@@ -38,13 +38,9 @@ export const linkEventToProductWorkflow = createWorkflow(
       },
       (data) => data.input.chefEvent
     )
-
-    console.log("EVENT TO CREATE", eventToCreate)
     const chefEvent = createChefEventStep({
       chefEvent: eventToCreate
     })
-    console.log("EVENT CREATED -------->>>>>", chefEvent)
-
     when(({ chefEvent }), ({ chefEvent }) => chefEvent?.id !== undefined)
       .then(() => {
         createRemoteLinkStep([{

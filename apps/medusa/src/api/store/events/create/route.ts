@@ -169,9 +169,6 @@ ${notes ? `\nSpecial Notes:\n${notes}` : ''}
       }
     };
 
-    console.log("PRODUCT DTO ====>>>", productInput)
-
-    // Use createProductsWorkflow with correct input structure
     const { result: [createdProduct] } = await createProductsWorkflow(req.scope).run({
       input: {
         products: [productInput]
@@ -205,8 +202,8 @@ ${notes ? `\nSpecial Notes:\n${notes}` : ''}
       }
     });
 
+    //TODO: THIS NEEDS TO BE FIXED. SHOULD NOT HAVE TO DO THIS, FOLLOW SEED FILE's Product creation
     const salesChannel = await salesChannelModuleService.listSalesChannels()
-    console.log("SALES CHANNEL #######################", salesChannel)
 
     const stockLocation = await stockLocationModuleService.listStockLocations({})
     console.log("STOCK LOCATION #######################", stockLocation)
@@ -220,7 +217,7 @@ ${notes ? `\nSpecial Notes:\n${notes}` : ''}
 
     console.log("TEST RESULT #######################", test)
 
-    // Link the menu to the new product
+    
     await linkMenuToEventProductWorkflow(req.scope).run({
       input: {
         productId: createdProduct.id as string,
@@ -252,10 +249,8 @@ ${notes ? `\nSpecial Notes:\n${notes}` : ''}
         }
       }
     };
-    console.log("GOING TO RUN WORKFLOW")
     const { result } = await linkEventToProductWorkflow(req.scope).run(workflowInput)
 
-    console.log("SENDING NOTIFICATION")
     await notificationService.createNotifications({
       to: "pablo_3@icloud.com",
       channel: "email",
@@ -298,7 +293,6 @@ ${notes ? `\nSpecial Notes:\n${notes}` : ''}
       message: "Chef event created successfully"
     })
   } catch (error) {
-    console.error("Error creating chef event:", error)
     res.status(500).json({
       message: "Failed to create chef event",
       error: error instanceof Error ? error.message : "Unknown error"

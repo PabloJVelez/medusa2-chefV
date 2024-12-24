@@ -34,8 +34,6 @@ export const createChefEventStep = createStep(
     const chefEventService: ChefEventService = container.resolve(
       CHEF_EVENT_MODULE
     )
-
-    // Set default values for optional fields
     const chefEventData = {
       status: data.chefEvent.status || 'pending',
       requestedDate: data.chefEvent.requestedDate,
@@ -60,7 +58,6 @@ export const createChefEventStep = createStep(
 
     return new StepResponse(chefEvent, chefEvent)
   },
-  // Compensation function to handle rollback
   async (chefEvent, { container }) => {
     const chefEventService: ChefEventService = container.resolve(
       CHEF_EVENT_MODULE

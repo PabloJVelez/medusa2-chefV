@@ -11,7 +11,6 @@ export type LinkMenuToEventProductWorkflowInput = {
 export const linkMenuToEventProductWorkflow = createWorkflow(
   "link-menu-to-event-product",
   (input: LinkMenuToEventProductWorkflowInput) => {
-    // Create the remote link directly in the workflow
     createRemoteLinkStep([{
       [Modules.PRODUCT]: {
         product_id: input.productId
