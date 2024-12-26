@@ -39,7 +39,7 @@ export const requestChefEvent = async (data: EventRequest): Promise<EventRespons
     });
 
     const productName = products[0]?.title || 'Unknown Menu';
-    const response = await sdk.client.fetch('/store/events/create', {
+    const response = await sdk.client.fetch('/store/events/request', {
       method: 'POST',
       body: {
         ...data,
