@@ -79,7 +79,6 @@ export async function POST(
         requestedTime
       }
     });
-    
     let hasConflictingEvent = false;
     if (existingEvents && existingEvents.length > 0) {
       hasConflictingEvent = true;
@@ -125,7 +124,7 @@ export async function POST(
       specialRequirements: "",
       estimatedDuration: 180,
       assignedChefId: "",
-      menuId: templateProduct.menu?.id
+      templateProductId: templateProduct.id
     });
 
     // Send notification to chef

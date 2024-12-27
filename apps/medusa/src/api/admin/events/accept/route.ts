@@ -4,6 +4,11 @@ import { CHEF_EVENT_MODULE } from "../../../../modules/chef-event"
 import { DateTime } from "luxon"
 import { CreateNotificationDTO } from "@medusajs/types"
 import ChefEventService from "../../../../modules/chef-event/service"
+import { createProductsWorkflow } from "@medusajs/medusa/core-flows"
+import { linkMenuToEventProductWorkflow } from "../../../../workflows/link-menu-to-eventProduct"
+import { linkEventToProductWorkflow } from "../../../../workflows/link-event-to-product"
+import { ProductStatus } from "@medusajs/utils"
+import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 
 interface AcceptEventBody {
   eventId?: string;
@@ -19,6 +24,7 @@ export async function GET(
   req: MedusaRequest<AcceptEventBody>,
   res: MedusaResponse
 ): Promise<void> {
+  //TODO: THIS ALL NEEDS TO BE REFACTORED TO BE A WORKFLOW
   try {
     const eventId = req.query.eventId;
 
@@ -39,13 +45,136 @@ export async function GET(
       });
       return;
     }
+
+    // Get services
+    const productService = req.scope.resolve(Modules.PRODUCT);
+    const inventoryService = req.scope.resolve(Modules.INVENTORY);
+    const stockLocationModuleService = req.scope.resolve(Modules.STOCK_LOCATION)
+    const salesChannelModuleService = req.scope.resolve(Modules.SALES_CHANNEL)
+    const remoteLink = req.scope.resolve(ContainerRegistrationKeys.REMOTE_LINK);
+    const query = req.scope.resolve(ContainerRegistrationKeys.QUERY)
+
+    // Get template product details
+    const {data: [templateProduct]} = await query.graph({
+      entity: "product",
+      fields: ["id", "title", "description", "menu.*", "menu.courses.*", "menu.courses.dishes.*", "variants.id", "variants.prices.*"],
+      filters: {
+        id: event.templateProductId
+      }
+    })
+
+    // Create new product title and description
+    const formattedDate = DateTime.fromISO(event.requestedDate.toISOString()).toFormat('LLL d, yyyy');
+    const formattedTime = DateTime.fromFormat(event.requestedTime, 'HH:mm').toFormat('h:mm a');
+    const eventTypeMap = {
+      cooking_class: "Chef's Cooking Class",
+      plated_dinner: "Plated Dinner Service",
+      buffet_style: "Buffet Style Service"
+    };
+
+
+    const newProductTitle = `${templateProduct.title} - ${eventTypeMap[event.eventType]} (${formattedDate})`;
+    const newProductDescription = `
+${templateProduct.description || ''}
+
+Event Details:
+• Date: ${formattedDate}
+• Time: ${formattedTime}
+• Type: ${eventTypeMap[event.eventType]}
+• Location: ${event.locationType === 'customer_location' ? 'at Customer\'s Location' : 'at Chef\'s Location'}
+${event.locationAddress ? `• Address: ${event.locationAddress}` : ''}
+• Party Size: ${event.partySize} guests
+• Total Price: ${event.totalPrice / 100} ${templateProduct.variants[0].prices[0].currency_code}
+    `.trim();
+
+    // Create the product
+    const productInput = {
+      title: newProductTitle,
+      description: newProductDescription,
+      status: ProductStatus.PUBLISHED,
+      options: [{
+        title: "Event Type",
+        values: ["Chef Event"]
+      }],
+      variants: [{
+        title: 'Chef Event Ticket',
+        manage_inventory: true,
+        allow_backorder: false,
+        options: {
+          "Event Type": "Chef Event"
+        },
+        prices: [{
+          amount: event.totalPrice / event.partySize,
+          currency_code: templateProduct.variants[0].prices[0].currency_code
+        }]
+      }],
+      metadata: {
+        template_product_id: templateProduct.id,
+        event_type: event.eventType,
+        event_date: event.requestedDate,
+        event_time: event.requestedTime,
+        party_size: event.partySize,
+        is_event_product: true
+      }
+    };
+
+    // Create product and handle inventory
+    const { result: [createdProduct] } = await createProductsWorkflow(req.scope).run({
+      input: { products: [productInput] }
+    });
+
+    // Set up inventory
+    const variantId = createdProduct.variants?.[0]?.id;
+    const eventLocationId = `loc_event_${createdProduct.id}`;
+    const [inventoryItem] = await inventoryService.createInventoryItems([{
+      sku: `${createdProduct.id}-${variantId}`
+    }]);
+
+    await inventoryService.createInventoryLevels({
+      inventory_item_id: inventoryItem.id,
+      location_id: eventLocationId,
+      stocked_quantity: event.partySize
+    });
+
+    // Link inventory to variant
+    await remoteLink.create({
+      [Modules.PRODUCT]: { variant_id: variantId },
+      [Modules.INVENTORY]: { inventory_item_id: inventoryItem.id }
+    });
+
+    // Link menu and event to product
+    await linkMenuToEventProductWorkflow(req.scope).run({
+      input: {
+        productId: createdProduct.id,
+        menuId: templateProduct.menu?.id
+      }
+    });
+    const chefEvent = {
+      ...event,
+      requestedDate: event.requestedDate.toISOString(),
+      requestedTime: event.requestedTime,
+      templateProductId: templateProduct.id,
+      status: "confirmed",
+      depositPaid: false,
+      specialRequirements: event.specialRequirements || "",
+    }
+
+    try {
+      const result = await linkEventToProductWorkflow(req.scope).run({
+        input: {
+          product: createdProduct,
+          chefEvent: chefEvent
+        }
+      });
+    } catch (error) {
+      throw error;
+    }
+
+    // Update event status and send notification
     const updatedEvent = await chefEventService.updateChefEvents({
       id: eventId as string,
       status: ChefEventStatus.CONFIRMED
     });
-
-    const formattedDate = DateTime.fromISO(event.requestedDate.toISOString()).toFormat('LLL d, yyyy');
-    const formattedTime = DateTime.fromFormat(event.requestedTime, 'HH:mm').toFormat('h:mm a');
 
     await notificationService.createNotifications({
       to: event.email,

@@ -24,7 +24,7 @@ export type LinkEventToProductWorkflowInput = {
     depositPaid: boolean
     specialRequirements: string
     estimatedDuration: number
-    assignedChefId: string
+    templateProductId: string
   }
 }
 

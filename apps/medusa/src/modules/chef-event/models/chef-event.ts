@@ -19,6 +19,7 @@ export const ChefEvent = model.define("chef_event", {
     'plated_dinner',
     'buffet_style'
   ]),
+  templateProductId: model.text(),
   
   // Location details
   locationType: model.enum([

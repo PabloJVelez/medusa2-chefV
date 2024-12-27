@@ -20,7 +20,7 @@ type CreateChefEventStepInput = {
     depositPaid: boolean
     specialRequirements: string
     estimatedDuration: number
-    assignedChefId: string
+    templateProductId: string
   }
 }
 
@@ -51,7 +51,7 @@ export const createChefEventStep = createStep(
       depositPaid: data.chefEvent.depositPaid || false,
       specialRequirements: data.chefEvent.specialRequirements || '',
       estimatedDuration: data.chefEvent.estimatedDuration || 180,
-      assignedChefId: data.chefEvent.assignedChefId || ''
+      templateProductId: data.chefEvent.templateProductId,
     }
 
     const chefEvent = await chefEventService.createChefEvents(chefEventData)
