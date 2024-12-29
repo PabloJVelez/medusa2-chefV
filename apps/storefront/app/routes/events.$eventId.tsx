@@ -24,8 +24,6 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
     }
 
     const chefEvent = response.chefEvent;
-
-    // Transform ChefEvent into Event format for the template
     const event: Event = {
       id: chefEvent.id,
       title: productData.products[0].title,

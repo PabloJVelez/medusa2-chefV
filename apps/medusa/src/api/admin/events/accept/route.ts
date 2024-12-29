@@ -9,6 +9,8 @@ import { linkMenuToEventProductWorkflow } from "../../../../workflows/link-menu-
 import { linkEventToProductWorkflow } from "../../../../workflows/link-event-to-product"
 import { ProductStatus } from "@medusajs/utils"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { createStockLocationsWorkflow } from "@medusajs/medusa/core-flows"
+import { linkSalesChannelsToStockLocationWorkflow } from "@medusajs/medusa/core-flows"
 
 interface AcceptEventBody {
   eventId?: string;
@@ -46,15 +48,21 @@ export async function GET(
       return;
     }
 
-    // Get services
-    const productService = req.scope.resolve(Modules.PRODUCT);
     const inventoryService = req.scope.resolve(Modules.INVENTORY);
-    const stockLocationModuleService = req.scope.resolve(Modules.STOCK_LOCATION)
     const salesChannelModuleService = req.scope.resolve(Modules.SALES_CHANNEL)
     const remoteLink = req.scope.resolve(ContainerRegistrationKeys.REMOTE_LINK);
     const query = req.scope.resolve(ContainerRegistrationKeys.QUERY)
 
-    // Get template product details
+    const defaultSalesChannels = await salesChannelModuleService.listSalesChannels({
+      name: 'Default Sales Channel',
+    });
+
+    if (!defaultSalesChannels.length) {
+      throw new Error("Default sales channel not found");
+    }
+
+    const defaultSalesChannel = defaultSalesChannels[0];
+
     const {data: [templateProduct]} = await query.graph({
       entity: "product",
       fields: ["id", "title", "description", "menu.*", "menu.courses.*", "menu.courses.dishes.*", "variants.id", "variants.prices.*"],
@@ -63,7 +71,6 @@ export async function GET(
       }
     })
 
-    // Create new product title and description
     const formattedDate = DateTime.fromISO(event.requestedDate.toISOString()).toFormat('LLL d, yyyy');
     const formattedTime = DateTime.fromFormat(event.requestedTime, 'HH:mm').toFormat('h:mm a');
     const eventTypeMap = {
@@ -71,8 +78,6 @@ export async function GET(
       plated_dinner: "Plated Dinner Service",
       buffet_style: "Buffet Style Service"
     };
-
-
     const newProductTitle = `${templateProduct.title} - ${eventTypeMap[event.eventType]} (${formattedDate})`;
     const newProductDescription = `
 ${templateProduct.description || ''}
@@ -87,7 +92,6 @@ ${event.locationAddress ? `• Address: ${event.locationAddress}` : ''}
 • Total Price: ${event.totalPrice / 100} ${templateProduct.variants[0].prices[0].currency_code}
     `.trim();
 
-    // Create the product
     const productInput = {
       title: newProductTitle,
       description: newProductDescription,
@@ -100,9 +104,7 @@ ${event.locationAddress ? `• Address: ${event.locationAddress}` : ''}
         title: 'Chef Event Ticket',
         manage_inventory: true,
         allow_backorder: false,
-        options: {
-          "Event Type": "Chef Event"
-        },
+        sku: `EVENT-${event.id}`,
         prices: [{
           amount: event.totalPrice / event.partySize,
           currency_code: templateProduct.variants[0].prices[0].currency_code
@@ -115,34 +117,48 @@ ${event.locationAddress ? `• Address: ${event.locationAddress}` : ''}
         event_time: event.requestedTime,
         party_size: event.partySize,
         is_event_product: true
-      }
+      },
+      sales_channels: [{ id: defaultSalesChannel.id }],
     };
-
-    // Create product and handle inventory
     const { result: [createdProduct] } = await createProductsWorkflow(req.scope).run({
       input: { products: [productInput] }
     });
+    
+    const { result: [eventLocation] } = await createStockLocationsWorkflow(req.scope).run({
+      input: {
+        locations: [{
+          name: `Event Location - ${newProductTitle}`,
+        }]
+      }
+    });
 
-    // Set up inventory
-    const variantId = createdProduct.variants?.[0]?.id;
-    const eventLocationId = `loc_event_${createdProduct.id}`;
-    const [inventoryItem] = await inventoryService.createInventoryItems([{
-      sku: `${createdProduct.id}-${variantId}`
+    await linkSalesChannelsToStockLocationWorkflow(req.scope).run({
+      input: {
+        id: eventLocation.id,
+        add: [defaultSalesChannel.id],
+      }
+    });
+
+    const [inventoryItem] = await inventoryService.listInventoryItems({
+      sku: `EVENT-${event.id}`
+    });
+
+    await inventoryService.createInventoryLevels([{
+      inventory_item_id: inventoryItem.id,
+      location_id: eventLocation.id,
+      stocked_quantity: event.partySize
     }]);
 
-    await inventoryService.createInventoryLevels({
-      inventory_item_id: inventoryItem.id,
-      location_id: eventLocationId,
-      stocked_quantity: event.partySize
-    });
-
-    // Link inventory to variant
     await remoteLink.create({
-      [Modules.PRODUCT]: { variant_id: variantId },
-      [Modules.INVENTORY]: { inventory_item_id: inventoryItem.id }
+      [Modules.STOCK_LOCATION]: {
+        stock_location_id: eventLocation.id,
+      },
+      [Modules.FULFILLMENT]: {
+        fulfillment_provider_id: 'manual_manual',
+      },
     });
 
-    // Link menu and event to product
+    
     await linkMenuToEventProductWorkflow(req.scope).run({
       input: {
         productId: createdProduct.id,
@@ -162,15 +178,13 @@ ${event.locationAddress ? `• Address: ${event.locationAddress}` : ''}
     try {
       const result = await linkEventToProductWorkflow(req.scope).run({
         input: {
-          product: createdProduct,
-          chefEvent: chefEvent
+          productId: createdProduct.id,
+          chefEventId: chefEvent.id
         }
       });
     } catch (error) {
       throw error;
     }
-
-    // Update event status and send notification
     const updatedEvent = await chefEventService.updateChefEvents({
       id: eventId as string,
       status: ChefEventStatus.CONFIRMED
