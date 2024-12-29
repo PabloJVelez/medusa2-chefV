@@ -172,7 +172,7 @@ export interface ProductTemplateProps {
   };
 }
 
-type Step = 'menu' | 'event' | 'location';
+type Step = 'menu' | 'event' | 'location' | 'confirmation';
 type StepStatus = 'pending' | 'current' | 'completed';
 
 interface StepConfig {
@@ -219,7 +219,7 @@ export const ProductTemplate = ({ product }: ProductTemplateProps) => {
     {
       id: 'menu',
       label: 'Menu Review',
-      validate: () => true // Menu review doesn't require validation
+      validate: () => true 
     },
     {
       id: 'event',
@@ -241,6 +241,11 @@ export const ProductTemplate = ({ product }: ProductTemplateProps) => {
         return Boolean(locationType) && 
           (locationType === 'chef_location' || Boolean(locationAddress));
       }
+    },
+    {
+      id: 'confirmation',
+      label: 'Confirmation',
+      validate: () => true 
     }
   ];
 
@@ -324,10 +329,11 @@ export const ProductTemplate = ({ product }: ProductTemplateProps) => {
   };
 
   useEffect(() => {
-    if (!isSubmitting && !hasErrors) {
+    if (currentStep !== 'confirmation' && completedSteps.has('confirmation')) {
       formRef.current?.reset();
+      setCompletedSteps(new Set());
     }
-  }, [isSubmitting, hasErrors]);
+  }, [currentStep, completedSteps]);
 
   const handleStepChange = (step: Step) => {
     setCurrentStep(step);
@@ -347,28 +353,23 @@ export const ProductTemplate = ({ product }: ProductTemplateProps) => {
   };
 
   const handleSubmit = async (values: AddToCartFormValues) => {
-  
-      const formData = new FormData();
-      Object.entries(values).forEach(([key, value]) => {
-        formData.append(key, value.toString());
-      });
+    const formData = new FormData();
+    Object.entries(values).forEach(([key, value]) => {
+      formData.append(key, value.toString());
+    });
 
-      addToCartFetcher.submit(formData, {
-        method: "post",
-        action: "/api/cart/line-items?action=createChefEvent",
-      });
-
-      if (!addToCartFetcher.data?.error) {
-        toggleCartDrawer();
-      }
-    
+    addToCartFetcher.submit(formData, {
+      method: "post",
+      action: "/api/cart/line-items?action=createChefEvent",
+    });
   };
 
   useEffect(() => {
     if (addToCartFetcher.state === "idle" && addToCartFetcher.data) {
-      if (addToCartFetcher.data.chefEvent) {
-        toggleCartDrawer();
-      } 
+      if (addToCartFetcher.data.success) {
+        setCurrentStep('confirmation');
+        setCompletedSteps(new Set(['menu', 'event', 'location', 'confirmation']));
+      }
     }
   }, [addToCartFetcher.state, addToCartFetcher.data]);
 
@@ -1058,6 +1059,62 @@ export const ProductTemplate = ({ product }: ProductTemplateProps) => {
                                   </div>
                                 </div>
                               </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className={currentStep === 'confirmation' ? 'block' : 'hidden'}>
+                          <div className="text-center py-8">
+                            <div className="mb-6">
+                              <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+                                <svg className="w-8 h-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path 
+                                    strokeLinecap="round" 
+                                    strokeLinejoin="round" 
+                                    strokeWidth={2} 
+                                    d="M5 13l4 4L19 7"
+                                  />
+                                </svg>
+                              </div>
+                            </div>
+                            
+                            <h2 className="text-2xl font-semibold text-gray-900 mb-4">
+                              Request Sent Successfully!
+                            </h2>
+                            
+                            <p className="text-gray-600 mb-8">
+                              Your booking request has been sent to the chef. They will review your request 
+                              and contact you within 24-48 hours to confirm the details.
+                            </p>
+
+                            <div className="space-y-4">
+                              <div className="p-4 bg-gray-50 rounded-lg">
+                                <h3 className="font-medium text-gray-900 mb-2">What happens next?</h3>
+                                <ol className="text-left text-sm text-gray-600 space-y-2">
+                                  <li className="flex items-start gap-2">
+                                    <span className="font-medium">1.</span>
+                                    <span>The chef will review your request and check their availability</span>
+                                  </li>
+                                  <li className="flex items-start gap-2">
+                                    <span className="font-medium">2.</span>
+                                    <span>You'll receive an email with the chef's response</span>
+                                  </li>
+                                  <li className="flex items-start gap-2">
+                                    <span className="font-medium">3.</span>
+                                    <span>Once confirmed, you'll be able to proceed with the booking payment</span>
+                                  </li>
+                                </ol>
+                              </div>
+
+                              <Button
+                                as={(buttonProps) => (
+                                  <Link to="/" {...buttonProps} />
+                                )}
+                                variant="primary"
+                                className="w-full"
+                              >
+                                Return to Home
+                              </Button>
                             </div>
                           </div>
                         </div>
