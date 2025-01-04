@@ -2,7 +2,7 @@ import { Container } from '../common/container';
 import { StarIcon } from '@heroicons/react/24/solid';
 import { useScrollArrows } from '@app/hooks/useScrollArrows';
 import { ScrollArrowButtons } from '@app/components/common/buttons/ScrollArrowButtons';
-import { memo, type FC, useState } from 'react';
+import { memo, type FC, useState, useEffect } from 'react';
 import clsx from 'clsx';
 
 interface Review {
@@ -79,7 +79,22 @@ export default function ReviewList({ className = '', heading = 'What Our Clients
     resetOnDepChange: [reviews],
   });
 
-  const reviewsPerPage = 6;
+  const [isMobile, setIsMobile] = useState(
+    typeof window !== 'undefined' && window.innerWidth < 768
+  );
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    handleResize();
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const reviewsPerPage = isMobile ? 2 : 6;
   const totalPages = Math.ceil(reviews.length / reviewsPerPage);
   const reviewPages = Array.from({ length: totalPages }, (_, i) => 
     reviews.slice(i * reviewsPerPage, (i + 1) * reviewsPerPage)
@@ -93,6 +108,12 @@ export default function ReviewList({ className = '', heading = 'What Our Clients
       </div>
 
       <div className="review-carousel relative">
+        {totalPages > 1 && (
+          <ScrollArrowButtons 
+            className="absolute top-1/2 -translate-y-1/2 w-full z-10" 
+            {...scrollArrowProps} 
+          />
+        )}
         <div
           ref={scrollableDivRef}
           className="w-full snap-both snap-mandatory overflow-x-auto whitespace-nowrap pb-2 sm:snap-proximity"
@@ -106,9 +127,6 @@ export default function ReviewList({ className = '', heading = 'What Our Clients
             </div>
           ))}
         </div>
-        {totalPages > 1 && (
-          <ScrollArrowButtons className="mt-8" {...scrollArrowProps} />
-        )}
       </div>
     </Container>
   );
