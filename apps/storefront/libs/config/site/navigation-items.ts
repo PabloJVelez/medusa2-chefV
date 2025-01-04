@@ -3,24 +3,16 @@ import { NavigationCollection, NavigationItemLocation } from '@libs/types';
 export const headerNavigationItems: NavigationCollection = [
   {
     id: 1,
-    label: 'View our Blends',
-    url: '/categories/blends',
+    label: 'View Menus',
+    url: '/products',
     sort_order: 0,
     location: NavigationItemLocation.header,
     new_tab: false,
   },
   {
     id: 3,
-    label: 'Our Story',
-    url: '/about-us',
-    sort_order: 1,
-    location: NavigationItemLocation.header,
-    new_tab: false,
-  },
-  {
-    id: 2,
-    label: 'Shop All',
-    url: '/products',
+    label: 'About Chef Velez',
+    url: '/about-chef',
     sort_order: 1,
     location: NavigationItemLocation.header,
     new_tab: false,
