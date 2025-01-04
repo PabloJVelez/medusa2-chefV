@@ -1,5 +1,7 @@
 import { Container } from '@app/components/common/container';
 import type { LoaderFunctionArgs, MetaFunction } from '@remix-run/node';
+import { json } from '@remix-run/node';
+import { useLoaderData } from '@remix-run/react';
 import { getMergedPageMeta } from '@libs/util/page';
 import Hero from '@app/components/sections/Hero';
 import { Image } from '@app/components/common/images/Image';
@@ -9,14 +11,26 @@ import { GridCTA } from '@app/components/sections/GridCTA';
 import { ActionList } from '@app/components/common/actions-list/ActionList';
 import ProductList from '@app/components/sections/ProductList';
 import MenuList from '@app/components/sections/MenuList';
+import ReviewList from '@app/components/sections/ReviewList';
+import fs from 'fs/promises';
+import path from 'path';
 
 export const loader = async (args: LoaderFunctionArgs) => {
-  return {};
+  try {
+    const reviewsPath = path.join(process.cwd(), '../../apps/medusa/chef_luis_reviews.json');
+    const reviewsData = await fs.readFile(reviewsPath, 'utf-8');
+    const reviews = JSON.parse(reviewsData);
+    return json({ reviews });
+  } catch (error) {
+    console.error('Error loading reviews:', error);
+    return json({ reviews: [] });
+  }
 };
 
 export const meta: MetaFunction<typeof loader> = getMergedPageMeta;
 
 export default function IndexRoute() {
+  const { reviews } = useLoaderData<typeof loader>();
 
   return (
     <>
@@ -41,7 +55,6 @@ export default function IndexRoute() {
         ]}
         image={{
           url: '/assets/images/chef-hero.png',
-          //url: '/assets/images/IMG_3232.png',
           alt: 'Barrio background',
         }}
       />
@@ -96,7 +109,6 @@ export default function IndexRoute() {
         ]}
       /> */}
 
-        //TODO: LIST REVIEWS HERE
       <ListItems
         itemsClassName="mb-2"
         title="Chef Velez's Core Values"
@@ -262,6 +274,12 @@ export default function IndexRoute() {
           </div>
         }
       /> */}
+
+      <ReviewList
+        className="!pb-[100px]"
+        heading="Client Testimonials"
+        reviews={reviews}
+        />
     </>
   );
 }
