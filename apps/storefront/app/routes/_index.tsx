@@ -174,7 +174,7 @@ export default function IndexRoute() {
         }
         actions={[
           {
-            label: 'Get your coffee',
+            label: 'Start your journey',
             url: '/products',
           },
         ]}
