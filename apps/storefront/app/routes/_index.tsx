@@ -50,7 +50,7 @@ export default function IndexRoute() {
         actions={[
           {
             label: 'Reserve Your Experience',
-            url: '/categories/blends',
+            url: '/menus',
           },
         ]}
         image={{
@@ -89,11 +89,11 @@ export default function IndexRoute() {
 
       <ProductList
         className="!pb-[100px]"
-        heading="Event Favorites"
+        heading="Menu Favorites"
         actions={[
           {
             label: 'View all',
-            url: '/products',
+            url: '/menus',
           },
         ]}
       />
@@ -120,29 +120,26 @@ export default function IndexRoute() {
               </h1>
           
               <ListItems
-                className="text-left w-full text-black justify-between p-0"
+                className="text-left w-full text-black justify-between p-0 [&_h4]:font-normal [&_h4]:text-base"
                 itemsClassName="grid grid-cols-1 md:grid-cols-3 gap-8"
                 items={[
                   {
                     title: '1. Select your experience',
                     description:
                       'Choose from private dining events, cooking demonstrations, or custom culinary experiences.',
-                    className: "rounded-3xl bg-highlight-900/70 p-10 text-sm",
-                    useFillTitle: true
+                    className: "rounded-3xl bg-highlight-900/70 p-10 text-sm"
                   },
                   {
                     title: '2. Customize your evening',
                     description:
                       'Share your preferences and dietary needs. Chef Velez will craft the perfect menu for your occasion.',
-                    className: "rounded-3xl bg-highlight-900/70 p-10 text-sm",
-                    useFillTitle: true
+                    className: "rounded-3xl bg-highlight-900/70 p-10 text-sm"
                   },
                   {
                     title: '3. Savor the moment',
                     description:
                       'Immerse yourself in an exceptional dining experience where every detail creates lasting memories.',
-                    className: "rounded-3xl bg-highlight-900/70 p-10 text-sm",
-                    useFillTitle: true
+                    className: "rounded-3xl bg-highlight-900/70 p-10 text-sm"
                   },
                 ]}
               />
@@ -152,7 +149,7 @@ export default function IndexRoute() {
         actions={[
           {
             label: 'Start your journey',
-            url: '/products',
+            url: '/menus',
           },
         ]}
         image={{

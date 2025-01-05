@@ -37,7 +37,7 @@ export default function ProductsIndexRoute() {
       url: `/`,
     },
     {
-      label: 'All Products',
+      label: 'All Menus',
     },
   ];
 

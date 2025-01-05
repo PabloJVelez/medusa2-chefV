@@ -4,7 +4,7 @@ export const headerNavigationItems: NavigationCollection = [
   {
     id: 1,
     label: 'View Menus',
-    url: '/products',
+    url: '/menus',
     sort_order: 0,
     location: NavigationItemLocation.header,
     new_tab: false,
@@ -23,7 +23,7 @@ export const footerNavigationItems: NavigationCollection = [
   {
     id: 1,
     label: 'Browse All Menus',
-    url: '/products',
+    url: '/menus',
     location: NavigationItemLocation.footer,
     sort_order: 1,
     new_tab: false,
