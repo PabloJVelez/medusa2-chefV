@@ -137,7 +137,7 @@ export default function IndexRoute() {
               description:
                 'I believe in transparency and honesty in everything I do - from my sourcing practices to my client relationships. I\'m committed to doing what\'s right, not what\'s easy, treating both ingredients and traditions with the respect they deserve.',
               image: {
-                src: '/assets/icons/concierge.svg',
+                src: '/assets/icons/scale.svg',
                 alt: 'Integrity',
                 width: 60,
                 height: 60,
@@ -150,7 +150,7 @@ export default function IndexRoute() {
               description:
                 'I am dedicated to continuous growth and learning in my craft. While honoring traditional techniques, I push creative boundaries to craft unique experiences. Every dish is an opportunity to innovate and inspire.',
               image: {
-                src: '/assets/icons/ingredients.svg',
+                src: '/assets/icons/book.svg',
                 alt: 'Innovation',
                 width: 60,
                 height: 60,
