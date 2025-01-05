@@ -22,32 +22,8 @@ export const headerNavigationItems: NavigationCollection = [
 export const footerNavigationItems: NavigationCollection = [
   {
     id: 1,
-    label: 'Shop All',
+    label: 'Browse All Menus',
     url: '/products',
-    location: NavigationItemLocation.footer,
-    sort_order: 1,
-    new_tab: false,
-  },
-  {
-    id: 2,
-    label: 'Light Roasts',
-    url: '/collections/light-roasts',
-    location: NavigationItemLocation.footer,
-    sort_order: 1,
-    new_tab: false,
-  },
-  {
-    id: 3,
-    label: 'Medium Roasts',
-    url: '/collections/medium-roasts',
-    location: NavigationItemLocation.footer,
-    sort_order: 1,
-    new_tab: false,
-  },
-  {
-    id: 4,
-    label: 'Dark Roasts',
-    url: '/collections/dark-roasts',
     location: NavigationItemLocation.footer,
     sort_order: 1,
     new_tab: false,

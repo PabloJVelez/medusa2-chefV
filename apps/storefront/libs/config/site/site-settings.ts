@@ -7,5 +7,5 @@ export const siteSettings: SiteSettings = {
   favicon: '/favicon.svg',
   social_facebook: 'https://www.facebook.com/',
   social_instagram: 'https://www.instagram.com/',
-  social_twitter: 'https://www.twitter.com/',
+  social_tiktok: 'https://www.tiktok.com/',
 };

@@ -6,7 +6,6 @@ import {
   PinterestIcon,
   SnapchatIcon,
   TiktokIcon,
-  TwitterIcon,
   YoutubeIcon,
 } from '@app/components/common/assets/icons';
 import { IconButton } from '@app/components/common/buttons/IconButton';
@@ -16,11 +15,10 @@ export const SocialIcons: FC<{ siteSettings?: SiteSettings }> = ({ siteSettings 
   const socialLinks = [
     { icon: FacebookIcon, url: siteSettings?.social_facebook },
     { icon: InstagramIcon, url: siteSettings?.social_instagram },
-    { icon: TwitterIcon, url: siteSettings?.social_twitter },
+    { icon: TiktokIcon, url: siteSettings?.social_tiktok },
     { icon: YoutubeIcon, url: siteSettings?.social_youtube },
     { icon: LinkedinIcon, url: siteSettings?.social_linkedin },
     { icon: PinterestIcon, url: siteSettings?.social_pinterest },
-    { icon: TiktokIcon, url: siteSettings?.social_tiktok },
     { icon: SnapchatIcon, url: siteSettings?.social_snapchat },
   ].filter((link) => !!link.url);
 

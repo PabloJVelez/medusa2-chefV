@@ -43,77 +43,23 @@ export const Footer = () => {
   return (
     <footer className="bg-accent-50 min-h-[140px] py-8 text-white">
       <Container>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-6 w-full flex-col items-center gap-8 sm:flex-row sm:items-start sm:gap-16">
-          <div className="flex w-full flex-col items-center gap-8 sm:w-auto sm:items-start sm:gap-9 sm:col-span-2 lg:col-span-3">
+        <div className="flex flex-col gap-8">
+          <div className="flex justify-between items-center">
             <div className="flex flex-col gap-5">
-              <h4 className="font-bold">Culinary Excellence</h4>
-              <p className="text-sm">
-                Experience the artistry of Chef Velez, where culinary mastery meets exceptional service. From intimate 
-                private dinners to interactive culinary demonstrations, each experience is crafted with precision and 
-                passion. Join us for an unforgettable journey through fine dining, where every dish tells a story of 
-                quality and creativity.
-              </p>
+              <SocialIcons siteSettings={settings} />
             </div>
-            <LogoStoreName />
+            {hasProducts && <StripeSecurityImage />}
           </div>
 
-          <nav
-            className={clsx('pt-2', {
-              'columns-2 gap-16': footerNavigationItems && footerNavigationItems?.length > 5,
-            })}
-          >
-            <h5 className="font-bold mb-4">Shop</h5>
-            {footerNavigationItems?.map(({ id, new_tab, ...navItemProps }) => (
-              <URLAwareNavLink
-                key={id}
-                {...navItemProps}
-                newTab={new_tab}
-                className="hover:text-slate-200 block pb-2 text-sm"
-                prefetch="intent"
-              >
-                {navItemProps.label}
-              </URLAwareNavLink>
-            ))}
-          </nav>
-          <div className="flex flex-col gap-5 lg:col-span-2">
-            <NewsletterSubscription className="mb-4" />
-
-            <SocialIcons siteSettings={settings} />
-
-            <div className="flex flex-col gap-4 mt-4">
-              <h5>Location</h5>
-              <p className="text-sm">
-                1619 E Cesar Chavez St, Austin, TX 78702
-                <br />
-                Open 7AM - 4PM Daily
-              </p>
-            </div>
-          </div>
-        </div>
-        <div className="flex flex-col max-md:items-center gap-8 mt-8 md:flex-row md:justify-between">
-          <div className="flex flex-col gap-8">
-            <div className="flex items-center gap-2 ">
-              <Select
-                className="!text-base border-1 border-white text-white bg-transparent !shadow-none"
-                options={regionOptions}
-                defaultValue={region?.id}
-                onChange={(e) => {
-                  onRegionChange(e.target.value);
-                }}
-              />
-            </div>
-
+          <div className="flex justify-center border-t border-white/10 pt-8">
             <a
-              href="https://www.lambdacurry.dev/"
+              href="https://www.linkedin.com/in/pablo-velez" 
               target="_blank"
               rel="noopener noreferrer"
-              className="flex flex-col items-start gap-1 text-sm"
+              className="text-sm"
             >
-              © {new Date().getFullYear()} Made with ❤️ by LambdaCurry
+              © {new Date().getFullYear()} Made with ❤️ by Pablo Velez
             </a>
-          </div>
-          <div className="mt-1 flex flex-col justify-end text-xs sm:mt-0">
-            {hasProducts && <StripeSecurityImage className="mt-2" />}
           </div>
         </div>
       </Container>

@@ -94,7 +94,7 @@ export default function ReviewList({ className = '', heading = 'What Our Clients
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const reviewsPerPage = isMobile ? 2 : 6;
+  const reviewsPerPage = isMobile ? 2 : 3;
   const totalPages = Math.ceil(reviews.length / reviewsPerPage);
   const reviewPages = Array.from({ length: totalPages }, (_, i) => 
     reviews.slice(i * reviewsPerPage, (i + 1) * reviewsPerPage)
