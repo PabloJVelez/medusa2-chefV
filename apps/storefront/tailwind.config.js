@@ -99,10 +99,21 @@ module.exports = {
           '40%': { transform: 'translateX(4px)' },
           '60%': { transform: 'translateX(-4px)' },
           '80%': { transform: 'translateX(4px)' },
-        }
+        },
+        'fade-slide-in': {
+          '0%': {
+            opacity: '0',
+            transform: 'translateX(20px)',
+          },
+          '100%': {
+            opacity: '1',
+            transform: 'translateX(0)',
+          },
+        },
       },
       animation: {
-        shake: 'shake 0.5s ease-in-out'
+        shake: 'shake 0.5s ease-in-out',
+        'fade-slide-in': 'fade-slide-in 0.6s ease-out forwards',
       }
     },
   },
