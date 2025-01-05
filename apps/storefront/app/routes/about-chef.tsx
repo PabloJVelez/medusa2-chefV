@@ -2,6 +2,7 @@ import { Container } from '@app/components/common/container';
 import type { LoaderFunctionArgs, MetaFunction } from '@remix-run/node';
 import { getMergedPageMeta } from '@libs/util/page';
 import Hero from '@app/components/sections/Hero';
+import { ListItems } from '@app/components/sections/ListItems';
 
 type ServiceProps = {
   title: string;
@@ -108,6 +109,54 @@ export default function IndexRoute() {
             {
               label: 'Explore Menus',
               url: '/products',
+            },
+          ]}
+        />
+      </Container>
+
+      <Container className="py-16">
+        <ListItems
+          className="space-y-12"
+          title="Core Values"
+          items={[
+            {
+              title: 'Excellence',
+              description:
+                'I hold myself to the highest standards in every detail of my craft. From selecting the finest ingredients to perfecting the final presentation, I ensure each dish that leaves my kitchen reflects the pinnacle of culinary excellence.',
+              image: {
+                src: '/assets/icons/chef-hat.svg',
+                alt: 'Excellence',
+                width: 60,
+                height: 60,
+                className: "mx-auto mb-6 transition-transform duration-300 group-hover:scale-110"
+              },
+              className: "group bg-accent-50/10 hover:bg-accent-50/30 transition-colors duration-300 p-8 rounded-3xl text-center space-y-4 flex flex-col items-center"
+            },
+            {
+              title: 'Integrity',
+              description:
+                'I believe in transparency and honesty in everything I do - from my sourcing practices to my client relationships. I\'m committed to doing what\'s right, not what\'s easy, treating both ingredients and traditions with the respect they deserve.',
+              image: {
+                src: '/assets/icons/concierge.svg',
+                alt: 'Integrity',
+                width: 60,
+                height: 60,
+                className: "mx-auto mb-6 transition-transform duration-300 group-hover:scale-110"
+              },
+              className: "group bg-accent-50/10 hover:bg-accent-50/30 transition-colors duration-300 p-8 rounded-3xl text-center space-y-4 flex flex-col items-center"
+            },
+            {
+              title: 'Innovation',
+              description:
+                'I am dedicated to continuous growth and learning in my craft. While honoring traditional techniques, I push creative boundaries to craft unique experiences. Every dish is an opportunity to innovate and inspire.',
+              image: {
+                src: '/assets/icons/ingredients.svg',
+                alt: 'Innovation',
+                width: 60,
+                height: 60,
+                className: "mx-auto mb-6 transition-transform duration-300 group-hover:scale-110"
+              },
+              className: "group bg-accent-50/10 hover:bg-accent-50/30 transition-colors duration-300 p-8 rounded-3xl text-center space-y-4 flex flex-col items-center"
             },
           ]}
         />

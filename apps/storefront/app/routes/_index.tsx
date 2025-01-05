@@ -109,46 +109,6 @@ export default function IndexRoute() {
         ]}
       /> */}
 
-      <ListItems
-        itemsClassName="mb-2"
-        title="Chef Velez's Core Values"
-        items={[
-          {
-            title: 'Culinary Mastery',
-            description:
-              'Every dish is a masterpiece, crafted with precision, passion, and the finest seasonal ingredients to create unforgettable dining experiences.',
-            image: {
-              src: '/assets/images/benefit-1.png',
-              alt: 'Culinary Excellence',
-              width: 60,
-              height: 60,
-            },
-          },
-          {
-            title: 'Personalized Experience',
-            description:
-              'Each event is thoughtfully customized to your preferences, whether it\'s an intimate dinner party or a grand celebration.',
-            image: {
-              src: '/assets/images/benefit-2.png',
-              alt: 'Personalized Experience',
-              width: 60,
-              height: 60,
-            },
-          },
-          {
-            title: 'Artisanal Quality',
-            description:
-              'We source exceptional ingredients from local producers, ensuring every component meets our exacting standards for taste and presentation.',
-            image: {
-              src: '/assets/images/benefit-3.png',
-              alt: 'Artisanal Quality',
-              width: 60,
-              height: 60,
-            },
-          },
-        ]}
-      />
-
       <Hero
         className="pb-10 min-h-[734px] !max-w-full"
         content={
