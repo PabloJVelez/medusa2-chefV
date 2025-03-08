@@ -26,8 +26,8 @@ createProductsWorkflow.hooks.productsCreated(
       if (additional_data?.chefEvent) {
         await chefEventWorkflow.run({
           input: {
-            product,
-            chefEvent: additional_data?.chefEvent
+            productId: product.id,
+            chefEventId: (additional_data?.chefEvent as any)?.id || ''
           } as LinkEventToProductWorkflowInput
         })
       }

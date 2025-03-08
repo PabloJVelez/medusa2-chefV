@@ -1,309 +1,309 @@
-import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
-import { linkEventToProductWorkflow } from "../../../../workflows/link-event-to-product"
-import { Modules } from "@medusajs/framework/utils"
-import { DateTime } from "luxon"
-import { CreateProductDTO, CreateProductOptionDTO, CreateProductVariantDTO, INotificationModuleService, CreateNotificationDTO, ProductDTO, CreateProductWorkflowInputDTO } from "@medusajs/types"
-import { ProductStatus } from "@medusajs/utils"
-import { Menu } from "../../../../modules/menu/models/menu"
-import {ContainerRegistrationKeys} from "@medusajs/framework/utils"
-import { linkMenuToEventProductWorkflow, LinkMenuToEventProductWorkflowInput } from "../../../../workflows/link-menu-to-eventProduct"
-import { linkSalesChannelsToStockLocationWorkflow, createProductsWorkflow } from "@medusajs/medusa/core-flows"
+// import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
+// import { linkEventToProductWorkflow } from "../../../../workflows/link-event-to-product"
+// import { Modules } from "@medusajs/framework/utils"
+// import { DateTime } from "luxon"
+// import { CreateProductDTO, CreateProductOptionDTO, CreateProductVariantDTO, INotificationModuleService, CreateNotificationDTO, ProductDTO, CreateProductWorkflowInputDTO } from "@medusajs/types"
+// import { ProductStatus } from "@medusajs/utils"
+// import { Menu } from "../../../../modules/menu/models/menu"
+// import {ContainerRegistrationKeys} from "@medusajs/framework/utils"
+// import { linkMenuToEventProductWorkflow, LinkMenuToEventProductWorkflowInput } from "../../../../workflows/link-menu-to-eventProduct"
+// import { linkSalesChannelsToStockLocationWorkflow, createProductsWorkflow } from "@medusajs/medusa/core-flows"
 
-import { MENU_MODULE } from "src/modules/menu"
+// import { MENU_MODULE } from "src/modules/menu"
 
-interface CreateChefEventBody {
-  productId: string
-  requestedDate: string
-  requestedTime: string
-  partySize: number | string
-  eventType: string
-  locationType: string
-  locationAddress?: string
-  firstName: string
-  lastName: string
-  email: string
-  phone?: string
-  notes?: string
-  productName?: string
-}
+// interface CreateChefEventBody {
+//   productId: string
+//   requestedDate: string
+//   requestedTime: string
+//   partySize: number | string
+//   eventType: string
+//   locationType: string
+//   locationAddress?: string
+//   firstName: string
+//   lastName: string
+//   email: string
+//   phone?: string
+//   notes?: string
+//   productName?: string
+// }
 
-interface ExtendedProductDTO extends ProductDTO {
-  menu?: typeof Menu
-}
+// interface ExtendedProductDTO extends ProductDTO {
+//   menu?: typeof Menu
+// }
 
-export async function POST(
-  req: MedusaRequest<CreateChefEventBody>,
-  res: MedusaResponse
-): Promise<void> {
-  const {
-    productId,
-    requestedDate,
-    requestedTime,
-    partySize,
-    eventType,
-    locationType,
-    locationAddress,
-    firstName,
-    lastName,
-    email,
-    phone,
-    notes,
-    productName
-  } = req.body
+// export async function POST(
+//   req: MedusaRequest<CreateChefEventBody>,
+//   res: MedusaResponse
+// ): Promise<void> {
+//   const {
+//     productId,
+//     requestedDate,
+//     requestedTime,
+//     partySize,
+//     eventType,
+//     locationType,
+//     locationAddress,
+//     firstName,
+//     lastName,
+//     email,
+//     phone,
+//     notes,
+//     productName
+//   } = req.body
 
-  try {
-    const productService = req.scope.resolve(Modules.PRODUCT);
-    const notificationService = req.scope.resolve(Modules.NOTIFICATION);
-    const inventoryService = req.scope.resolve(Modules.INVENTORY);
-    const stockLocationModuleService = req.scope.resolve(Modules.STOCK_LOCATION)
-    const salesChannelModuleService = req.scope.resolve(Modules.SALES_CHANNEL)
-    const pricingService = req.scope.resolve(Modules.PRICING)
-    const remoteLink = req.scope.resolve(ContainerRegistrationKeys.REMOTE_LINK);
+//   try {
+//     const productService = req.scope.resolve(Modules.PRODUCT);
+//     const notificationService = req.scope.resolve(Modules.NOTIFICATION);
+//     const inventoryService = req.scope.resolve(Modules.INVENTORY);
+//     const stockLocationModuleService = req.scope.resolve(Modules.STOCK_LOCATION)
+//     const salesChannelModuleService = req.scope.resolve(Modules.SALES_CHANNEL)
+//     const pricingService = req.scope.resolve(Modules.PRICING)
+//     const remoteLink = req.scope.resolve(ContainerRegistrationKeys.REMOTE_LINK);
 
-    const query = req.scope.resolve(ContainerRegistrationKeys.QUERY)
+//     const query = req.scope.resolve(ContainerRegistrationKeys.QUERY)
 
-    const {data: [templateProduct]} = await query.graph({
-      entity: "product",
-      fields: ["id", "title", "description", "menu.*", "menu.courses.*", "menu.courses.dishes.*", "variants.id", "variants.prices.*"],
-      filters: {
-        id: productId
-      }
-    })
+//     const {data: [templateProduct]} = await query.graph({
+//       entity: "product",
+//       fields: ["id", "title", "description", "menu.*", "menu.courses.*", "menu.courses.dishes.*", "variants.id", "variants.prices.*"],
+//       filters: {
+//         id: productId
+//       }
+//     })
 
-    if (!templateProduct) {
-      res.status(404).json({
-        message: "Template product not found"
-      });
-      return;
-    }
+//     if (!templateProduct) {
+//       res.status(404).json({
+//         message: "Template product not found"
+//       });
+//       return;
+//     }
 
-    // Get the template product's price
-    const templateVariant = templateProduct.variants?.[0];
-    if (!templateVariant || !templateVariant.prices?.length) {
-      res.status(400).json({
-        message: "Template product has no price information"
-      });
-      return;
-    }
+//     // Get the template product's price
+//     const templateVariant = templateProduct.variants?.[0];
+//     if (!templateVariant || !templateVariant.prices?.length) {
+//       res.status(400).json({
+//         message: "Template product has no price information"
+//       });
+//       return;
+//     }
 
-    const templatePrice = templateVariant.prices[0];
-    const pricePerPerson = templatePrice.amount;
-    const totalPrice = pricePerPerson * Number(partySize);
+//     const templatePrice = templateVariant.prices[0];
+//     const pricePerPerson = templatePrice.amount;
+//     const totalPrice = pricePerPerson * Number(partySize);
 
-    // Format the date and time for display
-    const formattedDate = DateTime.fromISO(requestedDate).toFormat('LLL d, yyyy');
-    const formattedTime = DateTime.fromFormat(requestedTime, 'HH:mm').toFormat('h:mm a');
+//     // Format the date and time for display
+//     const formattedDate = DateTime.fromISO(requestedDate).toFormat('LLL d, yyyy');
+//     const formattedTime = DateTime.fromFormat(requestedTime, 'HH:mm').toFormat('h:mm a');
 
-    // Get event type label
-    const eventTypeMap: Record<string, string> = {
-      cooking_class: "Chef's Cooking Class",
-      plated_dinner: "Plated Dinner Service",
-      buffet_style: "Buffet Style Service"
-    };
+//     // Get event type label
+//     const eventTypeMap: Record<string, string> = {
+//       cooking_class: "Chef's Cooking Class",
+//       plated_dinner: "Plated Dinner Service",
+//       buffet_style: "Buffet Style Service"
+//     };
 
-    // Get location type label
-    const locationTypeMap: Record<string, string> = {
-      customer_location: "at Customer's Location",
-      chef_location: "at Chef's Location"
-    };
+//     // Get location type label
+//     const locationTypeMap: Record<string, string> = {
+//       customer_location: "at Customer's Location",
+//       chef_location: "at Chef's Location"
+//     };
 
-    // Create new product title and description
-    const newProductTitle = `${productName || templateProduct.title} - ${eventTypeMap[eventType]} (${formattedDate})`;
-    const newProductDescription = `
-${templateProduct.description || ''}
+//     // Create new product title and description
+//     const newProductTitle = `${productName || templateProduct.title} - ${eventTypeMap[eventType]} (${formattedDate})`;
+//     const newProductDescription = `
+// ${templateProduct.description || ''}
 
-Event Details:
-• Date: ${formattedDate}
-• Time: ${formattedTime}
-• Type: ${eventTypeMap[eventType]}
-• Location: ${locationTypeMap[locationType]}
-${locationAddress ? `• Address: ${locationAddress}` : ''}
-• Party Size: ${partySize} guests
-• Price per Ticket: ${(pricePerPerson / 100).toFixed(2)} ${templatePrice.currency_code}
-• Total Price: ${(totalPrice / 100).toFixed(2)} ${templatePrice.currency_code}
+// Event Details:
+// • Date: ${formattedDate}
+// • Time: ${formattedTime}
+// • Type: ${eventTypeMap[eventType]}
+// • Location: ${locationTypeMap[locationType]}
+// ${locationAddress ? `• Address: ${locationAddress}` : ''}
+// • Party Size: ${partySize} guests
+// • Price per Ticket: ${(pricePerPerson / 100).toFixed(2)} ${templatePrice.currency_code}
+// • Total Price: ${(totalPrice / 100).toFixed(2)} ${templatePrice.currency_code}
 
-Customer Information:
-• Name: ${firstName} ${lastName}
-• Email: ${email}
-${phone ? `• Phone: ${phone}` : ''}
-${notes ? `\nSpecial Notes:\n${notes}` : ''}
-    `.trim();
+// Customer Information:
+// • Name: ${firstName} ${lastName}
+// • Email: ${email}
+// ${phone ? `• Phone: ${phone}` : ''}
+// ${notes ? `\nSpecial Notes:\n${notes}` : ''}
+//     `.trim();
 
-    // Convert product options to CreateProductOptionDTO format
-    const options: CreateProductOptionDTO[] = [{
-      title: "Event Type",
-      values: ["Chef Event"]
-    }];
+//     // Convert product options to CreateProductOptionDTO format
+//     const options: CreateProductOptionDTO[] = [{
+//       title: "Event Type",
+//       values: ["Chef Event"]
+//     }];
 
-    // Create the product input
-    const productInput: CreateProductWorkflowInputDTO = {
-      title: newProductTitle,
-      description: newProductDescription,
-      status: ProductStatus.PUBLISHED,
-      collection_id: templateProduct.collection_id,
-      type_id: templateProduct.type_id,
-      options: [{
-        title: "Event Type",
-        values: ["Chef Event"]
-      }],
-      variants: [{
-        title: 'Chef Event Ticket',
-        manage_inventory: true,
-        allow_backorder: false,
-        options: {
-          "Event Type": "Chef Event"
-        },
-        prices: [{
-          amount: pricePerPerson,
-          currency_code: templatePrice.currency_code
-        }]
-      }],
-      metadata: {
-        template_product_id: templateProduct.id,
-        event_type: eventType,
-        event_date: requestedDate,
-        event_time: requestedTime,
-        party_size: partySize,
-        price_per_person: pricePerPerson,
-        is_event_product: true
-      }
-    };
+//     // Create the product input
+//     const productInput: CreateProductWorkflowInputDTO = {
+//       title: newProductTitle,
+//       description: newProductDescription,
+//       status: ProductStatus.PUBLISHED,
+//       collection_id: templateProduct.collection_id,
+//       type_id: templateProduct.type_id,
+//       options: [{
+//         title: "Event Type",
+//         values: ["Chef Event"]
+//       }],
+//       variants: [{
+//         title: 'Chef Event Ticket',
+//         manage_inventory: true,
+//         allow_backorder: false,
+//         options: {
+//           "Event Type": "Chef Event"
+//         },
+//         prices: [{
+//           amount: pricePerPerson,
+//           currency_code: templatePrice.currency_code
+//         }]
+//       }],
+//       metadata: {
+//         template_product_id: templateProduct.id,
+//         event_type: eventType,
+//         event_date: requestedDate,
+//         event_time: requestedTime,
+//         party_size: partySize,
+//         price_per_person: pricePerPerson,
+//         is_event_product: true
+//       }
+//     };
 
-    const { result: [createdProduct] } = await createProductsWorkflow(req.scope).run({
-      input: {
-        products: [productInput]
-      }
-    });
+//     const { result: [createdProduct] } = await createProductsWorkflow(req.scope).run({
+//       input: {
+//         products: [productInput]
+//       }
+//     });
 
-    const variantId = createdProduct.variants?.[0]?.id;
+//     const variantId = createdProduct.variants?.[0]?.id;
 
-    // Create a unique location ID for this event
-    const eventLocationId = `loc_event_${createdProduct.id}`;
+//     // Create a unique location ID for this event
+//     const eventLocationId = `loc_event_${createdProduct.id}`;
 
-    // First create the inventory item
-    const [inventoryItem] = await inventoryService.createInventoryItems([{
-      sku: `${createdProduct.id}-${variantId}`
-    }]);
+//     // First create the inventory item
+//     const [inventoryItem] = await inventoryService.createInventoryItems([{
+//       sku: `${createdProduct.id}-${variantId}`
+//     }]);
 
-    // Then create inventory level with the location, using party size as the quantity
-    await inventoryService.createInventoryLevels({
-      inventory_item_id: inventoryItem.id,
-      location_id: eventLocationId,
-      stocked_quantity: Number(partySize)  // Set to party size to track guest capacity
-    });
+//     // Then create inventory level with the location, using party size as the quantity
+//     await inventoryService.createInventoryLevels({
+//       inventory_item_id: inventoryItem.id,
+//       location_id: eventLocationId,
+//       stocked_quantity: Number(partySize)  // Set to party size to track guest capacity
+//     });
 
-    // Link the inventory item to the variant using remote link
-    await remoteLink.create({
-      [Modules.PRODUCT]: {
-        variant_id: variantId
-      },
-      [Modules.INVENTORY]: {
-        inventory_item_id: inventoryItem.id
-      }
-    });
+//     // Link the inventory item to the variant using remote link
+//     await remoteLink.create({
+//       [Modules.PRODUCT]: {
+//         variant_id: variantId
+//       },
+//       [Modules.INVENTORY]: {
+//         inventory_item_id: inventoryItem.id
+//       }
+//     });
 
-    //TODO: THIS NEEDS TO BE FIXED. SHOULD NOT HAVE TO DO THIS, FOLLOW SEED FILE's Product creation
-    const salesChannel = await salesChannelModuleService.listSalesChannels()
+//     //TODO: THIS NEEDS TO BE FIXED. SHOULD NOT HAVE TO DO THIS, FOLLOW SEED FILE's Product creation
+//     const salesChannel = await salesChannelModuleService.listSalesChannels()
 
-    const stockLocation = await stockLocationModuleService.listStockLocations({})
-    console.log("STOCK LOCATION #######################", stockLocation)
+//     const stockLocation = await stockLocationModuleService.listStockLocations({})
+//     console.log("STOCK LOCATION #######################", stockLocation)
 
-    const test = await linkSalesChannelsToStockLocationWorkflow(req.scope).run({
-      input: {
-        id: stockLocation[0].id,
-        add: [salesChannel[0].id]
-      }
-    })
+//     const test = await linkSalesChannelsToStockLocationWorkflow(req.scope).run({
+//       input: {
+//         id: stockLocation[0].id,
+//         add: [salesChannel[0].id]
+//       }
+//     })
 
-    console.log("TEST RESULT #######################", test)
+//     console.log("TEST RESULT #######################", test)
 
     
-    await linkMenuToEventProductWorkflow(req.scope).run({
-      input: {
-        productId: createdProduct.id as string,
-        menuId: templateProduct.menu?.id as string
-      }
-    })
+//     await linkMenuToEventProductWorkflow(req.scope).run({
+//       input: {
+//         productId: createdProduct.id as string,
+//         menuId: templateProduct.menu?.id as string
+//       }
+//     })
 
-    const workflowInput = {
-      input: {
-        product: createdProduct,
-        chefEvent: {
-          status: "pending",
-          requestedDate,
-          requestedTime,
-          partySize: Number(partySize),
-          eventType,
-          locationType,
-          locationAddress: locationAddress || "",
-          firstName,
-          lastName,
-          email,
-          phone: phone || "",
-          notes: notes || "",
-          totalPrice: totalPrice,
-          depositPaid: false,
-          specialRequirements: "",
-          estimatedDuration: 180,
-          assignedChefId: ""
-        }
-      }
-    };
-    const { result } = await linkEventToProductWorkflow(req.scope).run(workflowInput)
+//     const workflowInput = {
+//       input: {
+//         product: createdProduct,
+//         chefEvent: {
+//           status: "pending",
+//           requestedDate,
+//           requestedTime,
+//           partySize: Number(partySize),
+//           eventType,
+//           locationType,
+//           locationAddress: locationAddress || "",
+//           firstName,
+//           lastName,
+//           email,
+//           phone: phone || "",
+//           notes: notes || "",
+//           totalPrice: totalPrice,
+//           depositPaid: false,
+//           specialRequirements: "",
+//           estimatedDuration: 180,
+//           assignedChefId: ""
+//         }
+//       }
+//     };
+//     const { result } = await linkEventToProductWorkflow(req.scope).run(workflowInput)
 
-    await notificationService.createNotifications({
-      to: "pablo_3@icloud.com",
-      channel: "email",
-      template: "d-c693ecebe49048d88e46d4dc26d30a19",
-      data: {
-        customer: {
-          first_name: firstName,
-          last_name: lastName,
-          email: email,
-          phone: phone || 'No phone provided'
-        },
-        booking: {
-          date: formattedDate,
-          time: formattedTime,
-          menu: productName || templateProduct.title,
-          event_type: eventTypeMap[eventType],
-          location_type: locationTypeMap[locationType],
-          location_address: locationAddress || 'At chef\'s location',
-          party_size: partySize,
-          notes: notes || 'No special requests',
-          price_per_person: (pricePerPerson / 100).toFixed(2),
-          total_price: (totalPrice / 100).toFixed(2),
-          currency_code: templatePrice.currency_code
-        },
-        event: {
-          id: result.chefEvent.id,
-          status: "pending",
-          total_price: totalPrice,
-          price_per_person: pricePerPerson,
-          deposit_paid: false
-        },
-        acceptUrl: `${process.env.ADMIN_BACKEND_URL}/admin/events/accept?eventId=${result.chefEvent.id}`,
-        rejectUrl: `${process.env.ADMIN_BACKEND_URL}/admin/events/reject?eventId=${result.chefEvent.id}`
-      }
-    } as CreateNotificationDTO);
+//     await notificationService.createNotifications({
+//       to: "pablo_3@icloud.com",
+//       channel: "email",
+//       template: "d-c693ecebe49048d88e46d4dc26d30a19",
+//       data: {
+//         customer: {
+//           first_name: firstName,
+//           last_name: lastName,
+//           email: email,
+//           phone: phone || 'No phone provided'
+//         },
+//         booking: {
+//           date: formattedDate,
+//           time: formattedTime,
+//           menu: productName || templateProduct.title,
+//           event_type: eventTypeMap[eventType],
+//           location_type: locationTypeMap[locationType],
+//           location_address: locationAddress || 'At chef\'s location',
+//           party_size: partySize,
+//           notes: notes || 'No special requests',
+//           price_per_person: (pricePerPerson / 100).toFixed(2),
+//           total_price: (totalPrice / 100).toFixed(2),
+//           currency_code: templatePrice.currency_code
+//         },
+//         event: {
+//           id: result.chefEvent.id,
+//           status: "pending",
+//           total_price: totalPrice,
+//           price_per_person: pricePerPerson,
+//           deposit_paid: false
+//         },
+//         acceptUrl: `${process.env.ADMIN_BACKEND_URL}/admin/events/accept?eventId=${result.chefEvent.id}`,
+//         rejectUrl: `${process.env.ADMIN_BACKEND_URL}/admin/events/reject?eventId=${result.chefEvent.id}`
+//       }
+//     } as CreateNotificationDTO);
 
-    res.status(200).json({
-      result,
-      eventProduct: createdProduct,
-      message: "Chef event created successfully"
-    })
-  } catch (error) {
-    res.status(500).json({
-      message: "Failed to create chef event",
-      error: error instanceof Error ? error.message : "Unknown error"
-    })
-  }
-}
+//     res.status(200).json({
+//       result,
+//       eventProduct: createdProduct,
+//       message: "Chef event created successfully"
+//     })
+//   } catch (error) {
+//     res.status(500).json({
+//       message: "Failed to create chef event",
+//       error: error instanceof Error ? error.message : "Unknown error"
+//     })
+//   }
+// }
 
-export const config = {
-  bodyParser: {
-    json: {
-      limit: '1mb'
-    }
-  }
-}
+// export const config = {
+//   bodyParser: {
+//     json: {
+//       limit: '1mb'
+//     }
+//   }
+// }

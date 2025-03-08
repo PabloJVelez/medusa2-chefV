@@ -19,7 +19,7 @@ export async function GET(
       "product.id"
     ],
     filters: {
-      id: req.params.id
+      id: req.params.id,
     }
   })
 

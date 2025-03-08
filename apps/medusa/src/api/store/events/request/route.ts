@@ -127,6 +127,8 @@ export async function POST(
       templateProductId: templateProduct.id
     });
 
+    console.log("CHEF EVENT CREATED", chefEvent);
+
     // Send notification to chef
     await notificationService.createNotifications({
       to: "pablo_3@icloud.com",

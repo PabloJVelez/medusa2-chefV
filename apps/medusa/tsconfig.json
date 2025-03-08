@@ -27,6 +27,9 @@
     "**/__fixtures__",
     "node_modules",
     "build",
-    ".cache"
+    ".cache",
+    "dist",
+    "**/*.spec.js",
+    "**/*.spec.ts"
   ]
 }
