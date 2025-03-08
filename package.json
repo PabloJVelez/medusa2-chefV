@@ -2,7 +2,7 @@
   "name": "root",
   "private": true,
   "scripts": {
-    "build": "turbo build",
+    "build": "yarn clean && yarn && turbo build",
     "start": "turbo start",
     "dev": "turbo dev",
     "lint": "turbo lint",

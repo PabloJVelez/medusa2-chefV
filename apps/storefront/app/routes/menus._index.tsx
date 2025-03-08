@@ -25,6 +25,7 @@ export default function ProductsIndexRoute() {
   if (!data) return null;
 
   const { products, count, limit, offset } = data;
+  const filteredProducts = products.filter((product: any) => !product.chef_event);
 
   const breadcrumbs = [
     {
@@ -50,7 +51,7 @@ export default function ProductsIndexRoute() {
       <div className="flex flex-col gap-4 sm:flex-row">
         <div className="flex-1">
           <ProductListWithPagination
-            products={products}
+            products={filteredProducts}
             paginationConfig={{ count, offset, limit }}
             context="products"
           />
