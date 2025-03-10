@@ -1,6 +1,6 @@
 import { createStep, StepResponse } from "@medusajs/framework/workflows-sdk"
-import MenuModuleService from "../../../modules/menu/service"
-import { MENU_MODULE } from "../../../modules/menu"
+import MenuModuleService from "../../modules/menu/service.js"
+import { MENU_MODULE } from "../../modules/menu"
 
 type CreateMenuStepInput = {
   menu: {

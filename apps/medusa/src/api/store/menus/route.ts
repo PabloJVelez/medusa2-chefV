@@ -1,5 +1,5 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
-import MenuModuleService from "../../../modules/menu/service"
+import MenuModuleService from "../../../modules/menu/service.js"
 import { MENU_MODULE } from "../../../modules/menu"
 
 export async function GET(

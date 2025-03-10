@@ -34,6 +34,7 @@
     "@medusajs/admin-sdk": "latest",
     "@medusajs/cli": "latest",
     "@medusajs/framework": "latest",
+    "@medusajs/icons": "^2.6.0",
     "@medusajs/js-sdk": "latest",
     "@medusajs/medusa": "latest",
     "@medusajs/types": "latest",
@@ -44,7 +45,9 @@
     "awilix": "^8.0.1",
     "axios": "^1.7.9",
     "cheerio": "^1.0.0",
-    "pg": "^8.13.0"
+    "pg": "^8.13.0",
+    "react-hook-form": "^7.54.2",
+    "react-i18next": "^15.4.1"
   },
   "devDependencies": {
     "@medusajs/test-utils": "latest",

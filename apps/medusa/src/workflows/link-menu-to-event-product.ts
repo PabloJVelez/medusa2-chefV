@@ -1,7 +1,7 @@
-import { createWorkflow, WorkflowResponse } from "@medusajs/framework/workflows-sdk"
+import { createWorkflow } from "@medusajs/framework/workflows-sdk"
 import { createRemoteLinkStep } from "@medusajs/medusa/core-flows"
+import { MENU_MODULE } from "../modules/menu"
 import { Modules } from "@medusajs/framework/utils"
-import { MENU_MODULE } from "../../modules/menu"
 
 export type LinkMenuToEventProductWorkflowInput = {
   productId: string
@@ -19,10 +19,5 @@ export const linkMenuToEventProductWorkflow = createWorkflow(
         menu_id: input.menuId
       }
     }])
-
-    return new WorkflowResponse({
-      productId: input.productId,
-      menuId: input.menuId
-    })
   }
-) 
+)

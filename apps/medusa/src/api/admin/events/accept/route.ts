@@ -1,16 +1,15 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { Modules } from "@medusajs/framework/utils"
-import { CHEF_EVENT_MODULE } from "../../../../modules/chef-event"
 import { DateTime } from "luxon"
 import { CreateNotificationDTO } from "@medusajs/types"
-import ChefEventService from "../../../../modules/chef-event/service"
 import { createProductsWorkflow } from "@medusajs/medusa/core-flows"
-import { linkMenuToEventProductWorkflow } from "../../../../workflows/link-menu-to-eventProduct"
+import { linkMenuToEventProductWorkflow } from "../../../../workflows/link-menu-to-event-product"
 import { linkEventToProductWorkflow } from "../../../../workflows/link-event-to-product"
 import { ProductStatus } from "@medusajs/utils"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { createStockLocationsWorkflow } from "@medusajs/medusa/core-flows"
 import { linkSalesChannelsToStockLocationWorkflow } from "@medusajs/medusa/core-flows"
+import { updateChefEventWorkflow } from "../../../../workflows/update-chef-event"
 
 interface AcceptEventBody {
   eventId?: string;
@@ -29,6 +28,7 @@ export async function GET(
   //TODO: THIS ALL NEEDS TO BE REFACTORED TO BE A WORKFLOW
   try {
     const eventId = req.query.eventId;
+    const query = req.scope.resolve(ContainerRegistrationKeys.QUERY)
 
     if (!eventId) {
       res.status(400).json({
@@ -37,9 +37,14 @@ export async function GET(
       return;
     }
 
-    const chefEventService: ChefEventService = req.scope.resolve(CHEF_EVENT_MODULE);
     const notificationService = req.scope.resolve(Modules.NOTIFICATION);
-    const event = await chefEventService.retrieveChefEvent(eventId as string);
+    const { data: [event] } = await query.graph({
+      entity: "chef_event",
+      fields: ["*"],
+      filters: {
+        id: eventId as string
+      }
+    })
 
     if (!event) {
       res.status(404).json({
@@ -51,7 +56,7 @@ export async function GET(
     const inventoryService = req.scope.resolve(Modules.INVENTORY);
     const salesChannelModuleService = req.scope.resolve(Modules.SALES_CHANNEL)
     const remoteLink = req.scope.resolve(ContainerRegistrationKeys.REMOTE_LINK);
-    const query = req.scope.resolve(ContainerRegistrationKeys.QUERY)
+    
 
     const defaultSalesChannels = await salesChannelModuleService.listSalesChannels({
       name: 'Default Sales Channel',
@@ -185,9 +190,12 @@ ${event.locationAddress ? `• Address: ${event.locationAddress}` : ''}
     } catch (error) {
       throw error;
     }
-    const updatedEvent = await chefEventService.updateChefEvents({
-      id: eventId as string,
-      status: ChefEventStatus.CONFIRMED
+
+    const updatedEvent = await updateChefEventWorkflow(req.scope).run({
+      input: {
+        chefEventId: chefEvent.id,
+        status: ChefEventStatus.CONFIRMED
+      }
     });
 
     await notificationService.createNotifications({

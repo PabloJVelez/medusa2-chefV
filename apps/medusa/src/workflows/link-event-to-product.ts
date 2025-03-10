@@ -1,7 +1,7 @@
 import { createWorkflow } from "@medusajs/framework/workflows-sdk"
 import { createRemoteLinkStep } from "@medusajs/medusa/core-flows"
 import { Modules } from "@medusajs/framework/utils"
-import { CHEF_EVENT_MODULE } from "../../modules/chef-event"
+import { CHEF_EVENT_MODULE } from "../modules/chef-event"
 
 export type LinkEventToProductWorkflowInput = {
   productId: string

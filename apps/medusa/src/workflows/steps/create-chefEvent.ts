@@ -1,6 +1,6 @@
 import { createStep, StepResponse } from "@medusajs/framework/workflows-sdk"
-import { CHEF_EVENT_MODULE } from "../../../modules/chef-event"
-import ChefEventService from "../../../modules/chef-event/service"
+import { CHEF_EVENT_MODULE } from "../../modules/chef-event"
+import ChefEventService from "../../modules/chef-event/service.js"
 
 type CreateChefEventStepInput = {
   chefEvent: {
