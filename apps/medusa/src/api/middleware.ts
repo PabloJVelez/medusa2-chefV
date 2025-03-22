@@ -51,7 +51,10 @@ export default defineMiddlewares({
           specialRequirements: z.string().optional(),
           estimatedDuration: z.number().optional(), // Duration in minutes
           assignedChefId: z.string().optional()
-        }).optional()
+        }).optional(),
+        productDetails: z.object({
+          type: z.string().optional(),
+        }).optional(),
       },
     },
   ],

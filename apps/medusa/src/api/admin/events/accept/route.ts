@@ -10,10 +10,13 @@ import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { createStockLocationsWorkflow } from "@medusajs/medusa/core-flows"
 import { linkSalesChannelsToStockLocationWorkflow } from "@medusajs/medusa/core-flows"
 import { updateChefEventWorkflow } from "../../../../workflows/update-chef-event"
+import { acceptEventWorkflow } from "../../../../workflows/accept-event"
 
 interface AcceptEventBody {
-  eventId?: string;
+  eventId: string
+  assignedChefId: string
 }
+
 enum ChefEventStatus {
   PENDING = 'pending',
   CONFIRMED = 'confirmed',
@@ -115,6 +118,7 @@ ${event.locationAddress ? `• Address: ${event.locationAddress}` : ''}
           currency_code: templateProduct.variants[0].prices[0].currency_code
         }]
       }],
+      type: "event",
       metadata: {
         template_product_id: templateProduct.id,
         event_type: event.eventType,
@@ -249,3 +253,41 @@ export const config = {
 }
 
 export const AUTHENTICATE = false;
+
+export async function POST(
+  req: MedusaRequest<AcceptEventBody>,
+  res: MedusaResponse
+): Promise<void> {
+  try {
+    const { eventId, assignedChefId } = req.body
+
+    if (!eventId || !assignedChefId) {
+      res.status(400).json({
+        success: false,
+        message: "Missing required fields: eventId and assignedChefId"
+      })
+      return
+    }
+
+    const result = await acceptEventWorkflow({
+      eventId,
+      assignedChefId
+    })
+
+    res.status(200).json({
+      success: true,
+      message: "Event accepted successfully",
+      data: {
+        eventId: result.chefEvent.id,
+        status: result.chefEvent.status,
+        productId: result.eventProduct.id
+      }
+    })
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to accept event",
+      error: error instanceof Error ? error.message : "Unknown error"
+    })
+  }
+}

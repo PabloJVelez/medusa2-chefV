@@ -7,12 +7,12 @@ import {
   linkEventToProductWorkflow,
   LinkEventToProductWorkflowInput
 } from "../link-event-to-product"
-
+import { createProductDetailsWorkflow, CreateProductDetailsWorkflowInput } from "../create-product-details"
 createProductsWorkflow.hooks.productsCreated(
 	async ({ products, additional_data }, { container }) => {
     const menuWorkflow = createMenuFromProductWorkflow(container)
     const chefEventWorkflow = linkEventToProductWorkflow(container)
-    
+    const productDetailsWorkflow = createProductDetailsWorkflow(container)
     for (let product of products) {
       if (additional_data?.menu) {
         await menuWorkflow.run({
@@ -31,6 +31,17 @@ createProductsWorkflow.hooks.productsCreated(
           } as LinkEventToProductWorkflowInput
         })
       }
+
+      if (additional_data?.productDetails) {
+
+        console.log("MADE IT HERE", additional_data?.productDetails)
+        await productDetailsWorkflow.run({
+          input: {
+            productId: product.id,
+            product_details: additional_data?.productDetails
+          } as CreateProductDetailsWorkflowInput
+        })
+      }
     }
-	}
+  }
 )
