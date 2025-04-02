@@ -39,9 +39,10 @@ export const sendEventRequestNotificationStep = createStep(
       customer_location: "at Customer's Location",
       chef_location: "at Chef's Location"
     }
+    console.log("SENDING DATA", data)
 
     await notificationService.createNotifications({
-      to: "pablo_3@icloud.com",
+      to: data.customer.email,
       channel: "email",
       template: "d-c693ecebe49048d88e46d4dc26d30a19",
       data: {
@@ -49,34 +50,64 @@ export const sendEventRequestNotificationStep = createStep(
           first_name: data.customer.firstName,
           last_name: data.customer.lastName,
           email: data.customer.email,
-          phone: data.customer.phone || 'No phone provided'
+          phone: data.customer.phone || "Not provided"
         },
         booking: {
           date: formattedDate,
           time: formattedTime,
-          menu: data.productName || data.templateProduct.title,
-          event_type: eventTypeMap[data.chefEvent.eventType],
-          location_type: locationTypeMap[data.chefEvent.locationType],
-          location_address: data.chefEvent.locationAddress || 'At chef\'s location',
+          menu: data.productName,
+          event_type: eventTypeMap[data.chefEvent.eventType] || data.chefEvent.eventType,
+          location_type: locationTypeMap[data.chefEvent.locationType] || data.chefEvent.locationType,
+          location_address: data.chefEvent.locationAddress || "Not provided",
           party_size: data.chefEvent.partySize,
-          notes: data.chefEvent.notes || 'No special requests',
-          price_per_person: (data.pricePerPerson / 100).toFixed(2),
-          total_price: (data.totalPrice / 100).toFixed(2),
-          currency_code: "usd"
+          notes: data.chefEvent.notes || "No special notes provided"
         },
         event: {
-          id: data.chefEvent.id,
-          status: "pending",
-          total_price: data.totalPrice,
-          price_per_person: data.pricePerPerson,
-          deposit_paid: false,
+          status: "Pending",
+          total_price: data.totalPrice.toFixed(2),
           conflict: data.hasConflictingEvent
         },
-        acceptUrl: `${process.env.ADMIN_BACKEND_URL}/admin/events/accept?eventId=${data.chefEvent.id}`,
-        rejectUrl: `${process.env.ADMIN_BACKEND_URL}/admin/events/reject?eventId=${data.chefEvent.id}`
+
+        // These URLs should be provided by your application
+
+        acceptUrl: `${process.env.ADMIN_BACKEND_URL}/admin/events/${data.chefEvent.id}/accept`,
+
+        rejectUrl: `${process.env.ADMIN_BACKEND_URL}/admin/events/${data.chefEvent.id}/reject`
       }
     } as CreateNotificationDTO)
 
-    return new StepResponse(true, true)
+    // Return the input data for compensation
+    return new StepResponse<SendEventRequestNotificationStepInput, SendEventRequestNotificationStepInput>(
+      data,
+      data
+    )
+  },
+  // Compensation function - send cancellation notification
+  async (data: SendEventRequestNotificationStepInput, { container }) => {
+    try {
+      const notificationService = container.resolve(Modules.NOTIFICATION)
+      await notificationService.createNotifications({
+        to: data.customer.email,
+        channel: "email",
+        template: "event-request-cancelled",
+        data: {
+          customer: data.customer,
+          event: {
+            product_name: data.productName,
+            formatted_date: DateTime.fromISO(data.chefEvent.requestedDate).toFormat('LLL d, yyyy'),
+            formatted_time: DateTime.fromFormat(data.chefEvent.requestedTime, 'HH:mm').toFormat('h:mm a')
+          }
+        }
+      } as CreateNotificationDTO)
+      
+      console.log("Successfully sent compensation notification", {
+        email: data.customer.email
+      })
+    } catch (error) {
+      console.error("Error sending compensation notification", {
+        email: data.customer.email,
+        error: error instanceof Error ? error.message : "Unknown error"
+      })
+    }
   }
 ) 

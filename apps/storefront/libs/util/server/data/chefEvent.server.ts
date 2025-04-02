@@ -37,7 +37,6 @@ export const requestChefEvent = async (data: EventRequest): Promise<EventRespons
       id: [data.productId],
       fields: 'title'
     });
-
     const productName = products[0]?.title || 'Unknown Menu';
     const response = await sdk.client.fetch('/store/events/request', {
       method: 'POST',
@@ -51,6 +50,7 @@ export const requestChefEvent = async (data: EventRequest): Promise<EventRespons
     });
     return response as EventResponse;
   } catch (error) {
+    console.log("ERROR --->", error)
     throw error;
   }
 };

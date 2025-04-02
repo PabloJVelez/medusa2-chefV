@@ -80,9 +80,13 @@ export const acceptEventWorkflow = createWorkflow(
       {
         event,
         templateProduct,
-        formattedDate
+        formattedDate,
+        formattedTime
       },
-      (data) => `${data.templateProduct.title} - ${eventTypeMap[data.event.eventType]} (${data.formattedDate})`
+      (data) => {
+        const shortEventId = data.event.id.substring(0, 8)
+        return `${data.templateProduct.title} - ${eventTypeMap[data.event.eventType]} (${data.formattedDate} at ${data.formattedTime}) #${shortEventId}`
+      }
     )
 
     const newProductDescription = transform(

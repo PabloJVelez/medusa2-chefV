@@ -1,12 +1,19 @@
-import { createWorkflow, transform, WorkflowResponse } from "@medusajs/framework/workflows-sdk"
-import { Modules } from "@medusajs/framework/utils"
+import { 
+  createStep,
+  createWorkflow, 
+  StepResponse,
+  transform,
+  WorkflowResponse,
+  type WorkflowData
+} from "@medusajs/framework/workflows-sdk"
+import { createRemoteLinkStep, emitEventStep } from "@medusajs/medusa/core-flows"
+import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { CHEF_EVENT_MODULE } from "../modules/chef-event"
-import { DateTime } from "luxon"
-import { CreateNotificationDTO } from "@medusajs/types"
-import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
-import { createChefEventStep } from "./steps/create-chef-event"
-import { checkEventConflictsStep } from "./steps/check-event-conflicts"
+import type { ChefEvent } from "../modules/chef-event/types"
+import ChefEventService from "../modules/chef-event/service"
 import { sendEventRequestNotificationStep } from "./steps/send-event-request-notification"
+// import { checkEventConflictsStep } from "./steps/check-event-conflicts"
+// import { sendNotificationStep } from "./steps/send-notification"
 
 export type RequestEventWorkflowInput = {
   productId: string
@@ -22,22 +29,19 @@ export type RequestEventWorkflowInput = {
   phone?: string
   notes?: string
   productName?: string
-}
+} 
 
-export const requestEventWorkflow = createWorkflow(
-  "request-event",
-  (input: RequestEventWorkflowInput) => {
-    const templateProduct = transform(
-      {
-        input
-      },
-      async (data, { container }) => {
-        const query = container.resolve(ContainerRegistrationKeys.QUERY)
+// Define steps inside the workflow file
+const getTemplateProduct = createStep(
+  "get-template-product",
+  async ({ productId, partySize }: { productId: string, partySize: string | number }, { container }) => {
+  
+    const query = container.resolve(ContainerRegistrationKeys.QUERY)
         const { data: [product] } = await query.graph({
           entity: "product",
           fields: ["id", "title", "variants.id", "variants.prices.*", "menu.id"],
           filters: {
-            id: data.input.productId
+            id: productId
           }
         })
 
@@ -50,85 +54,124 @@ export const requestEventWorkflow = createWorkflow(
           throw new Error("Template product has no price information")
         }
 
+        console.log("TEMPLATE VARIANT --->", templateVariant)
+
+    return new StepResponse({
+      product: {
+        id: productId,
+        title: product.title,
+      },
+      totalPrice: templateVariant.prices[0].amount,
+      pricePerPerson: templateVariant.prices[0].amount / Number(partySize)
+    })
+  },
+  async (compensationData, { container }) => {
+    // Compensation logic (optional)
+  }
+)
+
+const createChefEventStep = createStep(
+  "create-chef-event",
+  async (data: {chefEvent: Partial<ChefEvent>}, { container }) => {
+    const chefEventService: ChefEventService = container.resolve(
+      CHEF_EVENT_MODULE
+    )
+    const chefEventData = {
+      status: data.chefEvent.status || 'pending',
+      requestedDate: data.chefEvent.requestedDate,
+      requestedTime: data.chefEvent.requestedTime,
+      partySize: data.chefEvent.partySize,
+      eventType: data.chefEvent.eventType,
+      locationType: data.chefEvent.locationType,
+      locationAddress: data.chefEvent.locationAddress || '',
+      firstName: data.chefEvent.firstName,
+      lastName: data.chefEvent.lastName,
+      email: data.chefEvent.email,
+      phone: data.chefEvent.phone || '',
+      notes: data.chefEvent.notes || '',
+      totalPrice: data.chefEvent.totalPrice || 0,
+      depositPaid: data.chefEvent.depositPaid || false,
+      specialRequirements: data.chefEvent.specialRequirements || '',
+      estimatedDuration: data.chefEvent.estimatedDuration || 180,
+      templateProductId: data.chefEvent.templateProductId,
+    }
+    console.log("CREATE CHEF EVENT STEP RUNNING --->")
+    const chefEvent = await chefEventService.createChefEvents(chefEventData)
+    console.log("CHEF EVENT CREATED ---> ", chefEvent)
+
+   return new StepResponse(chefEvent)
+  },
+  async (compensationData, { container }) => {
+    // Compensation logic (optional)
+  }
+)
+
+
+export const requestEventWorkflow = createWorkflow(
+  "request-event",
+  function (input: WorkflowData<RequestEventWorkflowInput>) {
+    
+    const templateProductResult = getTemplateProduct({
+      productId: input.productId,
+      partySize: input.partySize
+    })
+
+    // Build chef event using template product data
+    const chefEventResult = createChefEventStep({
+      chefEvent: {
+        status: "pending",
+        requestedDate: input.requestedDate,
+        requestedTime: input.requestedTime,
+        partySize: input.partySize as number,
+        eventType: input.eventType as 'cooking_class' | 'plated_dinner' | 'buffet_style',
+        locationType: input.locationType as 'customer_location' | 'chef_location',
+        locationAddress: input.locationAddress || "",
+        firstName: input.firstName,
+        lastName: input.lastName,
+        email: input.email,
+        phone: input.phone || "",
+        notes: input.notes || "",
+        totalPrice: templateProductResult.totalPrice,
+        depositPaid: false,
+        specialRequirements: "",
+        estimatedDuration: 180,
+        templateProductId: templateProductResult.product.id
+      }
+    })
+
+    const sendEventRequestNotificationStepResult = sendEventRequestNotificationStep({
+      chefEvent: chefEventResult,
+      templateProduct: templateProductResult,
+      pricePerPerson: templateProductResult.pricePerPerson,
+      totalPrice: templateProductResult.totalPrice,
+      hasConflictingEvent: false,
+      customer: {
+        firstName: input.firstName,
+        lastName: input.lastName,
+        email: input.email,
+        phone: input.phone || ""
+      },
+      productName: templateProductResult.product.title
+    })
+    
+    
+
+    const result = transform(
+      {
+        templateProductResult,
+        chefEventResult
+      },
+      (data) => {
+        console.log("DATA --->", data)
         return {
-          product,
-          pricePerPerson: templateVariant.prices[0].amount,
-          totalPrice: templateVariant.prices[0].amount * Number(data.input.partySize)
+          product: data.templateProductResult.product,
+          chefEvent: data.chefEventResult
         }
       }
     )
-
-    const hasConflictingEvent = transform(
-      {
-        input
-      },
-      async (data) => {
-        return await checkEventConflictsStep({
-          requestedDate: data.input.requestedDate,
-          requestedTime: data.input.requestedTime
-        })
-      }
-    )
-
-    const chefEvent = transform(
-      {
-        input,
-        templateProduct,
-        hasConflictingEvent
-      },
-      async (data) => {
-        return await createChefEventStep({
-          status: "pending",
-          requestedDate: data.input.requestedDate,
-          requestedTime: data.input.requestedTime,
-          partySize: Number(data.input.partySize),
-          eventType: data.input.eventType,
-          locationType: data.input.locationType,
-          locationAddress: data.input.locationAddress || "",
-          firstName: data.input.firstName,
-          lastName: data.input.lastName,
-          email: data.input.email,
-          phone: data.input.phone || "",
-          notes: data.input.notes || "",
-          totalPrice: data.templateProduct.totalPrice,
-          depositPaid: false,
-          specialRequirements: "",
-          estimatedDuration: 180,
-          assignedChefId: "",
-          templateProductId: data.templateProduct.product.id
-        })
-      }
-    )
-
-    transform(
-      {
-        chefEvent,
-        templateProduct,
-        input,
-        hasConflictingEvent
-      },
-      async (data) => {
-        await sendEventRequestNotificationStep({
-          chefEvent: data.chefEvent,
-          templateProduct: data.templateProduct.product,
-          pricePerPerson: data.templateProduct.pricePerPerson,
-          totalPrice: data.templateProduct.totalPrice,
-          hasConflictingEvent: data.hasConflictingEvent,
-          customer: {
-            firstName: data.input.firstName,
-            lastName: data.input.lastName,
-            email: data.input.email,
-            phone: data.input.phone
-          },
-          productName: data.input.productName
-        })
-      }
-    )
-
-    return new WorkflowResponse({
-      chefEvent,
-      totalPrice: templateProduct.totalPrice,
-      hasConflictingEvent
-    })
+    
+    return new WorkflowResponse(result)
   }
-) 
+)
+
+export default requestEventWorkflow

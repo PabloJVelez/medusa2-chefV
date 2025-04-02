@@ -4210,6 +4210,25 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@medusajs/modules-sdk@npm:2.6.1":
+  version: 2.6.1
+  resolution: "@medusajs/modules-sdk@npm:2.6.1"
+  dependencies:
+    "@medusajs/orchestration": "npm:2.6.1"
+    "@medusajs/types": "npm:2.6.1"
+    "@medusajs/utils": "npm:2.6.1"
+  peerDependencies:
+    "@mikro-orm/core": 6.4.3
+    "@mikro-orm/knex": 6.4.3
+    "@mikro-orm/migrations": 6.4.3
+    "@mikro-orm/postgresql": 6.4.3
+    awilix: ^8.0.1
+    express: ^4.21.0
+    pg: ^8.13.0
+  checksum: 10c0/9f7831ff3fc0069ead6ed73ec97ee44f36966865a46a6a38202a1846b55b60faceb1770e3761a4df6e6f15c0c5210ce2859700a0555a0921e12688659d6b92cc
+  languageName: node
+  linkType: hard
+
 "@medusajs/modules-sdk@npm:^2.0.0":
   version: 2.0.0
   resolution: "@medusajs/modules-sdk@npm:2.0.0"
@@ -4259,6 +4278,24 @@ __metadata:
     "@mikro-orm/postgresql": 5.9.7
     awilix: ^8.0.1
   checksum: 10c0/b1de80c06505a8b6fcf6735daff2acb94437b50facc7f37415d23d5a2d2551392330c39901d7ac3bdba489f9f6229c6450115484c7247cdee10ac26c54a21a4c
+  languageName: node
+  linkType: hard
+
+"@medusajs/orchestration@npm:2.6.1":
+  version: 2.6.1
+  resolution: "@medusajs/orchestration@npm:2.6.1"
+  dependencies:
+    "@medusajs/types": "npm:2.6.1"
+    "@medusajs/utils": "npm:2.6.1"
+  peerDependencies:
+    "@mikro-orm/core": 6.4.3
+    "@mikro-orm/knex": 6.4.3
+    "@mikro-orm/migrations": 6.4.3
+    "@mikro-orm/postgresql": 6.4.3
+    awilix: ^8.0.1
+    express: ^4.21.0
+    pg: ^8.13.0
+  checksum: 10c0/7d79e20e757dc7589b906cecb8e6a2abf494f3295f249280f99728e56cdbd98e21317beb7621016f0d94b12c38dcce579ada1476f99f5f6b7c2034ba2b2a8e9f
   languageName: node
   linkType: hard
 
@@ -4461,6 +4498,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@medusajs/types@npm:2.6.1":
+  version: 2.6.1
+  resolution: "@medusajs/types@npm:2.6.1"
+  dependencies:
+    bignumber.js: "npm:^9.1.2"
+  peerDependencies:
+    awilix: ^8.0.1
+    ioredis: ^5.4.1
+    vite: ^5 || ^6
+  peerDependenciesMeta:
+    ioredis:
+      optional: true
+    vite:
+      optional: true
+  checksum: 10c0/356819ba354cc3538779848601c6d09d7c3c171c5516098a060c63256dc28b55e23f48a4afa6c64fc61fcd6b2d6e8f8d4307e86990665b978bcb1fa16d7ea3d3
+  languageName: node
+  linkType: hard
+
 "@medusajs/types@npm:^2.0.0, @medusajs/types@npm:latest":
   version: 2.0.0
   resolution: "@medusajs/types@npm:2.0.0"
@@ -4584,6 +4639,36 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@medusajs/utils@npm:2.6.1":
+  version: 2.6.1
+  resolution: "@medusajs/utils@npm:2.6.1"
+  dependencies:
+    "@graphql-codegen/core": "npm:^4.0.2"
+    "@graphql-codegen/typescript": "npm:^4.0.9"
+    "@graphql-tools/merge": "npm:^9.0.7"
+    "@graphql-tools/schema": "npm:^10.0.6"
+    "@medusajs/types": "npm:2.6.1"
+    "@types/pluralize": "npm:^0.0.33"
+    bignumber.js: "npm:^9.1.2"
+    dotenv: "npm:^16.4.5"
+    dotenv-expand: "npm:^11.0.6"
+    graphql: "npm:^16.9.0"
+    jsonwebtoken: "npm:^9.0.2"
+    pg-connection-string: "npm:^2.7.0"
+    pluralize: "npm:^8.0.0"
+    ulid: "npm:^2.3.0"
+  peerDependencies:
+    "@mikro-orm/core": 6.4.3
+    "@mikro-orm/knex": 6.4.3
+    "@mikro-orm/migrations": 6.4.3
+    "@mikro-orm/postgresql": 6.4.3
+    awilix: ^8.0.1
+    express: ^4.21.0
+    pg: ^8.13.0
+  checksum: 10c0/d423a396a3a1a821e94853a0afad9e6662c66542aa41a6021dae20f0c5bb3e53f2c68252e13d970b6da3d00589cf483f6146ee52662fecc888e0dd1a8b71f2a2
+  languageName: node
+  linkType: hard
+
 "@medusajs/workflow-engine-inmemory@npm:^2.0.0":
   version: 2.0.0
   resolution: "@medusajs/workflow-engine-inmemory@npm:2.0.0"
@@ -4635,6 +4720,27 @@ __metadata:
     express: ^4.21.0
     pg: ^8.13.0
   checksum: 10c0/78b15bb8be09ab3663b8ced0c67b90d2d17e22c234ee7239a7f62589a0034a00990a0ffb2c049203c16a60ba832a8ff6f0e95ab67955b7e39eb2398ade4ad5a2
+  languageName: node
+  linkType: hard
+
+"@medusajs/workflows-sdk@npm:^2.6.1":
+  version: 2.6.1
+  resolution: "@medusajs/workflows-sdk@npm:2.6.1"
+  dependencies:
+    "@medusajs/modules-sdk": "npm:2.6.1"
+    "@medusajs/orchestration": "npm:2.6.1"
+    "@medusajs/types": "npm:2.6.1"
+    "@medusajs/utils": "npm:2.6.1"
+    ulid: "npm:^2.3.0"
+  peerDependencies:
+    "@mikro-orm/core": 6.4.3
+    "@mikro-orm/knex": 6.4.3
+    "@mikro-orm/migrations": 6.4.3
+    "@mikro-orm/postgresql": 6.4.3
+    awilix: ^8.0.1
+    express: ^4.21.0
+    pg: ^8.13.0
+  checksum: 10c0/8588af3e36cc8eb69e4d7fcb546cdaa5a80b8b73e4750f3d141ba03300e4e1dd9907ee171a9d7a551e478df143e0a4aced8eb7cfeb3e1ec56ba3aa13ae4a66a2
   languageName: node
   linkType: hard
 
@@ -13400,6 +13506,13 @@ __metadata:
     pg-protocol: "npm:*"
     pg-types: "npm:^2.2.0"
   checksum: 10c0/8d16660c9a4f050d6d5e391c59f9a62e9d377a2a6a7eb5865f8828082dbdfeab700fd707e585f42d67b29e796b32863aea5bd6d5cbb8ceda2d598da5d0c61693
+  languageName: node
+  linkType: hard
+
+"@types/pluralize@npm:^0.0.33":
+  version: 0.0.33
+  resolution: "@types/pluralize@npm:0.0.33"
+  checksum: 10c0/24899caf85b79dd291a6b6e9b9f3b67b452b18d578d0ac0d531a705bf5ee0361d9386ea1f8532c64de9e22c6e9606c5497787bb5e31bd299c487980436c59785
   languageName: node
   linkType: hard
 
@@ -26414,6 +26527,7 @@ __metadata:
     "@biomejs/biome": "npm:1.9.3"
     "@headlessui/react": "npm:^2.2.0"
     "@medusajs/ui": "npm:^4.0.6"
+    "@medusajs/workflows-sdk": "npm:^2.6.1"
     "@types/luxon": "npm:^3.4.2"
     luxon: "npm:^3.5.0"
     medusa-plugin-sendgrid: "npm:^1.3.13"

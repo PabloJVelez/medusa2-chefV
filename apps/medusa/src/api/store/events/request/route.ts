@@ -1,5 +1,6 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { requestEventWorkflow, RequestEventWorkflowInput } from "../../../../workflows/request-event"
+import myWorkflow from "../../../../workflows/custom-test"
 
 interface RequestEventBody {
   productId: string
@@ -18,20 +19,24 @@ interface RequestEventBody {
 }
 
 export async function POST(
-  req: MedusaRequest<RequestEventWorkflowInput>,
+  req: MedusaRequest<RequestEventBody>,
   res: MedusaResponse
 ): Promise<void> {
   try {
-    const result = await requestEventWorkflow.run({
+     const { result } = await requestEventWorkflow(req.scope).run({
       input: req.body
-    } as RequestEventWorkflowInput)
-
+     })
+    
+    // if (!result.chefEvent) {
+    //   throw new Error("Failed to create chef event")
+    // }
+    
     res.status(200).json({
       success: true,
       message: "Chef event request sent successfully",
       data: {
         requestId: result.chefEvent.id,
-        status: "pending",
+        status: result.chefEvent.status,
         customerName: `${result.chefEvent.firstName} ${result.chefEvent.lastName}`,
         eventDetails: {
           date: new Date(result.chefEvent.requestedDate).toLocaleDateString('en-US', {
@@ -48,6 +53,7 @@ export async function POST(
       }
     })
   } catch (error) {
+    console.error("Error in request event workflow:", error)
     res.status(500).json({
       success: false,
       message: "Failed to send chef event request",

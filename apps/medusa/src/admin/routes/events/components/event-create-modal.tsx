@@ -122,7 +122,7 @@ const EventCreateModal = ({ onClose, availableMenuProducts = [], onSubmit }: Eve
         <form onSubmit={handleSubmit(handleFormSubmit)}>
           <FocusModal.Body className="flex flex-col h-full max-h-[80vh]">
             <Text className="text-gray-500 mb-4">
-              Create a new chef event by filling out the form below.
+              Create a new event by filling out the form below.
             </Text>
             
             <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-grow">

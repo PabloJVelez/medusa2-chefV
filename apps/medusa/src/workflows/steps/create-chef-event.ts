@@ -1,42 +1,20 @@
-import { createStep, StepResponse } from "@medusajs/framework/workflows-sdk"
-import ChefEventService from "../../modules/chef-event/service.js"
+import { createStep, StepResponse } from "@medusajs/workflows-sdk"
 import { CHEF_EVENT_MODULE } from "../../modules/chef-event"
+import type { CreateChefEventInput, ChefEvent } from "../../modules/chef-event/types"
 
-type CreateChefEventStepInput = {
-  status: string
-  requestedDate: string
-  requestedTime: string
-  partySize: number
-  eventType: string
-  locationType: string
-  locationAddress: string
-  firstName: string
-  lastName: string
-  email: string
-  phone: string
-  notes: string
-  totalPrice: number
-  depositPaid: boolean
-  specialRequirements: string
-  estimatedDuration: number
-  assignedChefId: string
-  templateProductId: string
-}
-
-export const createChefEventStep = createStep(
+export const createChefEventStep = createStep<
+  CreateChefEventInput,
+  ChefEvent,
+  ChefEvent
+>(
   "create-chef-event",
-  async (data: CreateChefEventStepInput, { container }) => {
-    const chefEventService: ChefEventService = container.resolve(CHEF_EVENT_MODULE)
-
-    try {
-      const chefEvent = await chefEventService.createChefEvents(data)
-      return new StepResponse(chefEvent, chefEvent)
-    } catch (error) {
-      throw error
-    }
+  async (input, { container }) => {
+    const chefEventService = container.resolve(CHEF_EVENT_MODULE) as any
+    const event = await chefEventService.create(input)
+    return new StepResponse(event)
   },
-  async (chefEvent, { container }) => {
-    const chefEventService: ChefEventService = container.resolve(CHEF_EVENT_MODULE)
-    await chefEventService.deleteChefEvents(chefEvent.id)
+  async (event, { container }) => {
+    const chefEventService = container.resolve(CHEF_EVENT_MODULE) as any
+    await chefEventService.delete(event.id)
   }
 ) 

@@ -1,27 +1,29 @@
-import { createStep, StepResponse } from "@medusajs/framework/workflows-sdk"
-import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+// import { createStep, StepResponse } from "@medusajs/workflows-sdk"
+// import { CHEF_EVENT_MODULE } from "../../modules/chef-event"
 
-type CheckEventConflictsStepInput = {
-  requestedDate: string
-  requestedTime: string
-}
+// type CheckEventConflictsInput = {
+//   requestedDate: string
+//   requestedTime: string
+// }
 
-export const checkEventConflictsStep = createStep(
-  "check-event-conflicts",
-  async (data: CheckEventConflictsStepInput, { container }) => {
-    const query = container.resolve(ContainerRegistrationKeys.QUERY)
-
-    const { data: existingEvents } = await query.graph({
-      entity: "chef_event",
-      fields: ["id", "status", "requestedDate", "requestedTime"],
-      filters: {
-        status: ["pending", "confirmed"],
-        requestedDate: data.requestedDate,
-        requestedTime: data.requestedTime
-      }
-    })
-
-    const hasConflictingEvent = existingEvents && existingEvents.length > 0
-    return new StepResponse(hasConflictingEvent, hasConflictingEvent)
-  }
-) 
+// export const checkEventConflictsStep = createStep<
+//   CheckEventConflictsInput,
+//   boolean,
+//   void
+// >(
+//   'check-event-conflicts',
+//   async (data, { container }) => {
+//     const chefEventService = container.resolve(CHEF_EVENT_MODULE) as any
+//     const hasConflicts = await chefEventService.hasConflictingEvents(
+//       data.requestedDate,
+//       data.requestedTime
+//     )
+//     return new StepResponse(hasConflicts)
+//   },
+//   // Compensation function - read operation, just log
+//   async (data: boolean, { container }) => {
+//     console.error("Compensating for check-event-conflicts step failure", {
+//       error: "Step failed, no actual cleanup needed for read operation"
+//     })
+//   }
+// ) 
