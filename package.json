@@ -2,21 +2,18 @@
   "name": "root",
   "private": true,
   "scripts": {
-    "build": "yarn clean && yarn && turbo build",
+    "build": "turbo build",
     "start": "turbo start",
     "dev": "turbo dev",
     "lint": "turbo lint",
     "generate-env": "cp ./apps/medusa/.env.template ./apps/medusa/.env && cp ./apps/storefront/.env.template ./apps/storefront/.env",
     "medusa:init": "turbo run medusa:init --filter=medusa",
     "format": "turbo run format",
-    "clean": "find . -name \"node_modules\" -type d -prune -exec rm -rf '{}' \\;",
-    "clean:medusa": "rm -rf ./apps/medusa/node_modules"
+    "clean": "find . -name \"node_modules\" -type d -prune -exec rm -rf '{}'"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.3",
-    "@types/luxon": "^3.4.2",
     "prettier": "^3.2.5",
-    "rimraf": "^5.0.5",
     "turbo": "^2.1.2",
     "typescript": "^5.6.2"
   },
@@ -27,32 +24,5 @@
   "workspaces": [
     "apps/*",
     "packages/*"
-  ],
-  "dependencies": {
-    "@headlessui/react": "^2.2.0",
-    "@medusajs/cli": "^2.7.0",
-    "@medusajs/framework": "^2.7.0",
-    "@medusajs/medusa": "^2.7.0",
-    "@medusajs/ui": "^4.0.6",
-    "@medusajs/workflows-sdk": "^2.6.1",
-    "@mikro-orm/core": "^6.4.12",
-    "@mikro-orm/knex": "^6.4.12",
-    "@mikro-orm/migrations": "^6.4.12",
-    "@mikro-orm/postgresql": "^6.4.12",
-    "@remix-run/react": "2.16.5",
-    "awilix": "^12.0.5",
-    "express": "^5.1.0",
-    "i18next": "^24.2.3",
-    "luxon": "^3.5.0",
-    "medusa-interfaces": "^1.3.10",
-    "medusa-plugin-sendgrid": "^1.3.13",
-    "pg": "^8.14.1",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0",
-    "react-hook-form": "^7.54.2",
-    "react-router-dom": "^7.3.0",
-    "reflect-metadata": "^0.2.2",
-    "typeorm": "^0.3.22",
-    "zod": "^3.24.2"
-  }
+  ]
 }
