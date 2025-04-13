@@ -4376,7 +4376,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@medusajs/ui@npm:4.0.8":
+"@medusajs/ui@npm:4.0.8, @medusajs/ui@npm:^4.0.8":
   version: 4.0.8
   resolution: "@medusajs/ui@npm:4.0.8"
   dependencies:
@@ -22022,6 +22022,7 @@ __metadata:
     "@medusajs/medusa": "npm:2.7.0"
     "@medusajs/test-utils": "npm:2.7.0"
     "@medusajs/types": "npm:2.7.0"
+    "@medusajs/ui": "npm:^4.0.8"
     "@mikro-orm/cli": "npm:6.4.3"
     "@mikro-orm/core": "npm:6.4.3"
     "@mikro-orm/knex": "npm:6.4.3"
