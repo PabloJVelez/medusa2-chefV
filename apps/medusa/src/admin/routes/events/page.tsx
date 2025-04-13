@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from "react"
 import { defineRouteConfig } from "@medusajs/admin-sdk"
 import { Container, Heading, Text, Button, Table, Badge } from "@medusajs/ui"
-import EventCreateModal from "./components/event-create-modal.js"
+import EventCreateModal from "../../components/event-create-modal.js"
 import { sdk } from "../../../sdk/index.js"
 import { AdminChefEventDTO } from "../../../sdk/admin/admin-chef-events.js"
-//import { useNavigate } from "react-router-dom"
 
 const EventsPage = () => {
   const [showModal, setShowModal] = useState(false)
@@ -13,9 +12,6 @@ const EventsPage = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [isLoadingEvents, setIsLoadingEvents] = useState(false)
   
-  
-  //const navigate = useNavigate()
-
   // Fetch available menu products when the page loads
   useEffect(() => {
     const fetchMenuProducts = async () => {
@@ -217,14 +213,12 @@ ${data.locationAddress ? `• Address: ${data.locationAddress}` : ''}
               <Table.HeaderCell>Customer</Table.HeaderCell>
               <Table.HeaderCell>Party Size</Table.HeaderCell>
               <Table.HeaderCell>Status</Table.HeaderCell>
+              <Table.HeaderCell>Actions</Table.HeaderCell>
             </Table.Row>
           </Table.Header>
           <Table.Body>
             {events.map((event) => (
-              <Table.Row key={event.id} className="cursor-pointer hover:bg-gray-50" onClick={() => {
-                // Navigate to event detail page
-                // navigate(`/events/${event.id}`)
-              }}>
+              <Table.Row key={event.id} className="hover:bg-gray-50">
                 <Table.Cell>{new Date(event.requestedDate).toLocaleDateString()}</Table.Cell>
                 <Table.Cell>{event.requestedTime}</Table.Cell>
                 <Table.Cell>
@@ -238,6 +232,18 @@ ${data.locationAddress ? `• Address: ${data.locationAddress}` : ''}
                   <Badge color={getStatusColor(event.status)}>
                     {event.status.charAt(0).toUpperCase() + event.status.slice(1)}
                   </Badge>
+                </Table.Cell>
+                <Table.Cell>
+                  <Button 
+                    variant="secondary" 
+                    size="small"
+                    onClick={() => {
+                      // Use the correct path format for Medusa admin routes
+                      window.location.href = `/app/events/${event.id}`
+                    }}
+                  >
+                    View Details
+                  </Button>
                 </Table.Cell>
               </Table.Row>
             ))}

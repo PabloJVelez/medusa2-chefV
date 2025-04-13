@@ -1,45 +1,25 @@
-import React from "react"
+import { useParams } from "react-router-dom"
+import { Container, Heading, Button } from "@medusajs/ui"
 import { defineRouteConfig } from "@medusajs/admin-sdk"
-import { Container, Heading, Text, Button } from "@medusajs/ui"
-//import { useNavigate, useParams } from "react-router-dom"
 
 const EventDetailPage = () => {
-  //const { id } = useParams()
-  //const navigate = useNavigate()
+  const { id } = useParams()
 
   return (
-    <Container>
-      
-        <Button
-          variant="secondary"
+    <Container className="flex items-center justify-between px-6 py-4 divide-y p-0">
+        <Heading level="h1">Event Details: {id}</Heading>
+        <Button 
+          variant="secondary" 
           size="small"
-          //onClick={() => navigate("/events")}
+          onClick={() => {
+            window.location.href = "/app/events"
+          }}
         >
           Back to Events
         </Button>
-
-
-      
-        <Heading level="h1">Event Details</Heading>
-      
-      
-      
-        <Text className="text-gray-500 mb-6">
-          Viewing details for event ID: {/*id*/}
-        </Text>
-        
-        {/* Placeholder for event details - will be implemented in Phase 5 */}
-        
-          <Text className="text-gray-400">
-            Event details will be displayed here in a future implementation.
-          </Text>
-        
     </Container>
   )
 }
 
-export const config = defineRouteConfig({
-  // No label needed for dynamic routes
-})
+export default EventDetailPage
 
-export default EventDetailPage 

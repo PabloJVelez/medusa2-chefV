@@ -1,16 +1,50 @@
+// import {
+//   MedusaRequest,
+//   MedusaResponse,
+// } from "@medusajs/framework/http"
+// import {
+//   ContainerRegistrationKeys,
+// } from "@medusajs/framework/utils"
+
+// export async function GET(
+//   req: MedusaRequest,
+//   res: MedusaResponse
+// ) {
+//   const query = req.scope.resolve(ContainerRegistrationKeys.QUERY)
+//   console.log("RUNNING EVENTS ROUTE")
+
+//   const { data: products } = await query.graph({
+//     entity: "product",
+//     fields: [
+//       "*",
+//       "product_details.*"
+//     ]
+//   })
+
+
+//   if (!products) {
+//     return res.status(404).json({ message: "Products not found" });
+//   }
+
+//   //console.log("PRODUCTS", products)
+//   const menuProducts = products.filter((product) => product.product_details !== undefined)
+//   console.log("MENU PRODUCTS", menuProducts)
+//   res.json({ products })
+// }
+
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { Modules } from "@medusajs/framework/utils"
 import { DateTime } from "luxon"
 import { CreateNotificationDTO } from "@medusajs/types"
 import { createProductsWorkflow } from "@medusajs/medusa/core-flows"
-import { linkMenuToEventProductWorkflow } from "../../../../workflows/link-menu-to-event-product"
-import { linkEventToProductWorkflow } from "../../../../workflows/link-event-to-product"
+import { linkMenuToEventProductWorkflow } from "../../../../../workflows/link-menu-to-event-product"
+import { linkEventToProductWorkflow } from "../../../../../workflows/link-event-to-product"
 import { ProductStatus } from "@medusajs/utils"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { createStockLocationsWorkflow } from "@medusajs/medusa/core-flows"
 import { linkSalesChannelsToStockLocationWorkflow } from "@medusajs/medusa/core-flows"
-import { updateChefEventWorkflow } from "../../../../workflows/update-chef-event"
-import { acceptEventWorkflow } from "../../../../workflows/accept-event"
+import { updateChefEventWorkflow } from "../../../../../workflows/update-chef-event"
+import { acceptEventWorkflow } from "../../../../../workflows/accept-event"
 
 interface AcceptEventBody {
   eventId: string
@@ -25,12 +59,13 @@ enum ChefEventStatus {
 }
 
 export async function GET(
-  req: MedusaRequest<AcceptEventBody>,
+  req: MedusaRequest,
   res: MedusaResponse
 ): Promise<void> {
   //TODO: THIS ALL NEEDS TO BE REFACTORED TO BE A WORKFLOW
+  console.log("ACCEPT EVENT STARTING")
   try {
-    const eventId = req.query.eventId;
+    const eventId = req.params.id;
     const query = req.scope.resolve(ContainerRegistrationKeys.QUERY)
 
     if (!eventId) {
@@ -48,6 +83,8 @@ export async function GET(
         id: eventId as string
       }
     })
+    
+
 
     if (!event) {
       res.status(404).json({
@@ -78,6 +115,7 @@ export async function GET(
         id: event.templateProductId
       }
     })
+    console.log("MADE IT HERE 2")
 
     const formattedDate = DateTime.fromISO(event.requestedDate.toISOString()).toFormat('LLL d, yyyy');
     const formattedTime = DateTime.fromFormat(event.requestedTime, 'HH:mm').toFormat('h:mm a');
@@ -118,7 +156,8 @@ ${event.locationAddress ? `• Address: ${event.locationAddress}` : ''}
           currency_code: templateProduct.variants[0].prices[0].currency_code
         }]
       }],
-      type: "event",
+      //TODO: Query the product type id from the product type service instead of hardcoding it
+      type: "ptyp_01JPKEQ001TBD3TDT1K7G3PPBX",
       metadata: {
         template_product_id: templateProduct.id,
         event_type: event.eventType,
@@ -239,55 +278,11 @@ ${event.locationAddress ? `• Address: ${event.locationAddress}` : ''}
   } catch (error) {
     res.status(500).json({
       message: "Failed to accept event",
-      error: error instanceof Error ? error.message : "Unknown error"
+      error: error.message
     });
   }
 }
 
-export const config = {
-  bodyParser: {
-    json: {
-      limit: '1mb'
-    }
-  }
-}
+
 
 export const AUTHENTICATE = false;
-
-export async function POST(
-  req: MedusaRequest<AcceptEventBody>,
-  res: MedusaResponse
-): Promise<void> {
-  try {
-    const { eventId, assignedChefId } = req.body
-
-    if (!eventId || !assignedChefId) {
-      res.status(400).json({
-        success: false,
-        message: "Missing required fields: eventId and assignedChefId"
-      })
-      return
-    }
-
-    const result = await acceptEventWorkflow({
-      eventId,
-      assignedChefId
-    })
-
-    res.status(200).json({
-      success: true,
-      message: "Event accepted successfully",
-      data: {
-        eventId: result.chefEvent.id,
-        status: result.chefEvent.status,
-        productId: result.eventProduct.id
-      }
-    })
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Failed to accept event",
-      error: error instanceof Error ? error.message : "Unknown error"
-    })
-  }
-}

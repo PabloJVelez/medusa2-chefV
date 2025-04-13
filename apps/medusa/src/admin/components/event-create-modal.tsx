@@ -541,4 +541,4 @@ const EventCreateModal = ({ onClose, availableMenuProducts = [], onSubmit }: Eve
   )
 }
 
-export default EventCreateModal
+export default EventCreateModal 
