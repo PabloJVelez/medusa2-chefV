@@ -145,6 +145,10 @@ const EventDetailPage = ({}: EventDetailsPageProps) => {
     handleInputChange("estimatedDuration", minutes)
   }
 
+  const handleResendEvent = () => {
+    console.log("RESENDING EVENT TO CUSTOMER")
+  }
+
   return (
     <Container>
       <div className="flex flex-col gap-6">
@@ -357,6 +361,22 @@ const EventDetailPage = ({}: EventDetailsPageProps) => {
         )}
         <Toaster />
       </div>
+      
+      {event && !isEditing && (
+        <div className="mt-8 border-t border-gray-200 pt-8">
+          <Heading className="text-lg mb-4">Event Management Tools</Heading>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant="secondary"
+              onClick={handleResendEvent}
+              disabled={isSaving}
+            >
+              Resend to Customer
+            </Button>
+            {/* Future management tools will be added here */}
+          </div>
+        </div>
+      )}
     </Container>
   )
 }
