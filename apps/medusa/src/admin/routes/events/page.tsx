@@ -12,7 +12,8 @@ import {
   DataTablePaginationState,
   DataTableFilteringState,
   DataTableSortingState,
-  createDataTableFilterHelper
+  createDataTableFilterHelper,
+  TooltipProvider
 } from "@medusajs/ui"
 import EventCreateModal from "../../components/event-create-modal.js"
 import { sdk } from "../../../sdk/index.js"
@@ -276,31 +277,33 @@ const EventsPage = () => {
 
   return (
     <Container>
-      <DataTable instance={table}>
-        <DataTable.Toolbar className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-          <div className="flex flex-col gap-1">
-            <Heading level="h1">Events</Heading>
-            <Text className="text-gray-500">
-              Manage chef events, including bookings, schedules, and customer requests.
-            </Text>
-          </div>
-          <div className="flex items-center gap-2">
-            <DataTable.Search placeholder="Search events..." />
-            <DataTable.FilterMenu tooltip="Filter events" />
-            <DataTable.SortingMenu tooltip="Sort events" />
-            <Button 
-              variant="primary" 
-              size="base"
-              onClick={() => setShowModal(true)}
-              disabled={isLoading}
-            >
-              Create Event
-            </Button>
-          </div>
-        </DataTable.Toolbar>
-        <DataTable.Table />
-        <DataTable.Pagination />
-      </DataTable>
+      <TooltipProvider>
+        <DataTable instance={table}>
+          <DataTable.Toolbar className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+            <div className="flex flex-col gap-1">
+              <Heading level="h1">Events</Heading>
+              <Text className="text-gray-500">
+                Manage chef events, including bookings, schedules, and customer requests.
+              </Text>
+            </div>
+            <div className="flex items-center gap-2">
+              <DataTable.Search placeholder="Search events..." />
+              <DataTable.FilterMenu tooltip="Filter events" />
+              <DataTable.SortingMenu tooltip="Sort events" />
+              <Button 
+                variant="primary" 
+                size="base"
+                onClick={() => setShowModal(true)}
+                disabled={isLoading}
+              >
+                Create Event
+              </Button>
+            </div>
+          </DataTable.Toolbar>
+          <DataTable.Table />
+          <DataTable.Pagination />
+        </DataTable>
+      </TooltipProvider>
 
       {showModal && (
         <EventCreateModal 

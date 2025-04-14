@@ -84,7 +84,7 @@ export class AdminChefEventsResource {
    */
   async update(eventId: string, data: AdminUpdateChefEventDTO) {
     return this.client.fetch<{ event: AdminChefEventDTO }>(`/admin/events/${eventId}`, {
-      method: 'PUT',
+      method: 'POST',
       body: data,
     });
   }
