@@ -33,14 +33,12 @@ export const fetchMenus = async (
   }
   params.append('region_id', region.id);
 
-  console.log("LOG NUMBER 2 WITH SDK BASE URL ***********", sdk.client)
   const response = await sdk.client.fetch<MenuResponse>(
     `/store/menus`,
     {
       method: 'GET',
     }
   );
-  console.log("LOG NUMBER 3 WITH RESPONSE ***********", response)
 
   if (!response.menus) {
     throw new Error(`Failed to fetch menus: ${JSON.stringify(response)}`);

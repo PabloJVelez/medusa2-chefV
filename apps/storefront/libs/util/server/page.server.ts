@@ -38,7 +38,7 @@ export const getProductListData = async (request: Request) => {
 };
 
 export const getMenuListData = async (request: Request) => {
-  console.log("LOG NUMBER 1 ***********")
+  
   const { menus = [] } = await fetchMenus(request, {
     limit: 10,
     offset: 0,
