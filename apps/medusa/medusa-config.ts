@@ -60,6 +60,10 @@ module.exports = defineConfig({
   ],
   modules: [
     {
+      resolve: './src/modules/menu',
+      options: {},
+    },
+    {
       resolve: '@medusajs/medusa/payment',
       options: {
         providers: [

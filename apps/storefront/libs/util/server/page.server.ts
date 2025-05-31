@@ -1,6 +1,8 @@
 import { HttpTypes, StoreCollection, StoreProductCategory } from '@medusajs/types';
 import { getSelectedRegion } from './data/regions.server';
 import { fetchProducts } from './products.server';
+import { fetchMenus } from './menu.server';
+import { StoreMenu, StoreMenuCategory } from '@app/components/sections/MenuList';
 
 export const getProductListData = async (request: Request) => {
   const region = await getSelectedRegion(request.headers);
@@ -32,5 +34,17 @@ export const getProductListData = async (request: Request) => {
     products,
     collection_tabs: [...collectionTabs.values()],
     category_tabs: [...categoryTabs.values()],
+  };
+};
+
+export const getMenuListData = async (request: Request) => {
+  console.log("LOG NUMBER 1 ***********")
+  const { menus = [] } = await fetchMenus(request, {
+    limit: 10,
+    offset: 0,
+  });
+
+  return {
+    menus,
   };
 };

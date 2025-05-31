@@ -1,5 +1,5 @@
 import { buildObjectFromSearchParams } from '@libs/util/buildObjectFromSearchParams';
-import { getProductListData } from '@libs/util/server/page.server';
+import { getProductListData, getMenuListData } from '@libs/util/server/page.server';
 import { LoaderFunctionArgs, data as remixData } from 'react-router';
 
 const productList = async ({ request }: Pick<LoaderFunctionArgs, 'request'>) => {
@@ -7,8 +7,14 @@ const productList = async ({ request }: Pick<LoaderFunctionArgs, 'request'>) => 
   return remixData(result, {});
 };
 
+const menuList = async ({ request }: Pick<LoaderFunctionArgs, 'request'>) => {
+  const result = await getMenuListData(request);
+  return remixData(result, {});
+};
+
 const loaders = {
   productList,
+  menuList,
 };
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {

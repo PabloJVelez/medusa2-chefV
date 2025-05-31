@@ -1,0 +1,818 @@
+[
+  {
+    "reviewer_name": "Marcia",
+    "date": "12/11/24",
+    "rating": 5,
+    "content": "Exceptional service, great communication and the food was delicious! We had a really fun time as it was the first time we had ever hired a private chef, he made our holiday meal extremely memorable and our guests loved the experience!"
+  },
+  {
+    "reviewer_name": "Brian",
+    "date": "11/16/24",
+    "rating": 5,
+    "content": "The meal was so good and Luis was patient and a great teacher. We had a group of college kids celebrating a birthday so this was a fun way to celebrate and eat amazing food. We would definitely recommend booking with Luis."
+  },
+  {
+    "reviewer_name": "Randy",
+    "date": "10/24/24",
+    "rating": 5,
+    "content": "Chef Luis was very accommodating and flexible with our kitchen space and planned every detail of the event perfectly!  He made cooking for our team a fun and enjoyable experience resulting in an absolutely delicious meal!!  Highly recommend and would do this event again!"
+  },
+  {
+    "reviewer_name": "James",
+    "date": "08/04/24",
+    "rating": 5,
+    "content": "This is the second time we've had a meal with Chef Louis, it was excellent again. Great food, fun experience. My kids have requested this for their Christmas gift every year now. Thanks Chef. See you next time!"
+  },
+  {
+    "reviewer_name": "David",
+    "date": "08/04/24",
+    "rating": 5,
+    "content": "Chef Luis was accommodating, prompt, and professional. Despite our lack of office kitchen essentials, he had us covered. He guided us on how to correctly hold and handle extremely sharp knives, sharing valuable cooking tips and tricks along the way. The food we prepared was both simple and delicious. As a bonus, he took videos and pictures during the event and sent them to us later. The team-building exercise was the perfect conclusion to our two-day Product Leadership marathon. Sure beats the standard axe-throwing or Escape Room schtick! Thanks, Chef Luis!"
+  },
+  {
+    "reviewer_name": "Tiffany Pearson",
+    "date": "07/22/24",
+    "rating": 5,
+    "content": "Had a wonderful experience and loved the fun Luis brought."
+  },
+  {
+    "reviewer_name": "Tasha Santistevan",
+    "date": "07/19/24",
+    "rating": 5,
+    "content": "Our chef was awesome. We had so much fun, and the food was amazing."
+  },
+  {
+    "reviewer_name": "Lauren",
+    "date": "05/28/24",
+    "rating": 5,
+    "content": "Luis was great! It was a very fun experience -- highly recommend it!"
+  },
+  {
+    "reviewer_name": "Tristan",
+    "date": "05/07/24",
+    "rating": 5,
+    "content": "Delicious meal, nice guy, made for a wonderful evening"
+  },
+  {
+    "reviewer_name": "Mark",
+    "date": "04/07/24",
+    "rating": 5,
+    "content": "Was amazing. He brought the game! It was better than any restaurant meal anywhere. We learned so much and the hospitality was amazing. We had such a great time. Thank you Chef Luis!!!!"
+  },
+  {
+    "reviewer_name": "Lexie",
+    "date": "03/11/24",
+    "rating": 5,
+    "content": "Chef Luis is spectacular. My fiance and I had the best time learning everything from techniques to prepare food better to making this specific delicious meal. Chef Luis was patient, reassuring, and easy to work with. He was extremely prepared and kept the class light & fun. He is a great person and an even better chef. We will use him again for sure :)"
+  },
+  {
+    "reviewer_name": "Dusty",
+    "date": "03/09/24",
+    "rating": 5,
+    "content": "Chef Luis was amazing. Very professional and very friendly. We had our kids present during the class and he did a great job including everyone. And of course, the food was fantastic!"
+  },
+  {
+    "reviewer_name": "Delaney",
+    "date": "02/23/24",
+    "rating": 5,
+    "content": "Chef Luis went over and above our expectations. We did the Exquisite Italian Fare four course class and the everything was absolutely delicious! Dare I say, better than getting it from a restaurant. I love that we were able to learn new skills that I can use in the kitchen going forward. Chef Luis was a great teacher and made the class very special for us. Would definitely book another class with him again! Thanks."
+  },
+  {
+    "reviewer_name": "Randy Burke",
+    "date": "02/10/24",
+    "rating": 5,
+    "content": "Chef Luis was amazing!  We had a wonderful time.  He taught us a lot of useful knife tricks and ways of imparting more flavor into our food.  The meal was elaborate and extremely delicious!!  He was a warm, welcoming and extremely positive attitude, even when we got off track with our conversations."
+  },
+  {
+    "reviewer_name": "Saphu",
+    "date": "02/10/24",
+    "rating": 5,
+    "content": "Beyond expectations! Thank you, Chef Luis."
+  },
+  {
+    "reviewer_name": "Justin",
+    "date": "02/03/24",
+    "rating": 5,
+    "content": "Chef Luis was fantastic. He is so skilled and knowledgable, and a fantastic teacher. My partner and I had the most fun learning to cook something we never thought we could and picked up a lot of important tips that will make many of our other meals so much better. Highly recommend this experience (or any of his others!)"
+  },
+  {
+    "reviewer_name": "Philippe Rataeu",
+    "date": "12/17/23",
+    "rating": 4,
+    "content": "Chef Luis was a great host. Good  knowledge of  cooking and the Italian  meal prepared was  excellent.  I wish we could had made our own pesto."
+  },
+  {
+    "reviewer_name": "Doug",
+    "date": "12/09/23",
+    "rating": 5,
+    "content": "Chef Luis is amazing! His presence and talents in our home made for the perfect get together. Highly recommend him to anyone."
+  },
+  {
+    "reviewer_name": "Torri",
+    "date": "12/04/23",
+    "rating": 5,
+    "content": "Chef Luis did a great job with a large party.  We all had a lot of fun.  He was patient and willing to walk us through everything.  Would recommend this experience!"
+  },
+  {
+    "reviewer_name": "Shakima",
+    "date": "10/17/23",
+    "rating": 5,
+    "content": "It was excellent! Chef Luis was on time and friendly and responsive to our requests. The food was delicious and everyone really loved it. This was my first time booking a private chef but I would absolutely do it again."
+  },
+  {
+    "reviewer_name": "Jake",
+    "date": "10/09/23",
+    "rating": 5,
+    "content": "Chef Luis was awesome! Super friendly and a great teacher. We learned so much. We had such a fun time and would definitely recommend."
+  },
+  {
+    "reviewer_name": "Jake",
+    "date": "10/06/23",
+    "rating": 5,
+    "content": "Chef Luis was amazing! He was on time and very communicative. He was patient as he guided us through the recipes and gave tips as we went. The food was amazing and we loved every bit of it. Then he even offered to wash the dishes. We will definitely be using him again."
+  },
+  {
+    "reviewer_name": "Savanah",
+    "date": "09/24/23",
+    "rating": 5,
+    "content": "I was looking for a fun experience for my husband’s birthday and found Chef Luis class to cook Italian. It was worth every penny! Not only was the food so delicious, but Chef Luis was so kind, helpful and great company. Highly recommend and will be booking him again."
+  },
+  {
+    "reviewer_name": "Mike",
+    "date": "08/24/23",
+    "rating": 5,
+    "content": "Chef Luis was great!  Not only was the food great, but Chef Luis provided a great personal touch of interaction with our group.  He had a great sense of humor and quickly won us over.  Our group wanted to interact with Chef Luis and even had opportunities to assist in the cooking.  We even learned a few things that we can add to our own skills.  Our goal was to have a simple team building experience and then have a wonderful dinner.  We chose the New York steak & lobster meal and the food was flavorful and tasted great.  Would I recommend Chef Luis again?  For sure!  His personality complimented and added to the whole experience.  Thank you Chef Luis."
+  },
+  {
+    "reviewer_name": "Ashton",
+    "date": "08/23/23",
+    "rating": 5,
+    "content": "Chef Luis was awesome. His recipes are delicious and was a great teacher. I want to become a better cook and he taught me techniques so I can improve. Over all it was a great way to spend an anniversary. 10/10 would do again"
+  },
+  {
+    "reviewer_name": "Colin",
+    "date": "07/20/23",
+    "rating": 5,
+    "content": "Chef Luis did a great job with us, and was very accommodating to my father in law, whose birthday it was. Had a great time, learned and lot, and got to each delicious food. Will definitely use Chef Luis' services again!"
+  },
+  {
+    "reviewer_name": "Mat",
+    "date": "06/18/23",
+    "rating": 5,
+    "content": "Luis is awesome! It was a fun hands-on class with great food!"
+  },
+  {
+    "reviewer_name": "Amy",
+    "date": "04/16/23",
+    "rating": 4,
+    "content": "Luis ran the evening very smoothly and his recipes were really tasty.  It was a fun evening."
+  },
+  {
+    "reviewer_name": "Nicole",
+    "date": "03/02/23",
+    "rating": 5,
+    "content": "Our session w/ Chef Luis was wonderful! He was fun, taught us amazing things and the food was AMAZING! The other thing we appreciated was he accommodated our food preferences & restrictions by changing up the menu. We will definitely be using him again!"
+  },
+  {
+    "reviewer_name": "Rus",
+    "date": "02/23/23",
+    "rating": 5,
+    "content": "Fun experience with an experienced Chef."
+  },
+  {
+    "reviewer_name": "Landon",
+    "date": "02/21/23",
+    "rating": 5,
+    "content": "Chef Luis was a great teacher, such a fun night!"
+  },
+  {
+    "reviewer_name": "Lorraine",
+    "date": "01/21/23",
+    "rating": 5,
+    "content": "Highly recommend! Our cooking and dining experience with Chef Luis was absolutely perfect in every way.  We had a group of six in our home.  Chef Luis was professional, well-prepared, super knowledgeable, amazingly comfortable and so much fun.  We learned a lot and had a fabulous time doing so.  The food was over the top; fresh, abundant and delicious. We are already booking our next event with Chef Luis."
+  },
+  {
+    "reviewer_name": "Alejandro",
+    "date": "09/18/22",
+    "rating": 5,
+    "content": "This was our first time doing a cooking class and chef Luis was a perfect choice! He was very professional, kind, and personable. We did the Japanese cooking class and the food was delicious! Definitely will do it again and highly recommend people take his classes!"
+  },
+  {
+    "reviewer_name": "David",
+    "date": "09/03/22",
+    "rating": 5,
+    "content": "Chef Luis is a great teacher with a warm personality.  We thoroughly enjoyed our experience with him as we made crab cakes, chicken Marsala, paella with shrimp, mussels, and scallops, and creme brulee.  Chef Luis walked us through the steps to create each dish and then served us the delicious meal we had created.  We would recommend him highly!"
+  },
+  {
+    "reviewer_name": "Ethan",
+    "date": "08/13/22",
+    "rating": 5,
+    "content": "Luis was perfect!"
+  },
+  {
+    "reviewer_name": "Debbie",
+    "date": "07/30/22",
+    "rating": 5,
+    "content": "We had an amazing cooking experience with Chef Luis. He was so positive and fun and taught us some great cooking techniques.  The food was fantastic!!!"
+  },
+  {
+    "reviewer_name": "Jonathan",
+    "date": "07/29/22",
+    "rating": 5,
+    "content": "What a great time! Chef Luis showed us how to make some amazing pasta! Each dish was easy and delicious and we just had the best time! I'd highly recommend his classes"
+  },
+  {
+    "reviewer_name": "James",
+    "date": "07/20/22",
+    "rating": 5,
+    "content": "Chef Luis was great!. We purchased this for a family event and it was everything we hoped it would be. What a great experience. Will definitely do again."
+  },
+  {
+    "reviewer_name": "Jennah Cutler",
+    "date": "07/18/22",
+    "rating": 5,
+    "content": "We had a great time and the food was delicious!"
+  },
+  {
+    "reviewer_name": "McKay Nielson",
+    "date": "07/13/22",
+    "rating": 5,
+    "content": "Chef Luis was awesome! He helped us make a salmon mousse dish (one of his personal recipes) and it was so good. Had a great experience overall and would highly recommend."
+  },
+  {
+    "reviewer_name": "Kelly",
+    "date": "07/11/22",
+    "rating": 5,
+    "content": "This is the second time we have had Chef Luis out and I’m so happy we did. I feel so nervous cooking things I have never tried but with Chef Luis there, I feel confident enough to try anything! He is kind, professional, patient and just fun to have around. The bananas foster alone is mind blowing and the seafood puff pastry is going to be a new favorite in our house. Can’t wait until our next class with Chef Luis."
+  },
+  {
+    "reviewer_name": "Hayden",
+    "date": "06/18/22",
+    "rating": 5,
+    "content": "Chef Luis helped us create one of the best meals we have ever personally made or had made for us! We were so impressed with this experience and highly recommend it to anyone wanting to learn how to make an incredible meal."
+  },
+  {
+    "reviewer_name": "Hideko",
+    "date": "03/19/22",
+    "rating": 5,
+    "content": "It was a fantastic experience I shared with my daughter. The food was delicious and chef Luis was great! We already are planning our next class with him."
+  },
+  {
+    "reviewer_name": "Susan",
+    "date": "03/14/22",
+    "rating": 5,
+    "content": "Chef Luis was great! He was very friendly and made my moms birthday dinner a fun, unquiue experiance! \nI would deffinitly reccomend him. The food was amazing!"
+  },
+  {
+    "reviewer_name": "Stephanie",
+    "date": "03/13/22",
+    "rating": 5,
+    "content": "Luis was great! We booked him for a bachelorette party and he cooked a special Italian meal for 8 ladies. He was very professional, arrived on time, and communicated with me in the days leading up to the event. I would definitely book Luis again next time I am in the area!"
+  },
+  {
+    "reviewer_name": "Diane",
+    "date": "10/17/21",
+    "rating": 5,
+    "content": "Chef Luis was great. He was punctual, organized, and was flexible with the fact that we were in an Airbnb. There were six of us, and I would say that was a good number to do all of the tasks at hand. It was a perfect way to spend a night with friends!"
+  },
+  {
+    "reviewer_name": "Tyler",
+    "date": "08/28/21",
+    "rating": 5,
+    "content": "Chef Luis helped us make an incredibly delicious dinner! We were hands on the entire time, which we loved. Then at the end he treated us to a fine dining experience in our own home as we sat at the table with our wine while he plated up the food we just made and gave us a 4 course experience. I recommend Chef Luis to anyone in the area!"
+  },
+  {
+    "reviewer_name": "Susanna",
+    "date": "08/20/21",
+    "rating": 5,
+    "content": "My boyfriend and I had an amazing time during Chef Luis' Traditional Vietnamese Flavors class! All the food was incredible, and we had plenty of leftovers which made the following days great too :). Chef Luis was charismatic and fun to be around. I'd definitely do this again!"
+  },
+  {
+    "reviewer_name": "Zade",
+    "date": "06/16/21",
+    "rating": 5,
+    "content": "I booked a meal with Chef Luis to celebrate my girlfriend's birthday. He arrived on time with all the ingredients needed for our great meal. He was very friendly, sharing advice and stories throughout our cooking. The Vietnamese food we made was delicious, our favorite dish was the spring rolls. Everything about the evening was a pleasant experience."
+  },
+  {
+    "reviewer_name": "James",
+    "date": "06/15/21",
+    "rating": 5,
+    "content": "Had a great time with Chef Luis! He brought everything we needed and taught us how to make some amazing food. It was so much fun. Would love to do it again soon!"
+  },
+  {
+    "reviewer_name": "marianne",
+    "date": "06/09/21",
+    "rating": 5,
+    "content": "We had such a fun, relaxing, and educational evening with Chef Luis. All four courses were delicious and taught well enough that we can repeat them on our own. Chef Luis was professional and very easy to get along with! Its a guaranteed special gathering!"
+  },
+  {
+    "reviewer_name": "Kelly",
+    "date": "04/03/21",
+    "rating": 5,
+    "content": "I was so excited to see that Chef Luis has moved to Salt Lake City and I sure didn't want to miss out on the opportunity to have him visit.  This was so much fun and we will definitely be having Chef Luis back.  The food was amazing and we learned a ton.  Chef Luis was patient and friendly and organized.  He kept us moving through the menu but he was still a lot of fun to have with us in our home.  I absolutely recommend the dishes we tried.  I particularly loved the shrimp ceviche and the sauce he uses on the fish tacos is simple to make and absolutely amazing.  I think this would be a great opportunity for a team building experience and I am going to suggest it with my work next.  Thank you so much!"
+  },
+  {
+    "reviewer_name": "Marilyn",
+    "date": "12/05/20",
+    "rating": 5,
+    "content": "Luis is a wonderful chef and gave my boyfriend and I an unforgettable evening! Beautiful home, great music and food! We made pasta by hand? Don’t hesitate to take a class with Luis! Thank you!"
+  },
+  {
+    "reviewer_name": "LaDonna",
+    "date": "11/24/20",
+    "rating": 5,
+    "content": "Thanks for everything. The food was great."
+  },
+  {
+    "reviewer_name": "Corrine",
+    "date": "11/04/20",
+    "rating": 5,
+    "content": "Chef Luis was wonderful to work with.  We totally enjoyed the experience!"
+  },
+  {
+    "reviewer_name": "Carlos",
+    "date": "11/02/20",
+    "rating": 5,
+    "content": "Great first experience with Cozymeal. Chef Luis was awesome!"
+  },
+  {
+    "reviewer_name": "Eric",
+    "date": "11/02/20",
+    "rating": 5,
+    "content": "Chef Luis was amazing.   I hired him to make my mother's birthday special and it was the perfect present.   He was on time, very friendly and took all of the necessary precautions that you want during Covid.  Just great all around, especially since we live out of state and was looking for something that let her know we were thinking about her on her special day.   Thank you Chef Luis"
+  },
+  {
+    "reviewer_name": "Christian",
+    "date": "10/30/20",
+    "rating": 5,
+    "content": "The experience was so fun, inviting, and the food was delicious! Luis makes you feel at home like it’s your kitchen! We learned a lot and had a great time!! We can’t wait to sign up for another class!"
+  },
+  {
+    "reviewer_name": "Michelle",
+    "date": "09/09/20",
+    "rating": 5,
+    "content": "If I could give this experience 10 stars I would! If you are in Vegas, don’t miss out on taking a class from Chef Luis! I was looking for something to do since so much was shut down and this class was perfect for a fun night.  We had such a good time, Chef Luis immediately put us at ease. He has amazing experience and it was fun to hear about his journey. The class was completely hands-on and he was able to give us some great basic skills tips. Everything we made was delicious and definitely recipes we will make at home.  Thanks for a great night!!"
+  },
+  {
+    "reviewer_name": "Marie",
+    "date": "09/01/20",
+    "rating": 5,
+    "content": "Had a lot of fun!  First time doing this.  I thought we all would be making the same thing but this was a great cooperative event!"
+  },
+  {
+    "reviewer_name": "Ellie",
+    "date": "08/31/20",
+    "rating": 5,
+    "content": "Chef Luis cooked up the perfect evening for our family girls night in, with a beautiful and delicious 4-course Italian cooking class for 5 people in my home! \n\nChef came prepared for us to learn & cook some fun new recipes, laugh together, and just have a great time. He's extremely enjoyable to be around. I highly recommend Chef Luis and Cozymeal to anyone looking for a fun and intimate experience, topped off with AMAZING food!"
+  },
+  {
+    "reviewer_name": "Jayne",
+    "date": "08/30/20",
+    "rating": 5,
+    "content": "Chef Luis was wonderful. Such a warm and fun personality. His cooking skills are perfect and he taught me some new techniques in the kitchen I never knew. Our Anniversary dinner with our children will be an event to remember. I really want to do some more classes in the future. His kitchen was modern and fully equipped with all the tools needed to create our dishes. He served the meal to us. We all enjoyed the experience thoroughly. \nThank you Cozymeal and especially Chef Luis!!"
+  },
+  {
+    "reviewer_name": "Laura",
+    "date": "08/30/20",
+    "rating": 5,
+    "content": "A fun experience and a memorable way to celebrate an anniversary with my parents.  Chef Luis was awesome and taught us all some great tips in the kitchen.  Loved the food!"
+  },
+  {
+    "reviewer_name": "Tiffan",
+    "date": "08/22/20",
+    "rating": 5,
+    "content": "This was THE best experience I've had in quite some time! Not only was Chef patient and kind, but funny. He definitely did a great job of walking us through all the necessary steps and by the end of the experience we were all smiles. This was AMAZING!"
+  },
+  {
+    "reviewer_name": "Brad",
+    "date": "08/17/20",
+    "rating": 5,
+    "content": "Chef Luis was amazing. He was extremely knowledgeable, friendly and engaging. My wife and I had a ton of fun and can’t wait to do it again. Thank you very much."
+  },
+  {
+    "reviewer_name": "Traci",
+    "date": "08/15/20",
+    "rating": 5,
+    "content": "Chef Luis was a lot of fun to work with. He was informative and made the experience very relaxing and enjoyable"
+  },
+  {
+    "reviewer_name": "Brett",
+    "date": "08/07/20",
+    "rating": 5,
+    "content": "Had a great time with Chef Luis! One of the best ribeyes have had in Vegas. Made our quarantine anniversary dinner a big success."
+  },
+  {
+    "reviewer_name": "Kay",
+    "date": "07/19/20",
+    "rating": 5,
+    "content": "Chef Luis prepared a wonderful meal for my husband's birthday! As New Englanders now living in Vegas, his clam chowder was amazing, and I have very high expectations for my chowder! The ribeye steak was grilled to perfection, and the lobster tail was seasoned perfectly, allowing the sweetness of the lobster to come through. Dessert was the perfect ending to a delicious meal. Chef Luis was friendly, professional, and even did all the clean up and had our leftovers ready to be put away. We will definitely use this service again! Thank you, Chef!"
+  },
+  {
+    "reviewer_name": "Michael",
+    "date": "07/11/20",
+    "rating": 5,
+    "content": "Chef Luis was amazing! He’s very knowledgeable and great at what he does. He made us feel so comfortable and was so easy going and easy to talk to. It was such a great experience and I can’t wait to book my next cozymeal cooking class with chef Luis!"
+  },
+  {
+    "reviewer_name": "Jaqlyn",
+    "date": "06/01/20",
+    "rating": 5,
+    "content": "Thanks to Chef Luis, our parents were able to celebrate their 50th anniversary in style. They said the food was fabulous and that Chef Luis was such a nice person. They really enjoyed it!"
+  },
+  {
+    "reviewer_name": "Angela",
+    "date": "03/19/20",
+    "rating": 4,
+    "content": "Food and experience was great, but wish we got the recipes and photos that he said he would email to us.  If we would have gotten the recipes, then it would have been 5 stars."
+  },
+  {
+    "reviewer_name": "Dave",
+    "date": "03/19/20",
+    "rating": 4,
+    "content": "I work for Autodesk.  While attending a corporate event in Las Vegas, my team (10-12 people) was looking for an team building event on Wednesday night.  Instead of going to dinner, we decided to try Cozymeal.\n\nI was initially surprised when we discovered the event was hosted at the Chef's house.  I wish that was more clearly communicated upfront, but aside from that - the experience was outstanding!   We purchased wine ahead of time and the Chef was gracious to provide wine glasses and a wine opener (for corks)!  \n\nI've participated in cooking classes before, but cozymeal (at a house) was a new experience.  I'd say the experience was more welcoming than going to a kitchen.   All the ingredients were purchased ahead of time and the chef had ample equipment to allow everyone to participate.  The food quality was very good as well.  \n\nThe areas I recommend for improvement would be:\na) better communication regarding the site location and expectations (already mentioned)\nb) better chairs and sitting arrangements (we sat on hard chairs - not bad, but not the most comfortable either)\nc) faster exchange of photos - the chef and his staff took pictures, but they weren't shared immediately (still pending).\nd) faster exchange of recipes and cooking directions (still pending)\n\nThe recommendations for improvement are relatively minor.  If those improvements are made, more companies, teams, and families/friends will want to take advantage.  \n\nThank you, Chef Luis for welcoming us to your home and putting together a great experience!"
+  },
+  {
+    "reviewer_name": "Darlene",
+    "date": "03/12/20",
+    "rating": 5,
+    "content": "Thank you Chef Luis for an informative & fun cooking lesson.  On Wednesday my husband and I attended the “Exquisite Italian Fare” cooking class and with Chef Luis’s guidance, culinary tips & tricks, we created a “professionally-perfect” 4- course meal that was spectacular and very delicious.  Looking forward to replicating the meal at home too.  We will definitely be signing up for more of his classes in the future. Highly recommend Chef Luis’s class for an extraordinary experience."
+  },
+  {
+    "reviewer_name": "David",
+    "date": "03/10/20",
+    "rating": 5,
+    "content": "I am local, and chef Luis with beautiful home made my Valentine's Day date PERFECT. Great occasion for anniversary, and couple's building. Chef Luis went above and beyond, from the background music, served us, and table setting. I highly recommend if you're looking for a special date, anniversary, etc. Thank you Chef Luis."
+  },
+  {
+    "reviewer_name": "Rudy",
+    "date": "02/15/20",
+    "rating": 5,
+    "content": "We came in not knowing what to expect with a private cooking class but Chef Luis made this an incredible experience. The food was super good and the class in general was tons of fun. We will definitely be booking more classes with him in the future."
+  },
+  {
+    "reviewer_name": "Bonnie",
+    "date": "02/10/20",
+    "rating": 5,
+    "content": "What an awesome experience! Chef Luis was very inviting and his home was beautiful. We had 3 couples in our group and there was plenty of room in the kitchen. Everyone had their own cooking stations, where there were printed receipes were ready to go. Chef provided guidance and showed us tips and tricks. He played the food for us while we sat at his dining table. The other 2 couples we were with were nice and fun to chat with. Overall, it was a wonderful experience that proved to be the perfect surprise early valentine's days gift for my honey. Will definitely do again."
+  },
+  {
+    "reviewer_name": "Brittany",
+    "date": "01/22/20",
+    "rating": 5,
+    "content": "Chef Luis went above and beyond to make us feel welcome and comfortable in his home! He was very skilled and shared many little tips to make us feel like we were chefs too. Everything was beautifully set up to easily move between courses. Not only did we enjoy our evening with Chef Luis, we got action pictures of our unforgettable night (compliments of Chef Luis and his wonderful wife). This will be a yearly activity for my husband and I, and we will book with Chef Luis every time!"
+  },
+  {
+    "reviewer_name": "vernon",
+    "date": "01/20/20",
+    "rating": 5,
+    "content": "What a wonderful time our group had.   Chef Luis is an excellent host.   His home is welcoming and suited nicely for a team building event.  The meal he taught us to cook was the best meal we had all week.   I would do this again in a heartbeat.   Do not pass up the opportunity to experience this when in Vegas!\n\nVern"
+  },
+  {
+    "reviewer_name": "Ashley",
+    "date": "01/20/20",
+    "rating": 5,
+    "content": "Chef Luis provided an excellent experience for my husband and I. We enjoyed the new skills he taught us and the recipes he provided us. We would recommend this to anyone looking for a good experience!"
+  },
+  {
+    "reviewer_name": "Phil",
+    "date": "01/16/20",
+    "rating": 5,
+    "content": "We had a wonderful time. Great food, and great company. Thanks Chef Luis!"
+  },
+  {
+    "reviewer_name": "Rajeev",
+    "date": "01/15/20",
+    "rating": 5,
+    "content": "I bought this as a gift for my parents for their anniversary. They thought it was absolutely wonderful. They really got an appreciation for gourmet cooking. Chef Luis was fantastic. The food was delicious. It was fun to prepare and then cook the meal. Also very special with just the two of them there with the chef. They felt extremely welcomed, loved the fun casual atmosphere, and walked away talking about the whole family needs to come next time.\nHighly recommend and delicious!"
+  },
+  {
+    "reviewer_name": "Dorane",
+    "date": "01/07/20",
+    "rating": 5,
+    "content": "I knew this is going to be great before I went but the actual experience was way beyond my expectation. Chef Luis is super friendly and his creation is easy and amazingly delicious. We just cooked, chatted, and had a great time together. At the dinning table, we ate the food we cooked but we felt like VIP.    This is truly special experience and I  highly recommend Chef Luis. Great job Chef and can't wait to try something new next time!"
+  },
+  {
+    "reviewer_name": "Heddy",
+    "date": "01/03/20",
+    "rating": 5,
+    "content": "Our group of 8 people had a great  evening with Chef  Luis. He was ready for us when we arrived at his home.   He was attentive giving us directions on out meals and answering our questions .We had a Greek meal and it was great. Chef Luis has also been kind enough to even answers questions about the recipes since our evening which I have really appreciate it. His wife was talking pictures of us during the evening which was a nice touch. I can not recommended enough how all of us truly enjoyed our  cooking class and dinner.  A company who is a client of mone had done a evening with him the week before and they were the ones who told us about cozymeals and Chef Luis.    We were so happy that we listen to their recommendation. This was one of the high lights of our trip to Vegas. We are not be gamblers so this was a fun way to enjoy either other company  as well as having a great time."
+  },
+  {
+    "reviewer_name": "Leanne",
+    "date": "01/01/20",
+    "rating": 5,
+    "content": "He was amazing! Our family had a great time and would love to go back when we’re in Vegas again?"
+  },
+  {
+    "reviewer_name": "Paul",
+    "date": "12/30/19",
+    "rating": 5,
+    "content": "FABULOUS, AMAZING - Chef Luis and our Exquisite Italian Fare class with him was absolutely AMAZING!!! His kitchen is wonderful, he had all the ingredients prepared and so perfectly arranged and he was so patient teaching us and answering our many questions. SO FABULOUS that we are already talking about when to do again!!!"
+  },
+  {
+    "reviewer_name": "Jasmine",
+    "date": "12/29/19",
+    "rating": 5,
+    "content": "I bought this package as a gift for my husband and in-laws for Christmas so that we can learn how to cook like a professional chef, make fun memories together, and enjoy an amazing 4 course meal, all in the comfort of our own home so we can keep an eye on our toddlers. Chef Luis was professional, patient, adaptable and personable with us amateurs, and the dishes themselves were fantastic. I would do this again in a heartbeat."
+  },
+  {
+    "reviewer_name": "Chris",
+    "date": "12/18/19",
+    "rating": 5,
+    "content": "Chef Luis was an excellent host.  He was gracious, patient and funny.  He even gave me an impromptu chopping lesson when I asked him to.  Our team had a fantastic experience with Chef Luis.  Thank you so much!"
+  },
+  {
+    "reviewer_name": "Gregory",
+    "date": "12/16/19",
+    "rating": 5,
+    "content": "Excellent and fun session!"
+  },
+  {
+    "reviewer_name": "Karroll",
+    "date": "12/16/19",
+    "rating": 5,
+    "content": "This was such a great team experience and exceeded our expectations. Chef made sure everyone was participating; he answered questions and the overall experience was very personalized vs. cookie cutter.  The meal was exceptional, tasty and elegantly served at the right temperature. We'll definitely do this again."
+  },
+  {
+    "reviewer_name": "Angie",
+    "date": "12/15/19",
+    "rating": 5,
+    "content": "The food was excellent. I would definitely do it again with chef Luis. It was a great experience and the food was outstanding"
+  },
+  {
+    "reviewer_name": "John",
+    "date": "12/13/19",
+    "rating": 5,
+    "content": "We had an amazing time! Chef Luis was fun, knew his stuff and took the time to both teach us about cooking techniques as well as maintain lively conversation for all. He was so gracious welcoming us into his home and the meal was nothing short of delicious. I was so impressed by the experience, I'm going to plan another event with my family (this was a corporate meeting) in the future. Well done!"
+  },
+  {
+    "reviewer_name": "Melissa",
+    "date": "12/12/19",
+    "rating": 5,
+    "content": "As a vegetarian, I appreciated that Chef Luis prepared special food for me when the rest of the meal was meat-based for my coworkers. The food was exceptional and the chef's style was very informative and friendly. The bananas foster was divine and overall, the meal was one of the best meals I've ever had. The experience was fun too and I'm hoping to use Cozymeal and Chef Luis again in the future."
+  },
+  {
+    "reviewer_name": "Kim",
+    "date": "12/12/19",
+    "rating": 5,
+    "content": "Chef Luis gave us the perfect corporate dinner. As a small Managment team of 7, we were able to help prepare the meal but mostly mingle casually with our co-workers. His home was very nice and he was an amazing host. I wouldn’t hesitate to book a group dinner with him again. Oh and the food was to die for. Thank you for the perfect business dinner."
+  },
+  {
+    "reviewer_name": "Jeremy",
+    "date": "12/07/19",
+    "rating": 5,
+    "content": "We had the most amazing time last night with Chef Luis. We had chosen the Cajun menu. We were greeted with a warm smile and immediately felt comfortable and at home in his beautiful, clean kitchen. In the kitchen were fresh, washed aprons for us to wear and all materials set out for us to begin. Chef Luis was clear in his instructions and great at demonstrating what we needed to do. The food was fresh and beautiful, even before cooking. The most memorable part of preparation was the calamari. Chef Luis showed us how and provided optional gloves if it would help us feel more comfortable. The conversation was delightful, with great mood music in the background, and a really cool fire to set a great ambiance. Preparing the food was a blast, but my favorite part was when we got to eat. THE FOOD WAS MOUTHWATERING GOOD! There was not a single item I did not thoroughly enjoy eating. The flavors were amazing. The meats, so tender. We loved that after all our preparation, we were able to just sit while we were served the food we had created, one course at a time. We will definitely be back and definitely highly recommend this outing and experience."
+  },
+  {
+    "reviewer_name": "Leslie",
+    "date": "12/04/19",
+    "rating": 5,
+    "content": "My first experience with Cozymeal was fabulous! Chef Luis welcomed us with a smile and had all the ingredients prepared. We started right in with food prep and Chef Luis’ easy-going style made me feel relaxed. He answered questions and showed the best cutting, dicing, and mixing techniques. When the food was all ready, we sat down as Chef Luis served each course with wonderful presentations for each plate. I learned a lot and feel inspired to expand my cooking creativity at home! Thanks, Chef Luis and Cozymeal!"
+  },
+  {
+    "reviewer_name": "Daniel",
+    "date": "12/02/19",
+    "rating": 5,
+    "content": "This was most certainly one of the best team building events I’ve done wi my team. Chef Luis and his team did an outstanding job engaging my team and making us all feel comfortable learning. I highly recommend."
+  },
+  {
+    "reviewer_name": "Lijun",
+    "date": "11/25/19",
+    "rating": 5,
+    "content": "I’m not big on surprises but when my lady scheduled an evening out for our anniversary and booked a personal cooking class through Cozymeal it was one of the greatest experiences of my life. I must say that I consider myself a very good cook and my Lisa can also knock out some outstanding dishes, the idea of a cooking class held a lot of interest but could the Chief actually out shine our own abilities ?\n\nThe deal is this, you actually do most of the cooking while the Chief shows you how and takes you through all of the seasonings and the techniques.\n\nWe walked into the beautiful home of Chief Luis at 7 pm with a bottle of Beringer, Knights Valley, Cabernet 2005 and the magic started as soon as he greeted us. The fireplace was warm and inviting and the dining room was set like a photo out of a Currier & Ives catalog.\n\nChief Luis took us through every step and shared every secret. He explained every cut of the knife and when and where we were to add the seasonings and how to blended the cooking oils for the maximum effect. We learned new techniques to add to our own and gave us shortcuts down to the best pots and pans to use and how to buy them at one third the cost !!\n\nI don’t want to give too much away but we made the greatest Creme Brulee ever and I could not believe how easy it was. We made an extra one for his beautiful wife. Chief Luis is a graduate of the School of Culinary Arts and it shows. He is extremely generous with his knowledge and loves to share. This evening that ended at 10:30 was one of the most memorable I have had in years. My lady Lisa and I fell in love all over again.\n\nI want to thank Cozymeals but my special thanks goes out to Chief Luis and his wife for such a lovely time.\n\nFIVE STARS\n\nDon and Lisa"
+  },
+  {
+    "reviewer_name": "David",
+    "date": "11/19/19",
+    "rating": 5,
+    "content": "I can't say enough about our team building experience with Chef Luis!  We chose the Greek Fare menu and it was incredible.  From learning how to prep the rack of lamb to spanokopita, it couldn't have been more fun and engaging.  If you're looking to do something interactive with those you work with, or with friends outside of work, LOOK NO FURTHER!  Aside from being a gifted chef, Luis is just a lot of fun to be around.  You'll leave feeling like you've made a life-long friend!  Every single one of my colleagues raved about how much fun they had!  Book NOW!  You won't be disappointed."
+  },
+  {
+    "reviewer_name": "Kish",
+    "date": "11/17/19",
+    "rating": 5,
+    "content": "This was an absolutely awesome experience. Chef Luis is amazing!! Upon arrival, we immediately felt welcomed and comfortable. We chose the exquisite Italian fare menu because I love osso buco. We had a blast making it, and that’s saying a lot coming from me when talking about cooking. Everything was delicious-scallops, puff pastry, osso buco, dessert...all of it. I could eat the sauce from the puff pastry solo, out of a jar with a spoon.  I highly recommend Chef Luis. You won’t regret it."
+  },
+  {
+    "reviewer_name": "Michael",
+    "date": "11/15/19",
+    "rating": 5,
+    "content": "I wish I could give Chef Luis 6 or 7 stars out of 5!  Every aspect of this corporate group event was handled with friendly care, exceptional precision and amazing foresight.  The entire experience was not only engaging, entertaining, relaxing and fun, but the Chef also worked with us to achieve our organizational goals!  Each of my customers were able to develop lasting relationships with peers from other industries in an atmosphere that was conducive to social and professional conversation.  The entire planning process was so smooth and seamless and Chef Luis and his staff bent over backward to make sure everything was taken care of, down to the smallest detail.  His home is so warm and comfortable, all of my customers were immediately set at ease and able to relax away from the chaos of The Vegas Strip.  \nHere are a few quotes from the event:\n\"Thank you so much for this activity! Was very fun and insightful, inspiring.  My favorite activity so far, at this conference\"\n\"I made new, real connections that will sustain past conference! It reinforced my ... belief in the power of the relationship my company has with ... our joint desire for mutual success!\"\n\"This was an amazing event that is a welcome break from the normal hustle and bustle. I hope these events continue in the future.\"\n \"This was a great way to get away and build more meaningful connections and share experiences with others in a similar role. By cooking together you also immediately have something in common with the person next to you. Great experience.\"\n\"The whole evening was an absolute lovely event.\"\nWe have been asked to host this event again next year with zero changes by all of the attendees!  We won't even bother looking for a different Chef or venue, only that Chef Luis duplicate this extraordinary evening again."
+  },
+  {
+    "reviewer_name": "Elizabeth",
+    "date": "10/15/19",
+    "rating": 5,
+    "content": "Chef Luis did an excellent job.  He  was a great host and chef.  We enjoyed our evening and loved the food!"
+  },
+  {
+    "reviewer_name": "Kevin",
+    "date": "10/15/19",
+    "rating": 5,
+    "content": "Chef Luis did a great job!  As someone that doesn't do a lot of cooking, he was very patient.  The meal we ate was one of the best so far on our Vegas Vacation."
+  },
+  {
+    "reviewer_name": "Arlene",
+    "date": "09/28/19",
+    "rating": 5,
+    "content": "This was an excellent experience with Chef Luis. The menu was superb and he and his wife were a joy to spend the morning with. We will definitely take one of his classes when we come back to Vegas!"
+  },
+  {
+    "reviewer_name": "Anthony",
+    "date": "09/15/19",
+    "rating": 5,
+    "content": "Best teacher, very friendly, and food was outstanding! Went for anniversary and it was the perfect date! Thank you chef luis for showing us how fun it is to cook"
+  },
+  {
+    "reviewer_name": "Christine",
+    "date": "09/04/19",
+    "rating": 5,
+    "content": "Chef Luis and his wife were wonderful hosts. My husband and I learned new dishes and had a wonderful time. I highly recommend it!"
+  },
+  {
+    "reviewer_name": "Merideth",
+    "date": "07/25/19",
+    "rating": 5,
+    "content": "My fiance' and I had a wonderful time with Chef Luis and his wife.  We enjoyed the cooking experience and we will definitely sign up and try a different class. Thank you so much!\nMerideth and Bryan"
+  },
+  {
+    "reviewer_name": "Hylie",
+    "date": "06/22/19",
+    "rating": 5,
+    "content": "We absolutely loved our cooking and dining experience with Chef Luis. We learned some great new techniques and can’t wait to try to make the amazing crab cakes again on our own!  We are hoping to plan another soon to learn even more."
+  },
+  {
+    "reviewer_name": "Dylan",
+    "date": "06/20/19",
+    "rating": 5,
+    "content": "Meeting Chef Luis at his home for an Italian cooking lesson was an excellent experience. He made my wife and I very comfortable. He was an excellent host, fantastic teacher and all around great guy. The food was delicious. For less than the cost of most dinners on the Strip, you get a lesson, activity, and dinner all rolled into one. I highly recommend this Cozymeal experience."
+  },
+  {
+    "reviewer_name": "Christine",
+    "date": "06/18/19",
+    "rating": 5,
+    "content": "Cozymeal was a refreshing event I enjoyed doing while visiting Las Vegas and wanting to do something off the strip. Not only was it fun so do with a group of girls but it was delicious!!! We chose the global menu because well every dish offered were my favorite dishes! We all got to be hands on and learned to prep and cook with the assistance and guidance if Chef Luis. The crab cakes were filled with more crab over breading and the sauce was amazing! The paella ( I was in charge of) was amazing easy to make and turned out oh so good! The chicken Marsala was a huge portion that almost put me in a food coma was moist and flavorful. Lastly. The creme brûlée was smooth and tasty. It could have set a little longer but for the short time we made it i was still satisfied!! Chef Luis and his wife are sweet hosts. Don’t hesitate to book his class bc not only will you leave full and happy but also a little smarter in the kitchen!!"
+  },
+  {
+    "reviewer_name": "Ed",
+    "date": "06/15/19",
+    "rating": 5,
+    "content": "We had a wonderful experience on Friday evening at Chef Luis’. I had never made pasta before but it was sure fun to learn!!  We had a delicious meal and participated in the entire preparation. Chef Luis is very professional, patient and kind!  We thoroughly enjoyed the evening and would recommend this to others who want to do something unique in Vegas and hone their cooking skills at the same time!"
+  },
+  {
+    "reviewer_name": "Angela",
+    "date": "06/04/19",
+    "rating": 5,
+    "content": "Chef Luis was AMAZING!! We met at his home for a small team building exercise and he surpassed our expectations!! He was very warm and welcoming and patient and I learned how to make pasta!!! I definitely will recommend to all my friends and family who go to visit Vegas!!! Awesome experience!!"
+  },
+  {
+    "reviewer_name": "Toru",
+    "date": "06/03/19",
+    "rating": 5,
+    "content": "I had good experience and great meals."
+  },
+  {
+    "reviewer_name": "Ilka",
+    "date": "06/03/19",
+    "rating": 5,
+    "content": "Very nice event!"
+  },
+  {
+    "reviewer_name": "Sandra",
+    "date": "05/31/19",
+    "rating": 5,
+    "content": "Chef Luis was wonderful! The event was absolutely awesome. This was a team building work event  where 12 of us had a great time working together in pairs to create the Romantic Italian menu!. We had a blast preparing the 4 course meal with Chef Luis giving us tips along the way. Once the meal was prepared Chef Luis served us our delicious meal! It was truly a great event where we worked together, socialized, enjoy great wine.. Absolutely recommend this event and Chef Luis!!"
+  },
+  {
+    "reviewer_name": "Danielle",
+    "date": "05/31/19",
+    "rating": 5,
+    "content": "Chef Luis was awesome!! We went to this event as a team building exercise for work. I think it’s safe to say the entire team had a really great time. Highly recommend!"
+  },
+  {
+    "reviewer_name": "Melanie",
+    "date": "05/31/19",
+    "rating": 5,
+    "content": "Great meal. Thanks for the warm welcome and friendly atmosphere"
+  },
+  {
+    "reviewer_name": "Taniela",
+    "date": "05/15/19",
+    "rating": 5,
+    "content": "We had an unforgettable date night with Chef Luis. His home was quiet and romantically lit, and his kitchen was beautifully organized. We were greeted upon arrival with the utmost professionalism and charm. He had music playing in the  background that made it feel like we were in a five star restaurant. His instruction was simple and easy to understand and follow, and we enjoyed every minute of learning, preparing, and cooking a wonderful greek meal. His cute wife joined us to take photos and also engaged in conversation. It was the perfect balance between a fun date night out, and feeling like we were hanging with long time friends. When it came time, we were sat to be served the meal we had prepped and cooked together, and it was beyond delicious!! We would recommend this experience for any kind of special occasion, or date night! Thank you Chef!"
+  },
+  {
+    "reviewer_name": "Apryl",
+    "date": "05/12/19",
+    "rating": 5,
+    "content": "I can’t say enough about what a great experience this was! I loved spending time with my son on Mother's Day, cooking an amazing meal with Chef Luis! Thank you so very much! We will be back!"
+  },
+  {
+    "reviewer_name": "Joel",
+    "date": "05/09/19",
+    "rating": 5,
+    "content": "Great experience!  Food was fantastic!! Learned a lot by participating in the cooking process. Thank you Chef for having us."
+  },
+  {
+    "reviewer_name": "James",
+    "date": "05/06/19",
+    "rating": 5,
+    "content": "Chef Luis offered an excellent cooking and dining experience. He welcomed us into his home. His knowledge of cooking was very evident and he really enjoyed teaching us. Each course was truly tasteful. I would strongly reccommend him as a host. We will definitely return to join him again. His kitchen is clean and there was plenty of space to prepare the meal.  We really enjoyed the intimate cooking with him learning each course step by step. Great job!!"
+  },
+  {
+    "reviewer_name": "Michelle",
+    "date": "05/03/19",
+    "rating": 5,
+    "content": "Chef Luis was EXCELLENT!!!!!! Very nice house with great ambiance. Perfect for 2 or 12+ people. He was very welcoming and nice. He made sure my date and I felt at ease even though we had no idea what we were doing. He showed us basic knife skills and different cooking techniques. Explaining everything as we went. He gave examples of how to prepare the dishes and then stepped back so we could get our hands right in there and cook. To say the food was FANTASTIC is seriously an understatement. The feta crusted lamb was cooked to perfection. Juicy, well seasoned and he even made a wine reduction sauce to go with it. The cucumber yogurt flavorful. Literally the best i have ever had. I'n normally not a fan of orzo until his. It was creamy and was like a light mac n cheese with spinach in it. The spinach stuffed pastries were flakey and moist. I honestly wanted to lick my plate. By the time we got to the greek donuts for dessert, i was so full but i couldnt walk away without sampling it. Next thing i know, that plate was clear too.  I almost had to be rolled out. The portion size was large. So much so the leftovers was another 3 meals. It was beyond worth the price and time. I would highly recommend. An added bonus was he gave us the recipes to every dish we made.  His wife was very nice. She took pictures of us cooking to commemorate the experience and sent them to us before we even left. The next time im in Vegas i will book him again without a doubt. Thank you Chef Luis for sharing your home and giving us the best meal we had in Vegas."
+  },
+  {
+    "reviewer_name": "Pam",
+    "date": "05/02/19",
+    "rating": 5,
+    "content": "What a concept, I celebrated my birthday with 12 friends at Chef Luis' home.  It could not have been more perfect!  Initially, I thought it would be a little odd entering a stranger's home for dinner, but Chef and his lovely wife made us feel very comfortable.  Chef Luis directed us to an amazing 4 course meal.  His wife captured beautiful photos of the entire cooking experience which was also a treat.  Chef Luis is the BEST!  Can't wait to use him again.  Thank you Chef Luis and Cozymeal's!"
+  },
+  {
+    "reviewer_name": "Kelly",
+    "date": "05/01/19",
+    "rating": 5,
+    "content": "Chef Luis was fantastic in his teaching, hospitality and recipes! We did the big \"Global\" dinner that he offers and every course was phenomenal. We couldn't believe that we made it all.  I highly recommend going to one of Chef Luis' classes, but make sure that you wear makeup because there will be pictures!"
+  },
+  {
+    "reviewer_name": "Pam",
+    "date": "04/10/19",
+    "rating": 5,
+    "content": "Chef Luis was incredible. His knowledge and easy going personality made for a perfect evening. Our menu includes lamb and I don't eat lamb but was willing to give it a try. It was delicious and I ate the whole meal. We had the best evening and time with chef Luis as he shared his home with us. Can't wait to do it again. \n\n5 stars \n\nPam Dechief :)"
+  },
+  {
+    "reviewer_name": "GREG",
+    "date": "04/10/19",
+    "rating": 5,
+    "content": "Chef Luis invited us into his home and helped us cook a fabulous dinner with perfect accompanying sauces.\nIt was a pleasant evening of cooking, dining, visiting and and learning.\nThanks Chef Luis for your hospitality"
+  },
+  {
+    "reviewer_name": "Robert",
+    "date": "04/08/19",
+    "rating": 5,
+    "content": "Chef Luis was amazing! I can’t say enough good things about my experience. My friend, Sunnie and I thoroughly enjoyed our experience. Chef Luis gave us a great example of how to make our dinner, clear instructions on what to do, and then let us experience a wonderful culinary experience of making what will become a repeat dinner in our lives. We were privileged to learn how to make an incredible mouth-watering delicious lobster Ravioli, wonderful Caesar salad with homemade dressing, and an incredibly delicious banana foster, all of which we made from scratch. I was amazed that this was something that I could make.  Chef Luis was a wonderful teacher showing us how to do each thing. He graciously allowed us to come into his wonderful home and showed us how to cook an amazing meal. We had a great time getting to visit with them and learn from them. The whole experience gave a new meaning to what one can make at home when properly taught. We recommend Chef Luis all the way!"
+  },
+  {
+    "reviewer_name": "Vernetta",
+    "date": "03/07/19",
+    "rating": 5,
+    "content": "As a graduate from the Santa Ana Art Institute, coupled with his vast restaurant experience, Chef Luis is a skilled chef with an extraordinary knowledge of how to balance spices, ingredients, and flavors. The feta crusted rack of lamb was beautifully presented and bursting with flavor, the scallops were mouth watering. The lump crab cakes were amazing! The chocolate mousse was delectable. His engaging personality, patience, ability to explain his processes made for an incredible learning/dining experience."
+  },
+  {
+    "reviewer_name": "Francisco",
+    "date": "03/14/19",
+    "rating": 5,
+    "content": "Chef Luis is an extraordinary chef. He has a wide experience in different cuisines. He has helped many restaurants from ground up. He is extremely professional takes pride in his work and it shows by the flavors he puts in each plate. He catered our Thanksgiving dinner everything was amazing. He has also prepared vegan meals for us and vegan has never been so flavorful for us. We have never been able to find that flavor anywhere else."
+  },
+  {
+    "reviewer_name": "Ley J.",
+    "date": "03/14/19",
+    "rating": 5,
+    "content": "Chef Luis is outstanding. He personalizes each dish with such dedication. I was impressed with his presentation and colorful pallet. His Hawaiian BBQ dish is to die for, although he presents a modern artistic dish, his flavors still remain vibrant and traditional. the tenderness of the meat just kinda melts away in your mouth with popping sensations of all the tangy flavors its delightful. He does an exquisite job at making his clients feel present and his one on one teaching methods are absolutely admirable. Hands down, Chef Luis is a 5 star chef!"
+  },
+  {
+    "reviewer_name": "Fernando",
+    "date": "03/14/19",
+    "rating": 5,
+    "content": "The shrimp fettuccini alfredo was without a doubt the best I've ever had. Chef Luis managed to add a twist of his own to this timeless recipe that created subtle kick without being overbearing. The sauce is to die for! I absolutely would recommend this dish every time ."
+  },
+  {
+    "reviewer_name": "Maddy C.",
+    "date": "03/14/19",
+    "rating": 5,
+    "content": "Amazing to say the least! I love any meal that has seafood in it but Chef Luis' fish was by far my all time favorite. It's hard to decide on what I loved more between the presentation of the dish and the taste itself. Needless to say, this was definitely the best seafood I have ever had. Five stars all across the board from me!"
+  },
+  {
+    "reviewer_name": "Alberto A.",
+    "date": "03/14/19",
+    "rating": 5,
+    "content": "Chef Luis is a talented, professional and artistic chef. My favorite dish from him is the Cajun Seafood Boil. It has a buttery, sweet and tender taste; you'll definitely enjoy Chef Luis. Big kudos to him!!"
+  },
+  {
+    "reviewer_name": "Mel",
+    "date": "03/14/19",
+    "rating": 5,
+    "content": "Chef Luis' choice of unique and exotic flavors is second to none. One can truly appreciate the level of detail and effort meticulously exhausted in preparation of every meal by Chef Luis. As in one of our favorite dishes he’s personally prepared for us, even in something as simple as a risotto with chicken in mushroom sauce, one can fully savor his delicious twists and innovations at his command. Definitely someone you need during a special event!"
+  },
+  {
+    "reviewer_name": "Haydee",
+    "date": "03/14/19",
+    "rating": 5,
+    "content": "Attention to detail is his specialty! Chef Luis has a talent like none other when it comes to creating masterpieces on a plate. He has assisted in several restaurant openings both as the head and sous-chef. He has had many years to perfect his culinary skill allowing for him to create delicious meals that will please even the pickiest of palates. The way he puts on a show  when hired to do special events with the way each plate is presented is not something just anyone can do. It takes true, natural talent to do what Chef Luis does. He brings food to life!"
+  },
+  {
+    "reviewer_name": "Beatriz",
+    "date": "03/14/19",
+    "rating": 5,
+    "content": "Chef Luis is an amazing Chef. He has a unique way when teaching how to do a specific meal. He taught us how to make Seafood Paella which came out amazing . Flavors where spectacular. Definitely recommend Chef Luis"
+  },
+  {
+    "reviewer_name": "Wade V.",
+    "date": "03/14/19",
+    "rating": 5,
+    "content": "Chef Luis is absolutely the best! I’ve been to a few grand openings which he has put on for new businesses. The presentation of his food is first class and it tastes even better. He is so creative with his menu. He also puts on an amazing show for smaller gatherings and private clientele. My favorite dish of his is Pappardelle ala aragosta, the most delicious seafood pasta that I have ever tasted. There is no doubt that he loves what he does and is the best in the business. Luis is a five star chef."
+  }
+]
