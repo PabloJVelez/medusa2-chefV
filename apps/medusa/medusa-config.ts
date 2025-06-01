@@ -64,6 +64,10 @@ module.exports = defineConfig({
       options: {},
     },
     {
+      resolve: './src/modules/chef-event',
+      options: {},
+    },
+    {
       resolve: '@medusajs/medusa/payment',
       options: {
         providers: [

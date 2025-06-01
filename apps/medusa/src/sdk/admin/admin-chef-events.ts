@@ -7,7 +7,7 @@ export type AdminChefEventDTO = {
   requestedDate: string
   requestedTime: string
   partySize: number
-  eventType: 'cooking_class' | 'plated_dinner' | 'buffet_style' | 'custom'
+  eventType: 'cooking_class' | 'plated_dinner' | 'buffet_style'
   templateProductId: string
   locationType: 'customer_location' | 'chef_location'
   locationAddress?: string
