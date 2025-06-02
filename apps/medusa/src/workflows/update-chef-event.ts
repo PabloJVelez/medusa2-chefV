@@ -4,7 +4,7 @@ import ChefEventService from "../modules/chef-event/service"
 
 export type UpdateChefEventWorkflowInput = {
   chefEventId: string
-  status: string
+  status: 'pending' | 'confirmed' | 'cancelled' | 'completed'
   assignedChefId?: string
 }
 
@@ -17,9 +17,8 @@ export const updateChefEventWorkflow = createWorkflow(
       },
       async (data, { container }) => {
         const chefEventService: ChefEventService = container.resolve(CHEF_EVENT_MODULE)
-        const updatedEvent = await chefEventService.updateChefEvents(data.input.chefEventId, {
-          status: data.input.status,
-          assignedChefId: data.input.assignedChefId
+        const updatedEvent = await chefEventService.updateChefEvents({
+          ...data.input
         })
         return updatedEvent
       }

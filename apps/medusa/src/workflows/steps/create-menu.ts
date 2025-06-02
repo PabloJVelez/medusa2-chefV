@@ -3,7 +3,7 @@ import MenuModuleService from "../../modules/menu/service.js"
 import { MENU_MODULE } from "../../modules/menu"
 
 type CreateMenuStepInput = {
-  menu: {
+  
     name: string
     courses: {
       name: string
@@ -17,21 +17,22 @@ type CreateMenuStepInput = {
       }[]
     }[]
   }
-}
 
 export const createMenuStep = createStep(
   "create-menu",
   async (data: CreateMenuStepInput, { container }) => {
-    if (!data?.menu) {
+    if (!data) {
       return
     }
 
     const menuModuleService: MenuModuleService = container.resolve(
       MENU_MODULE
     )
-
     try {
-      const menu = await menuModuleService.createMenus(data.menu)
+      const menu = await menuModuleService.createMenus({
+        ...data,
+        courses: data.courses as any
+      })
       return new StepResponse(menu, menu)
     } catch (error) {
       throw error
@@ -42,6 +43,6 @@ export const createMenuStep = createStep(
       MENU_MODULE
     )
 
-    await menuModuleService.deleteMenus(menu.id)
+    await menuModuleService.deleteMenus(menu?.id || "")
   }
 )

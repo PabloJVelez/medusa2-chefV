@@ -1,6 +1,31 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { ContainerRegistrationKeys } from "@medusajs/utils"
 import { Modules } from "@medusajs/utils"
+import { Menu } from "../../../modules/menu/models/menu"
+import { Course } from "../../../modules/menu/models/course"
+
+type MenuCourse = {
+  id: string
+  name: string
+  dishes: Array<{
+    id: string
+    name: string
+  }>
+}
+
+type MenuWithCourses = {
+  id: string
+  name: string
+  courses: MenuCourse[]
+}
+
+type ProductWithMenu = {
+  id: string
+  title: string
+  created_at: Date
+  updated_at: Date
+  menu?: MenuWithCourses
+}
 
 export async function GET(
   req: MedusaRequest,
@@ -8,7 +33,7 @@ export async function GET(
 ): Promise<void> {
   const query = req.scope.resolve(ContainerRegistrationKeys.QUERY)
   
-  const { data: products } = await query.graph({
+  const result = await query.graph({
     entity: "product",
     fields: ["*", "menu.*", "menu.courses.*", "menu.courses.dishes.*"],
     filters: req.query.product_ids ? {
@@ -17,6 +42,8 @@ export async function GET(
       }
     } : undefined
   })
+
+  const products = result.data as unknown as ProductWithMenu[]
 
   if (!products || products.length === 0) {
     res.status(404).json({

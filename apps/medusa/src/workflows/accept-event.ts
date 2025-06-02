@@ -1,5 +1,5 @@
 import { createWorkflow, transform, WorkflowResponse } from "@medusajs/framework/workflows-sdk"
-import { createProductsWorkflow } from "@medusajs/medusa/core-flows"
+import { createProductsWorkflow, useQueryGraphStep } from "@medusajs/medusa/core-flows"
 import { createStockLocationsWorkflow } from "@medusajs/medusa/core-flows"
 import { linkSalesChannelsToStockLocationWorkflow } from "@medusajs/medusa/core-flows"
 import { linkMenuToEventProductWorkflow } from "./link-menu-to-event-product"
@@ -177,14 +177,18 @@ ${data.event.locationAddress ? `• Address: ${data.event.locationAddress}` : ''
 
     transform(
       {
-        eventLocation,
-        event
+        eventLocation
       },
       async (data, { container }) => {
+        //@ts-ignore
+        const { data: salesChannels } = useQueryGraphStep({
+          entity: "sales_channel",
+          fields: ["id"],
+        })
         await linkSalesChannelsToStockLocationWorkflow(container).run({
           input: {
             id: data.eventLocation.id,
-            add: [data.event.salesChannelId],
+            add: [salesChannels[0].id],
           }
         })
       }
