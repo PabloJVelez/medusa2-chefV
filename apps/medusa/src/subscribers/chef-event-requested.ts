@@ -5,10 +5,10 @@ import type {
 import { Modules } from "@medusajs/framework/utils"
 import { CreateNotificationDTO } from "@medusajs/types"
 import { DateTime } from "luxon"
-import type { ChefEvent } from "../modules/chef-event/types"
+import type { ChefEventType } from "../modules/chef-event/models/chef-event"
 
 type EventData = {
-  chefEvent: ChefEvent
+  chefEvent: ChefEventType
   templateProduct: {
     id: string
     title: string
@@ -25,7 +25,7 @@ export default async function chefEventRequestedHandler({
   const notificationService = container.resolve(Modules.NOTIFICATION)
 
   // Format the date and time for display
-  const formattedDate = DateTime.fromISO(data.chefEvent.requestedDate).toFormat('LLL d, yyyy')
+  const formattedDate = DateTime.fromJSDate(data.chefEvent.requestedDate).toFormat('LLL d, yyyy')
   const formattedTime = DateTime.fromFormat(data.chefEvent.requestedTime, 'HH:mm').toFormat('h:mm a')
 
   // Get event type label
@@ -64,7 +64,7 @@ export default async function chefEventRequestedHandler({
       },
       event: {
         status: "Pending",
-        total_price: data.chefEvent.totalPrice.toFixed(2),
+        total_price: data.chefEvent.totalPrice ? data.chefEvent.totalPrice.toFixed(2) : "Not provided",
         conflict: false // This can be handled separately if needed
       },
       acceptUrl: `${process.env.ADMIN_BACKEND_URL}/admin/events/${data.chefEvent.id}/accept`,
