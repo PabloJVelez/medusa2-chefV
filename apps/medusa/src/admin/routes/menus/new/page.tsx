@@ -1,12 +1,12 @@
 import { defineRouteConfig } from "@medusajs/admin-sdk"
 import { Container, Heading } from "@medusajs/ui"
-import { useCreateMenu } from "../../../hooks/menus.js"
-import { MenuForm } from "../components/menu-form.js"
+import { useAdminCreateMenuMutation } from "../../../hooks/menus"
+import { MenuForm } from "../components/menu-form"
 import { useNavigate } from "@remix-run/react"
-import type { AdminCreateMenuDTO } from "../../../sdk/admin/admin-menus.js"
+import type { AdminCreateMenuDTO } from "../../../../sdk/admin/admin-menus"
 
 const NewMenuPage = () => {
-  const createMenu = useCreateMenu()
+  const createMenu = useAdminCreateMenuMutation()
   const navigate = useNavigate()
 
   const handleSubmit = async (data: AdminCreateMenuDTO) => {
@@ -21,7 +21,10 @@ const NewMenuPage = () => {
       <div className="flex items-center justify-between px-6 py-4">
         <Heading level="h1">Create Menu</Heading>
       </div>
-      <MenuForm onSubmit={handleSubmit} />
+      <MenuForm 
+        onSubmit={handleSubmit}
+        isLoading={createMenu.isPending}
+      />
     </Container>
   )
 }

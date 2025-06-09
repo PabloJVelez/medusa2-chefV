@@ -1,8 +1,8 @@
 import { defineRouteConfig } from "@medusajs/admin-sdk"
 import { Container, Heading } from "@medusajs/ui"
-import { useMenu, useUpdateMenu } from "../../../hooks/menus.js"
-import { MenuForm } from "../components/menu-form.js"
-import type { AdminCreateMenuDTO } from "../../../sdk/admin/admin-menus"
+import { useAdminRetrieveMenu, useAdminUpdateMenuMutation } from "../../../hooks/menus"
+import { MenuForm } from "../components/menu-form"
+import type { AdminUpdateMenuDTO } from "../../../../sdk/admin/admin-menus"
 
 interface MenuDetailsPageProps {
   params: {
@@ -11,11 +11,31 @@ interface MenuDetailsPageProps {
 }
 
 const MenuDetailsPage = ({ params }: MenuDetailsPageProps) => {
-  const { data: menu } = useMenu(params.id)
-  const updateMenu = useUpdateMenu(params.id)
+  const { data: menu, isLoading } = useAdminRetrieveMenu(params.id)
+  const updateMenu = useAdminUpdateMenuMutation(params.id)
 
-  const handleSubmit = async (data: AdminCreateMenuDTO) => {
+  const handleSubmit = async (data: AdminUpdateMenuDTO) => {
     await updateMenu.mutateAsync(data)
+  }
+
+  if (isLoading) {
+    return (
+      <Container>
+        <div className="flex items-center justify-center h-full">
+          <span>Loading...</span>
+        </div>
+      </Container>
+    )
+  }
+
+  if (!menu) {
+    return (
+      <Container>
+        <div className="flex items-center justify-center h-full">
+          <span>Menu not found</span>
+        </div>
+      </Container>
+    )
   }
 
   return (
@@ -23,12 +43,11 @@ const MenuDetailsPage = ({ params }: MenuDetailsPageProps) => {
       <div className="flex items-center justify-between px-6 py-4">
         <Heading level="h1">Edit Menu</Heading>
       </div>
-      {menu && (
-        <MenuForm
-          initialData={menu}
-          onSubmit={handleSubmit}
-        />
-      )}
+      <MenuForm
+        initialData={menu}
+        onSubmit={handleSubmit}
+        isLoading={updateMenu.isPending}
+      />
     </Container>
   )
 }

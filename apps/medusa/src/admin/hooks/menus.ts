@@ -1,39 +1,67 @@
-import { useQuery, useMutation } from "@tanstack/react-query"
-import { sdk } from "../../sdk/index"
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { sdk } from '../../sdk'
 import type { 
   AdminListMenusQuery, 
   AdminCreateMenuDTO, 
-  AdminUpdateMenuDTO 
-} from "../../sdk/admin/admin-menus"
+  AdminUpdateMenuDTO,
+  AdminMenuDTO,
+  AdminMenusResponse
+} from '../../sdk/admin/admin-menus'
 
-export const useMenus = (query?: AdminListMenusQuery) => {
-  return useQuery({
-    queryKey: ["menus", query],
-    queryFn: () => sdk.menus.list(query)
+const QUERY_KEY = ['menus']
+
+export const useAdminListMenus = (query: AdminListMenusQuery = {}) => {
+  return useQuery<AdminMenusResponse>({
+    queryKey: [...QUERY_KEY, query],
+    placeholderData: (previousData) => previousData,
+    queryFn: async () => {
+      return sdk.menus.list(query)
+    },
   })
 }
 
-export const useMenu = (id: string) => {
-  return useQuery({
-    queryKey: ["menu", id],
-    queryFn: () => sdk.menus.retrieve(id)
+export const useAdminRetrieveMenu = (id: string) => {
+  return useQuery<AdminMenuDTO>({
+    queryKey: [...QUERY_KEY, id],
+    queryFn: async () => {
+      return sdk.menus.retrieve(id)
+    },
   })
 }
 
-export const useCreateMenu = () => {
+export const useAdminCreateMenuMutation = () => {
+  const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (data: AdminCreateMenuDTO) => sdk.menus.create(data)
+    mutationFn: async (data: AdminCreateMenuDTO) => {
+      return await sdk.menus.create(data)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEY })
+    },
   })
 }
 
-export const useUpdateMenu = (id: string) => {
+export const useAdminUpdateMenuMutation = (id: string) => {
+  const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (data: AdminUpdateMenuDTO) => sdk.menus.update(id, data)
+    mutationFn: async (data: AdminUpdateMenuDTO) => {
+      return await sdk.menus.update(id, data)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEY })
+      queryClient.invalidateQueries({ queryKey: [...QUERY_KEY, id] })
+    },
   })
 }
 
-export const useDeleteMenu = () => {
+export const useAdminDeleteMenuMutation = () => {
+  const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (id: string) => sdk.menus.delete(id)
+    mutationFn: async (id: string) => {
+      return await sdk.menus.delete(id)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEY })
+    },
   })
 } 

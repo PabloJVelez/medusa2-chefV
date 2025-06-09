@@ -1,39 +1,46 @@
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Button } from "@medusajs/ui"
+import { Button, Label, Text, Textarea } from "@medusajs/ui"
 import { menuSchema } from "../schemas"
-import type { AdminCreateMenuDTO } from "../../../sdk/admin/admin-menus"
+import type { AdminCreateMenuDTO, AdminMenuDTO } from "../../../../sdk/admin/admin-menus"
 
 interface MenuFormProps {
-  initialData?: AdminCreateMenuDTO
+  initialData?: AdminMenuDTO
   onSubmit: (data: AdminCreateMenuDTO) => void
+  isLoading?: boolean
 }
 
-export const MenuForm = ({ initialData, onSubmit }: MenuFormProps) => {
+export const MenuForm = ({ initialData, onSubmit, isLoading }: MenuFormProps) => {
   const form = useForm({
     resolver: zodResolver(menuSchema),
     defaultValues: initialData
   })
 
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)}>
-      <div className="mb-4">
-        <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-          Menu Name
-        </label>
-        <input
-          type="text"
-          id="name"
-          name="name"
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-          required
-          {...form.register("name")}
-        />
+    <form onSubmit={form.handleSubmit(onSubmit)} className="p-6">
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="name">Menu Name</Label>
+          <Textarea
+            id="name"
+            placeholder="Enter menu name..."
+            {...form.register("name")}
+          />
+          {form.formState.errors.name && (
+            <Text className="text-red-500" size="small">
+              {form.formState.errors.name.message}
+            </Text>
+          )}
+        </div>
+
+        {/* Add course form fields here */}
+        
+        <div className="flex justify-end">
+          <Button type="submit" disabled={isLoading}>
+            {isLoading ? "Saving..." : initialData ? "Update Menu" : "Create Menu"}
+          </Button>
+        </div>
       </div>
-      {/* Add course form fields here */}
-      <Button type="submit">
-        {initialData ? "Update Menu" : "Create Menu"}
-      </Button>
     </form>
   )
 } 
