@@ -1,111 +1,105 @@
-import type { Client } from '@medusajs/js-sdk';
+import type { Client } from '@medusajs/js-sdk'
 
 // Define the types for our chef events
-export type AdminChefEventDTO = {
+export interface AdminChefEventDTO {
   id: string
-  status: 'pending' | 'confirmed' | 'cancelled' | 'completed'
-  requestedDate: string
-  requestedTime: string
-  partySize: number
-  eventType: 'cooking_class' | 'plated_dinner' | 'buffet_style' | 'custom'
-  templateProductId: string
-  locationType: 'customer_location' | 'chef_location'
-  locationAddress?: string
-  firstName: string
-  lastName: string
-  email: string
-  phone?: string
-  notes?: string
-  totalPrice?: number
-  depositPaid: boolean
-  specialRequirements?: string
-  estimatedDuration?: number
-  assignedChefId?: string
-  createdAt: string
-  updatedAt: string
+  name: string
+  description?: string
+  start_date: string
+  end_date: string
+  created_at: string
+  updated_at: string
 }
 
-export type AdminListChefEventsQuery = {
+export interface AdminCreateChefEventDTO {
+  name: string
+  description?: string
+  start_date: string
+  end_date: string
+}
+
+export interface AdminUpdateChefEventDTO {
+  name?: string
+  description?: string
+  start_date?: string
+  end_date?: string
+}
+
+export interface AdminListChefEventsQuery {
   limit?: number
   offset?: number
-  status?: 'pending' | 'confirmed' | 'cancelled' | 'completed'
-  eventType?: 'cooking_class' | 'plated_dinner' | 'buffet_style' | 'custom'
-  fromDate?: string
-  toDate?: string
-  q?: string
+  order?: string
+  expand?: string[]
+  fields?: string[]
 }
 
-export type AdminListChefEventsResponse = {
+export interface AdminChefEventsResponse {
   events: AdminChefEventDTO[]
   count: number
-  limit: number
   offset: number
+  limit: number
 }
-
-export type AdminCreateChefEventDTO = Omit<AdminChefEventDTO, 'id' | 'createdAt' | 'updatedAt'>
-
-export type AdminUpdateChefEventDTO = Partial<Omit<AdminChefEventDTO, 'id' | 'createdAt' | 'updatedAt'>>
 
 export class AdminChefEventsResource {
   constructor(private client: Client) {}
 
   /**
-   * List all chef events with pagination and filtering
+   * List chef events
+   * @param query - Query parameters
+   * @returns List of chef events
    */
   async list(query: AdminListChefEventsQuery = {}) {
-    console.log("GETTING THE EVENTS")
-    return this.client.fetch<AdminListChefEventsResponse>(`/admin/events`, {
+    return this.client.fetch<AdminChefEventsResponse>(`/admin/chef-events`, {
       method: 'GET',
       query,
-    });
+    })
   }
 
   /**
-   * Get a specific chef event by ID
+   * Retrieve a chef event
+   * @param id - Chef event ID
+   * @returns Chef event details
    */
-  async retrieve(eventId: string) {
-    return this.client.fetch<{ event: AdminChefEventDTO }>(`/admin/events/${eventId}`, {
+  async retrieve(id: string) {
+    return this.client.fetch<AdminChefEventDTO>(`/admin/chef-events/${id}`, {
       method: 'GET',
-    });
+    })
   }
 
   /**
-   * Create a new chef event
-   */   
-  async create(data: AdminCreateChefEventDTO) {
-    return this.client.fetch<{ event: AdminChefEventDTO }>(`/admin/events`, {
-      method: 'POST',
-      body: data,
-    });
-  }
-
-  /**
-   * Update an existing chef event
+   * Create a chef event
+   * @param data - Chef event data
+   * @returns Created chef event
    */
-  async update(eventId: string, data: AdminUpdateChefEventDTO) {
-    return this.client.fetch<{ event: AdminChefEventDTO }>(`/admin/events/${eventId}`, {
+  async create(data: AdminCreateChefEventDTO) {
+    return this.client.fetch<AdminChefEventDTO>(`/admin/chef-events`, {
       method: 'POST',
       body: data,
-    });
+    })
+  }
+
+  /**
+   * Update a chef event
+   * @param id - Chef event ID
+   * @param data - Chef event data
+   * @returns Updated chef event
+   */
+  async update(id: string, data: AdminUpdateChefEventDTO) {
+    return this.client.fetch<AdminChefEventDTO>(`/admin/chef-events/${id}`, {
+      method: 'POST',
+      body: data,
+    })
   }
 
   /**
    * Delete a chef event
+   * @param id - Chef event ID
+   * @returns Deleted chef event
    */
-  async delete(eventId: string) {
-    return this.client.fetch<void>(`/admin/events/${eventId}`, {
+  async delete(id: string) {
+    return this.client.fetch<AdminChefEventDTO>(`/admin/chef-events/${id}`, {
       method: 'DELETE',
-    });
-  }
-
-  /**
-   * Update the status of a chef event
-   */
-  async updateStatus(eventId: string, status: 'pending' | 'confirmed' | 'cancelled' | 'completed') {
-    return this.client.fetch<{ event: AdminChefEventDTO }>(`/admin/events/${eventId}/status`, {
-      method: 'PUT',
-      body: { status },
-    });
+    })
   }
 
   /**
@@ -114,7 +108,6 @@ export class AdminChefEventsResource {
   async getMenuProducts() {
     return this.client.fetch<{ products: Array<{ id: string, title: string }> }>(`/admin/products`, {
       method: 'GET',
-      // query: { is_menu: true },
-    });
+    })
   }
-} 
+}

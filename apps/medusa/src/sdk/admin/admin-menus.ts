@@ -1,112 +1,116 @@
-import type { Client } from '@medusajs/js-sdk';
+import type { Client } from '@medusajs/js-sdk'
 
-// Define the types for our menus
-export type AdminMenuDTO = {
-  id: string
+export interface AdminIngredientDTO {
+  id?: string
   name: string
-  courses: AdminCourseDTO[]
-  createdAt: string
-  updatedAt: string
+  optional?: boolean
 }
 
-export type AdminCourseDTO = {
-  id: string
+export interface AdminDishDTO {
+  id?: string
+  name: string
+  description?: string
+  ingredients: AdminIngredientDTO[]
+}
+
+export interface AdminCourseDTO {
+  id?: string
   name: string
   dishes: AdminDishDTO[]
 }
 
-export type AdminDishDTO = {
+export interface AdminMenuDTO {
   id: string
   name: string
-  description: string | null
-  ingredients: AdminIngredientDTO[]
+  courses: AdminCourseDTO[]
+  created_at: string
+  updated_at: string
 }
 
-export type AdminIngredientDTO = {
-  id: string
+export interface AdminCreateMenuDTO {
   name: string
-  optional: boolean | null
+  courses: AdminCourseDTO[]
 }
 
-export type AdminListMenusQuery = {
+export interface AdminUpdateMenuDTO {
+  name?: string
+  courses?: AdminCourseDTO[]
+}
+
+export interface AdminListMenusQuery {
   limit?: number
   offset?: number
-  q?: string
-  product_ids?: string[]
+  order?: string
+  expand?: string[]
+  fields?: string[]
 }
 
-export type AdminListMenusResponse = {
+export interface AdminMenusResponse {
   menus: AdminMenuDTO[]
   count: number
-  limit: number
   offset: number
+  limit: number
 }
-
-export type AdminCreateMenuDTO = {
-  name: string
-  courses: {
-    name: string
-    dishes: {
-      name: string
-      description?: string
-      ingredients: {
-        name: string
-        optional?: boolean
-      }[]
-    }[]
-  }[]
-}
-
-export type AdminUpdateMenuDTO = Partial<AdminCreateMenuDTO>
 
 export class AdminMenusResource {
   constructor(private client: Client) {}
 
   /**
-   * List all menus with pagination and filtering
+   * List menus
+   * @param query - Query parameters
+   * @returns List of menus
    */
   async list(query: AdminListMenusQuery = {}) {
-    return this.client.fetch<AdminListMenusResponse>(`/admin/menus`, {
+    return this.client.fetch<AdminMenusResponse>(`/admin/menus`, {
       method: 'GET',
       query,
-    });
+    })
   }
 
   /**
-   * Get a specific menu by ID
+   * Retrieve a menu
+   * @param id - Menu ID
+   * @returns Menu details
    */
-  async retrieve(menuId: string) {
-    return this.client.fetch<{ menu: AdminMenuDTO }>(`/admin/menus/${menuId}`, {
+  async retrieve(id: string) {
+    return this.client.fetch<AdminMenuDTO>(`/admin/menus/${id}`, {
       method: 'GET',
-    });
+    })
   }
 
   /**
-   * Create a new menu
-   */   
-  async create(data: AdminCreateMenuDTO) {
-    return this.client.fetch<{ menu: AdminMenuDTO }>(`/admin/menus`, {
-      method: 'POST',
-      body: data,
-    });
-  }
-
-  /**
-   * Update an existing menu
+   * Create a menu
+   * @param data - Menu data
+   * @returns Created menu
    */
-  async update(menuId: string, data: AdminUpdateMenuDTO) {
-    return this.client.fetch<{ menu: AdminMenuDTO }>(`/admin/menus/${menuId}`, {
+  async create(data: AdminCreateMenuDTO) {
+    return this.client.fetch<AdminMenuDTO>(`/admin/menus`, {
       method: 'POST',
       body: data,
-    });
+    })
+  }
+
+  /**
+   * Update a menu
+   * @param id - Menu ID
+   * @param data - Menu data
+   * @returns Updated menu
+   */
+  async update(id: string, data: AdminUpdateMenuDTO) {
+    return this.client.fetch<AdminMenuDTO>(`/admin/menus/${id}`, {
+      method: 'POST',
+      body: data,
+    })
   }
 
   /**
    * Delete a menu
+   * @param id - Menu ID
+   * @returns Deleted menu
    */
-  async delete(menuId: string) {
-    return this.client.fetch<void>(`/admin/menus/${menuId}`, {
+  async delete(id: string) {
+    return this.client.fetch<AdminMenuDTO>(`/admin/menus/${id}`, {
       method: 'DELETE',
-    });
+    })
   }
 } 

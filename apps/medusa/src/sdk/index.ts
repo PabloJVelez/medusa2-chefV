@@ -1,22 +1,24 @@
-import Medusa, { type Config } from '@medusajs/js-sdk';
-import { ExtendedAdminSDK } from './admin/index';
+import { Client, Admin } from '@medusajs/js-sdk'
+import { AdminMenusResource } from './admin/admin-menus'
+import { AdminChefEventsResource } from './admin/admin-chef-events'
 
-export class MedusaPluginsSDK extends Medusa {
-  public admin: ExtendedAdminSDK
-  
+export class ExtendedAdminSDK extends Admin {
+  public menus: AdminMenusResource
+  public chefEvents: AdminChefEventsResource
 
-  constructor(config: Config) {
-    super(config)
-    
-    this.admin = new ExtendedAdminSDK(this.client)
+  constructor(client: Client) {
+    super(client)
+    this.menus = new AdminMenusResource(client)
+    this.chefEvents = new AdminChefEventsResource(client)
   }
 }
 
-export const sdk = new MedusaPluginsSDK({
-  baseUrl: 'http://localhost:9000',
-  // apiKey: process.env.SDK_API_KEY,
-  apiKey: 'sk_6813a3c7eb8af6d971738f443e4885098464a6317f5050912811835b3ef323ac',
-})
+// Use a hardcoded URL for now since we're in development
+export const sdk = new ExtendedAdminSDK(
+  new Client({
+    baseUrl: 'http://localhost:9000',
+  })
+)
 
 export { AdminChefEventsResource } from './admin/admin-chef-events'
 export { AdminMenusResource } from './admin/admin-menus'
