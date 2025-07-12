@@ -58,11 +58,13 @@ export async function POST(
 ): Promise<void> {
   try {
     const { id } = req.params
+    console.log("ID WE GET IN THE API", id)
     const validatedData = updateMenuSchema.parse(req.body)
     
     // Check if menu exists first
     const menuModuleService = req.scope.resolve(MENU_MODULE)
     const existingMenu = await menuModuleService.retrieveMenu(id)
+    console.log("EXISTING MENU", existingMenu)
     
     if (!existingMenu) {
       res.status(404).json({

@@ -5,6 +5,7 @@ import {
   WorkflowResponse
 } from "@medusajs/workflows-sdk"
 import { MENU_MODULE } from "../modules/menu"
+import MenuModuleService from "src/modules/menu/service"
 
 type UpdateMenuWorkflowInput = {
   id: string
@@ -28,10 +29,11 @@ type UpdateMenuWorkflowInput = {
 const updateMenuStep = createStep(
   "update-menu-step",
   async (input: UpdateMenuWorkflowInput, { container }: { container: any }) => {
-    const menuModuleService = container.resolve(MENU_MODULE)
+    const menuModuleService: MenuModuleService = container.resolve(MENU_MODULE)
     
     // Update the menu
-    const menu = await menuModuleService.updateMenus(input.id, {
+    const menu = await menuModuleService.updateMenus({
+      id: input.id,
       name: input.name
     })
     
