@@ -1,5 +1,5 @@
 import { defineRouteConfig } from "@medusajs/admin-sdk"
-import { Container, Heading, FocusModal } from "@medusajs/ui"
+import { Container, Heading, FocusModal, toast } from "@medusajs/ui"
 import { MenuList } from "./components/menu-list.js"
 import { MenuForm } from "./components/menu-form.js"
 import { useAdminCreateMenuMutation } from "../../hooks/menus.js"
@@ -14,9 +14,16 @@ const MenusPage = () => {
     try {
       await createMenu.mutateAsync(data)
       setShowCreateModal(false)
+      toast.success("Menu Created", {
+        description: "The menu has been created successfully.",
+        duration: 3000,
+      })
     } catch (error) {
       console.error("Error creating menu:", error)
-      // Error handling is done in the form component
+      toast.error("Creation Failed", {
+        description: "There was an error creating the menu. Please try again.",
+        duration: 5000,
+      })
     }
   }
 

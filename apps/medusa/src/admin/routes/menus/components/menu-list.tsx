@@ -1,5 +1,5 @@
 import { useAdminListMenus, useAdminDeleteMenuMutation } from "../../../hooks/menus"
-import { DataTable, createDataTableColumnHelper, useDataTable, Button } from "@medusajs/ui"
+import { DataTable, createDataTableColumnHelper, useDataTable, Button, toast } from "@medusajs/ui"
 import { useState } from "react"
 import type { AdminMenuDTO } from "../../../../sdk/admin/admin-menus"
 
@@ -46,7 +46,21 @@ export const MenuList = ({ onCreateMenu }: MenuListProps) => {
           label: "Delete",
           onClick: () => {
             if (confirm(`Are you sure you want to delete "${row.original.name}"?`)) {
-              deleteMenu.mutate(row.original.id)
+              deleteMenu.mutate(row.original.id, {
+                onSuccess: () => {
+                  toast.success("Menu Deleted", {
+                    description: `"${row.original.name}" has been deleted successfully.`,
+                    duration: 3000,
+                  })
+                },
+                onError: (error) => {
+                  console.error("Error deleting menu:", error)
+                  toast.error("Delete Failed", {
+                    description: "There was an error deleting the menu. Please try again.",
+                    duration: 5000,
+                  })
+                },
+              })
             }
           },
         },
