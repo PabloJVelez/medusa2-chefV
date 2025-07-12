@@ -17,6 +17,9 @@ export class ExtendedAdminSDK extends Admin {
 export const sdk = new ExtendedAdminSDK(
   new Client({
     baseUrl: 'http://localhost:9000',
+    auth: {
+    type: "session",
+  },
   })
 )
 

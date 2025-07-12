@@ -1,46 +1,54 @@
 import { useAdminListMenus, useAdminDeleteMenuMutation } from "../../../hooks/menus"
-import { DataTable, Heading, createDataTableColumnHelper, useDataTable } from "@medusajs/ui"
-import { Link } from "@remix-run/react"
+import { DataTable, createDataTableColumnHelper, useDataTable, Button } from "@medusajs/ui"
 import { useState } from "react"
 import type { AdminMenuDTO } from "../../../../sdk/admin/admin-menus"
 
 const columnHelper = createDataTableColumnHelper<AdminMenuDTO>()
 
-export const MenuList = () => {
+interface MenuListProps {
+  onCreateMenu: () => void
+}
+
+export const MenuList = ({ onCreateMenu }: MenuListProps) => {
   const [query, setQuery] = useState({ limit: 10, offset: 0, q: "" })
   const { data, isLoading } = useAdminListMenus(query)
   const deleteMenu = useAdminDeleteMenuMutation()
 
   const columns = [
-    columnHelper.accessor('name', {
+    columnHelper.accessor("name", {
       header: "Name",
       cell: ({ row }) => (
-        <Link to={`/app/menus/${row.original.id}`} className="hover:underline">
+        <button
+          onClick={() => (window.location.href = `/app/menus/${row.original.id}`)}
+          className="hover:underline text-blue-600 text-left"
+        >
           {row.original.name}
-        </Link>
+        </button>
       ),
     }),
-    columnHelper.accessor('courses', {
+    columnHelper.accessor("courses", {
       header: "Courses",
-      cell: ({ row }) => row.original.courses.length,
+      cell: ({ row }) => row.original.courses?.length || 0,
     }),
-    columnHelper.accessor('created_at', {
+    columnHelper.accessor("created_at", {
       header: "Created At",
       cell: ({ row }) => new Date(row.original.created_at).toLocaleDateString(),
     }),
     columnHelper.action({
       actions: ({ row }) => [
         {
-          icon: "Edit",
+          icon: "PencilSquare",
           label: "Edit",
-          onClick: () => {
-            // Navigation is handled by the Link component
-          },
+          onClick: () => (window.location.href = `/app/menus/${row.original.id}`),
         },
         {
-          icon: "Delete",
+          icon: "Trash",
           label: "Delete",
-          onClick: () => deleteMenu.mutate(row.original.id),
+          onClick: () => {
+            if (confirm(`Are you sure you want to delete "${row.original.name}"?`)) {
+              deleteMenu.mutate(row.original.id)
+            }
+          },
         },
       ],
     }),
@@ -75,9 +83,16 @@ export const MenuList = () => {
 
   return (
     <DataTable instance={table}>
-      <DataTable.Toolbar className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
-        <Heading>Menus</Heading>
-        <DataTable.Search />
+      <DataTable.Toolbar>
+        <DataTable.Search placeholder="Search menus..." />
+        <Button 
+          variant="primary" 
+          size="base"
+          onClick={onCreateMenu}
+          className="ml-auto"
+        >
+          Create Menu
+        </Button>
       </DataTable.Toolbar>
 
       <DataTable.Table />
@@ -85,4 +100,4 @@ export const MenuList = () => {
       <DataTable.Pagination />
     </DataTable>
   )
-} 
+}

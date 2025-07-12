@@ -18,5 +18,5 @@ export const courseSchema = z.object({
 
 export const menuSchema = z.object({
   name: z.string().min(1, "Menu name is required"),
-  courses: z.array(courseSchema)
+  courses: z.array(courseSchema).optional().default([])
 }) 

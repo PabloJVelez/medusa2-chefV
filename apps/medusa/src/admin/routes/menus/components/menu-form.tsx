@@ -1,46 +1,77 @@
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Button, Label, Text, Textarea } from "@medusajs/ui"
+import { Button, Label, Text, Input } from "@medusajs/ui"
 import { menuSchema } from "../schemas"
 import type { AdminCreateMenuDTO, AdminMenuDTO } from "../../../../sdk/admin/admin-menus"
 
 interface MenuFormProps {
   initialData?: AdminMenuDTO
-  onSubmit: (data: AdminCreateMenuDTO) => void
+  onSubmit: (data: AdminCreateMenuDTO) => Promise<void>
+  onCancel: () => void
   isLoading?: boolean
 }
 
-export const MenuForm = ({ initialData, onSubmit, isLoading }: MenuFormProps) => {
+export const MenuForm = ({ initialData, onSubmit, onCancel, isLoading }: MenuFormProps) => {
   const form = useForm({
     resolver: zodResolver(menuSchema),
-    defaultValues: initialData
+    defaultValues: initialData || {
+      name: "",
+      courses: []
+    }
   })
 
+  const handleSubmit = async (data: AdminCreateMenuDTO) => {
+    try {
+      await onSubmit(data)
+    } catch (error) {
+      console.error("Form submission error:", error)
+    }
+  }
+
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)} className="p-6">
-      <div className="flex flex-col gap-4">
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="name">Menu Name</Label>
-          <Textarea
-            id="name"
-            placeholder="Enter menu name..."
-            {...form.register("name")}
-          />
-          {form.formState.errors.name && (
-            <Text className="text-red-500" size="small">
-              {form.formState.errors.name.message}
+    <div className="p-6">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+        <div className="space-y-4">
+          <div>
+            <Label htmlFor="name">Menu Name</Label>
+            <Input
+              id="name"
+              placeholder="Enter menu name..."
+              {...form.register("name")}
+            />
+            {form.formState.errors.name && (
+              <Text className="text-red-500 text-sm mt-1">
+                {form.formState.errors.name.message}
+              </Text>
+            )}
+          </div>
+
+          <div>
+            <Text size="small" className="text-gray-600">
+              Course and dish management will be available after creating the menu.
+              You can edit the menu to add courses, dishes, and ingredients.
             </Text>
-          )}
+          </div>
         </div>
 
-        {/* Add course form fields here */}
-        
-        <div className="flex justify-end">
-          <Button type="submit" disabled={isLoading}>
-            {isLoading ? "Saving..." : initialData ? "Update Menu" : "Create Menu"}
+        <div className="flex items-center justify-end gap-2 pt-4 border-t">
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={onCancel}
+            disabled={isLoading}
+          >
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            variant="primary"
+            disabled={isLoading}
+          >
+            {isLoading ? "Creating..." : initialData ? "Update Menu" : "Create Menu"}
           </Button>
         </div>
-      </div>
-    </form>
+      </form>
+    </div>
   )
 } 

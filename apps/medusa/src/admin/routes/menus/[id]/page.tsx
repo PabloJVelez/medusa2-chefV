@@ -2,6 +2,7 @@ import { defineRouteConfig } from "@medusajs/admin-sdk"
 import { Container, Heading } from "@medusajs/ui"
 import { useAdminRetrieveMenu, useAdminUpdateMenuMutation } from "../../../hooks/menus"
 import { MenuForm } from "../components/menu-form"
+import { useParams, useNavigate } from "react-router-dom"
 import type { AdminUpdateMenuDTO } from "../../../../sdk/admin/admin-menus"
 
 interface MenuDetailsPageProps {
@@ -11,11 +12,23 @@ interface MenuDetailsPageProps {
 }
 
 const MenuDetailsPage = ({ params }: MenuDetailsPageProps) => {
-  const { data: menu, isLoading } = useAdminRetrieveMenu(params.id)
-  const updateMenu = useAdminUpdateMenuMutation(params.id)
+  const { id } = useParams()
+  console.log("id", id)
+  const { data: menu, isLoading } = useAdminRetrieveMenu(id as string)
+  const updateMenu = useAdminUpdateMenuMutation(id as string)
+  const navigate = useNavigate()
 
   const handleSubmit = async (data: AdminUpdateMenuDTO) => {
-    await updateMenu.mutateAsync(data)
+    try {
+      await updateMenu.mutateAsync(data)
+      navigate("/app/menus")
+    } catch (error) {
+      console.error("Error updating menu:", error)
+    }
+  }
+
+  const handleCancel = () => {
+    navigate("/app/menus")
   }
 
   if (isLoading) {
@@ -46,6 +59,7 @@ const MenuDetailsPage = ({ params }: MenuDetailsPageProps) => {
       <MenuForm
         initialData={menu}
         onSubmit={handleSubmit}
+        onCancel={handleCancel}
         isLoading={updateMenu.isPending}
       />
     </Container>
