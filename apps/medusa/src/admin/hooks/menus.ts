@@ -20,9 +20,10 @@ export const useAdminListMenus = (query: AdminListMenusQuery = {}) => {
   })
 }
 
-export const useAdminRetrieveMenu = (id: string) => {
+export const useAdminRetrieveMenu = (id: string, options?: { enabled?: boolean }) => {
   return useQuery<AdminMenuDTO>({
     queryKey: [...QUERY_KEY, id],
+    enabled: options?.enabled !== false && !!id,
     queryFn: async () => {
       return sdk.menus.retrieve(id)
     },

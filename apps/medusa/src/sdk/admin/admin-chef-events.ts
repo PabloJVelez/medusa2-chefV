@@ -3,26 +3,65 @@ import type { Client } from '@medusajs/js-sdk'
 // Define the types for our chef events
 export interface AdminChefEventDTO {
   id: string
-  name: string
-  description?: string
-  start_date: string
-  end_date: string
-  created_at: string
-  updated_at: string
+  status: 'pending' | 'confirmed' | 'cancelled' | 'completed'
+  requestedDate: Date
+  requestedTime: string
+  partySize: number
+  eventType: 'cooking_class' | 'plated_dinner' | 'buffet_style'
+  templateProductId?: string
+  locationType: 'customer_location' | 'chef_location'
+  locationAddress: string
+  firstName: string
+  lastName: string
+  email: string
+  phone?: string
+  notes?: string
+  totalPrice?: number
+  depositPaid: boolean
+  specialRequirements?: string
+  estimatedDuration?: number
+  createdAt: Date
+  updatedAt: Date
 }
 
 export interface AdminCreateChefEventDTO {
-  name: string
-  description?: string
-  start_date: string
-  end_date: string
+  status?: 'pending' | 'confirmed' | 'cancelled' | 'completed'
+  requestedDate: string
+  requestedTime: string
+  partySize: number
+  eventType: 'cooking_class' | 'plated_dinner' | 'buffet_style'
+  templateProductId?: string
+  locationType: 'customer_location' | 'chef_location'
+  locationAddress: string
+  firstName: string
+  lastName: string
+  email: string
+  phone?: string
+  notes?: string
+  totalPrice?: number
+  depositPaid?: boolean
+  specialRequirements?: string
+  estimatedDuration?: number
 }
 
 export interface AdminUpdateChefEventDTO {
-  name?: string
-  description?: string
-  start_date?: string
-  end_date?: string
+  status?: 'pending' | 'confirmed' | 'cancelled' | 'completed'
+  requestedDate?: string
+  requestedTime?: string
+  partySize?: number
+  eventType?: 'cooking_class' | 'plated_dinner' | 'buffet_style'
+  templateProductId?: string
+  locationType?: 'customer_location' | 'chef_location'
+  locationAddress?: string
+  firstName?: string
+  lastName?: string
+  email?: string
+  phone?: string
+  notes?: string
+  totalPrice?: number
+  depositPaid?: boolean
+  specialRequirements?: string
+  estimatedDuration?: number
 }
 
 export interface AdminListChefEventsQuery {
@@ -34,7 +73,7 @@ export interface AdminListChefEventsQuery {
 }
 
 export interface AdminChefEventsResponse {
-  events: AdminChefEventDTO[]
+  chefEvents: AdminChefEventDTO[]
   count: number
   offset: number
   limit: number
@@ -61,9 +100,10 @@ export class AdminChefEventsResource {
    * @returns Chef event details
    */
   async retrieve(id: string) {
-    return this.client.fetch<AdminChefEventDTO>(`/admin/chef-events/${id}`, {
+    const response = await this.client.fetch<{ chefEvent: AdminChefEventDTO }>(`/admin/chef-events/${id}`, {
       method: 'GET',
     })
+    return response.chefEvent
   }
 
   /**
@@ -72,10 +112,11 @@ export class AdminChefEventsResource {
    * @returns Created chef event
    */
   async create(data: AdminCreateChefEventDTO) {
-    return this.client.fetch<AdminChefEventDTO>(`/admin/chef-events`, {
+    const response = await this.client.fetch<{ chefEvent: AdminChefEventDTO }>(`/admin/chef-events`, {
       method: 'POST',
       body: data,
     })
+    return response.chefEvent
   }
 
   /**
@@ -85,10 +126,11 @@ export class AdminChefEventsResource {
    * @returns Updated chef event
    */
   async update(id: string, data: AdminUpdateChefEventDTO) {
-    return this.client.fetch<AdminChefEventDTO>(`/admin/chef-events/${id}`, {
+    const response = await this.client.fetch<{ chefEvent: AdminChefEventDTO }>(`/admin/chef-events/${id}`, {
       method: 'POST',
       body: data,
     })
+    return response.chefEvent
   }
 
   /**
@@ -97,9 +139,10 @@ export class AdminChefEventsResource {
    * @returns Deleted chef event
    */
   async delete(id: string) {
-    return this.client.fetch<AdminChefEventDTO>(`/admin/chef-events/${id}`, {
+    const response = await this.client.fetch<{ deleted: boolean }>(`/admin/chef-events/${id}`, {
       method: 'DELETE',
     })
+    return response
   }
 
   /**
