@@ -1,6 +1,7 @@
 import { Client, Admin } from '@medusajs/js-sdk'
 import { AdminMenusResource } from './admin/admin-menus'
 import { AdminChefEventsResource } from './admin/admin-chef-events'
+import { ExtendedStoreSDK } from './store'
 
 export class ExtendedAdminSDK extends Admin {
   public menus: AdminMenusResource
@@ -13,15 +14,32 @@ export class ExtendedAdminSDK extends Admin {
   }
 }
 
+export class ExtendedSDK {
+  public admin: ExtendedAdminSDK
+  public store: ExtendedStoreSDK
+
+  constructor(baseUrl: string = 'http://localhost:9000') {
+    const adminClient = new Client({
+      baseUrl,
+      auth: {
+        type: "session",
+      },
+    })
+    
+    const storeClient = new Client({
+      baseUrl,
+      // Store client doesn't need authentication
+    })
+
+    this.admin = new ExtendedAdminSDK(adminClient)
+    this.store = new ExtendedStoreSDK(storeClient)
+  }
+}
+
 // Use a hardcoded URL for now since we're in development
-export const sdk = new ExtendedAdminSDK(
-  new Client({
-    baseUrl: 'http://localhost:9000',
-    auth: {
-    type: "session",
-  },
-  })
-)
+export const sdk = new ExtendedSDK('http://localhost:9000')
 
 export { AdminChefEventsResource } from './admin/admin-chef-events'
 export { AdminMenusResource } from './admin/admin-menus'
+export { ExtendedStoreSDK } from './store'
+export type * from './store'

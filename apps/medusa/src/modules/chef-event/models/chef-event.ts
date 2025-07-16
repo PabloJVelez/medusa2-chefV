@@ -39,7 +39,7 @@ export const ChefEvent = model.define("chef_event", {
   totalPrice: model.bigNumber(),
   depositPaid: model.boolean().default(false),
   specialRequirements: model.text(),
-  estimatedDuration: model.number(), // Duration in minutes
+  estimatedDuration: model.number().nullable(), // Duration in minutes
   
 }).cascades({
   delete: [] // Add any cascading deletes if needed

@@ -31,11 +31,19 @@ const createChefEventStep = createStep(
   async (input: CreateChefEventWorkflowInput, { container }: { container: any }) => {
     const chefEventModuleService = container.resolve(CHEF_EVENT_MODULE)
     
+    // Provide default estimated duration based on event type if not provided
+    const defaultDurations = {
+      'cooking_class': 180, // 3 hours
+      'plated_dinner': 240, // 4 hours  
+      'buffet_style': 150   // 2.5 hours
+    }
+    
     const chefEvent = await chefEventModuleService.createChefEvents({
       ...input,
       requestedDate: new Date(input.requestedDate),
       totalPrice: input.totalPrice || 0,
-      depositPaid: input.depositPaid || false
+      depositPaid: input.depositPaid || false,
+      estimatedDuration: input.estimatedDuration || defaultDurations[input.eventType]
     })
     
     return new StepResponse(chefEvent)
