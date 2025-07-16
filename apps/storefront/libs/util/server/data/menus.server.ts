@@ -1,0 +1,114 @@
+import { cachified } from '@epic-web/cachified';
+import { sdkCache, baseMedusaConfig } from '../client.server';
+
+export interface StoreIngredientDTO {
+  id: string;
+  name: string;
+  optional?: boolean;
+}
+
+export interface StoreDishDTO {
+  id: string;
+  name: string;
+  description?: string;
+  ingredients: StoreIngredientDTO[];
+}
+
+export interface StoreCourseDTO {
+  id: string;
+  name: string;
+  dishes: StoreDishDTO[];
+}
+
+export interface StoreMenuDTO {
+  id: string;
+  name: string;
+  courses: StoreCourseDTO[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface StoreMenusResponse {
+  menus: StoreMenuDTO[];
+  count: number;
+  offset: number;
+  limit: number;
+}
+
+export interface StoreMenuResponse {
+  menu: StoreMenuDTO;
+}
+
+// Fetch all available menus with optional search and pagination
+export const fetchMenus = async ({
+  limit = 20,
+  offset = 0,
+  q,
+}: {
+  limit?: number;
+  offset?: number;
+  q?: string;
+} = {}): Promise<StoreMenusResponse> => {
+  const cacheKey = `menus-${JSON.stringify({ limit, offset, q })}`;
+  
+  return cachified({
+    key: cacheKey,
+    cache: sdkCache,
+    ttl: 1000 * 60 * 30, // 30 minutes TTL as specified in the plan
+    async getFreshValue() {
+      const params = new URLSearchParams();
+      params.append('limit', limit.toString());
+      params.append('offset', offset.toString());
+      if (q) params.append('q', q);
+
+      const response = await fetch(`${baseMedusaConfig.baseUrl}/store/menus?${params}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-publishable-api-key': baseMedusaConfig.publishableKey || '',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch menus: ${response.statusText}`);
+      }
+
+      return response.json();
+    },
+  });
+};
+
+// Fetch a specific menu by ID with full details
+export const fetchMenuById = async (id: string): Promise<StoreMenuResponse> => {
+  const cacheKey = `menu-${id}`;
+  
+  return cachified({
+    key: cacheKey,
+    cache: sdkCache,
+    ttl: 1000 * 60 * 30, // 30 minutes TTL
+    async getFreshValue() {
+      const response = await fetch(`${baseMedusaConfig.baseUrl}/store/menus/${id}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-publishable-api-key': baseMedusaConfig.publishableKey || '',
+        },
+      });
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error(`Menu not found: ${id}`);
+        }
+        throw new Error(`Failed to fetch menu: ${response.statusText}`);
+      }
+
+      return response.json();
+    },
+  });
+};
+
+// Get featured menus (first 6 menus for homepage)
+export const getFeaturedMenus = async (): Promise<StoreMenuDTO[]> => {
+  const response = await fetchMenus({ limit: 6, offset: 0 });
+  return response.menus;
+}; 
