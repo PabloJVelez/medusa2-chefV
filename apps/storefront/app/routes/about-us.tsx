@@ -9,21 +9,21 @@ const locations: LocationProps[] = [
     addressLines: ['1105 S. Lamar Blvd', 'Austin, TX 78704'],
     phone: '(512) 906-0010',
     hours: ['Open Daily — 7am to 7pm'],
-    imageUrl: '/assets/images/location-1.png',
+    imageUrl: 'https://images.unsplash.com/photo-1567521464027-f127ff144326?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&q=80',
   },
   {
     title: 'Barrio Sonterra',
     addressLines: ['700 E. Sonterra Blvd. Suite #1113', 'San Antonio, TX 78258'],
     phone: '(210) 530-8740',
     hours: ['Mon thru Fri — 6am to 7pm', 'Sat — 7am to 7pm', 'Sun — 7am to 6pm'],
-    imageUrl: '/assets/images/location-2.png',
+    imageUrl: 'https://images.unsplash.com/photo-1551632436-cbf8dd35adfa?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&q=80',
   },
   {
     title: 'Barrio Deep Ellum',
     addressLines: ['2369 Main Street', 'Dallas, TX 75226'],
     phone: '(469) 248-3440',
     hours: ['Sun thru Thu — 7am to 7pm', 'Fri thru Sat — 7am to 8pm'],
-    imageUrl: '/assets/images/location-3.png',
+    imageUrl: 'https://images.unsplash.com/photo-1592861956120-e524fc739696?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&q=80',
   },
 ];
 
