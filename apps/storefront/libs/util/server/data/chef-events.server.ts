@@ -51,12 +51,9 @@ export interface ChefEventError {
   }>;
 }
 
-// Pricing structure matching the backend
-export const PRICING_STRUCTURE = {
-  'buffet_style': 99.99,
-  'cooking_class': 119.99,
-  'plated_dinner': 149.99,
-} as const;
+// Import pricing structure from shared constants
+import { PRICING_STRUCTURE } from '@libs/constants/pricing';
+export { PRICING_STRUCTURE };
 
 // Calculate total price for an event
 export const calculateEventPrice = (

@@ -11,12 +11,12 @@ import type { FC } from 'react';
 
 // Real form step components
 import { MenuSelector } from './MenuSelector';
-const EventTypeSelector = () => <div>Event Type Selection Step - Coming Soon</div>;
-const DateTimeForm = () => <div>Date & Time Step - Coming Soon</div>;
-const PartySizeSelector = () => <div>Party Size Step - Coming Soon</div>;
-const LocationForm = () => <div>Location Step - Coming Soon</div>;
-const ContactDetails = () => <div>Contact Details Step - Coming Soon</div>;
-const SpecialRequests = () => <div>Special Requests Step - Coming Soon</div>;
+import { EventTypeSelector } from './EventTypeSelector';
+import { PartySizeSelector } from './PartySizeSelector';
+import { DateTimeForm } from './DateTimeForm';
+import { LocationForm } from './LocationForm';
+import { ContactDetails } from './ContactDetails';
+import { SpecialRequests } from './SpecialRequests';
 const RequestSummary = ({ menus }: { menus: any[] }) => <div>Review & Submit Step - Coming Soon</div>;
 
 export interface EventRequestFormProps {
