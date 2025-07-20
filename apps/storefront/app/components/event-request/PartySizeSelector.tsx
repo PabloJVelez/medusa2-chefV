@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Button } from '@app/components/common/buttons/Button';
 import { useFormContext } from 'react-hook-form';
-import type { EventRequestFormData } from '@app/routes/request';
+import type { EventRequestFormData } from '@app/routes/request._index';
 import { PRICING_STRUCTURE, getEventTypeDisplayName } from '@libs/constants/pricing';
 import clsx from 'clsx';
 import type { FC } from 'react';

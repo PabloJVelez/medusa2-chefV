@@ -1,7 +1,7 @@
 import { Button } from '@app/components/common/buttons/Button';
 import { Image } from '@app/components/common/images/Image';
 import { useFormContext } from 'react-hook-form';
-import type { EventRequestFormData } from '@app/routes/request';
+import type { EventRequestFormData } from '@app/routes/request._index';
 import { PRICING_STRUCTURE, getEventTypeDisplayName } from '@libs/constants/pricing';
 import clsx from 'clsx';
 import type { FC } from 'react';

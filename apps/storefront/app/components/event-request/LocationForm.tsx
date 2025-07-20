@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useFormContext } from 'react-hook-form';
-import type { EventRequestFormData } from '@app/routes/request';
+import type { EventRequestFormData } from '@app/routes/request._index';
 import clsx from 'clsx';
 import type { FC } from 'react';
 

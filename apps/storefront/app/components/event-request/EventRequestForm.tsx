@@ -1,11 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@app/components/common/buttons/Button';
 import { ActionList } from '@app/components/common/actions-list/ActionList';
 import type { StoreMenuDTO } from '@app/../types/menus';
-import type { EventRequestFormData } from '@app/routes/request';
+import type { EventRequestFormData } from '@app/routes/request._index';
 import { RemixFormProvider, useRemixForm } from 'remix-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { eventRequestSchema } from '@app/routes/request';
+import { eventRequestSchema } from '@app/routes/request._index';
+import { useActionData } from 'react-router';
 import clsx from 'clsx';
 import type { FC } from 'react';
 
@@ -17,11 +18,20 @@ import { DateTimeForm } from './DateTimeForm';
 import { LocationForm } from './LocationForm';
 import { ContactDetails } from './ContactDetails';
 import { SpecialRequests } from './SpecialRequests';
-const RequestSummary = ({ menus }: { menus: any[] }) => <div>Review & Submit Step - Coming Soon</div>;
+import { RequestSummary } from './RequestSummary';
 
 export interface EventRequestFormProps {
   menus: StoreMenuDTO[];
   initialValues?: Partial<EventRequestFormData>;
+}
+
+// Type for action response
+interface ActionResponse {
+  success?: boolean;
+  eventId?: string;
+  redirectTo?: string;
+  message?: string;
+  errors?: any;
 }
 
 const STEPS = [
@@ -40,6 +50,7 @@ export const EventRequestForm: FC<EventRequestFormProps> = ({
   initialValues = {} 
 }) => {
   const [currentStep, setCurrentStep] = useState(1);
+  const actionData = useActionData() as ActionResponse;
   
   const form = useRemixForm<EventRequestFormData>({
     resolver: zodResolver(eventRequestSchema),
@@ -50,6 +61,15 @@ export const EventRequestForm: FC<EventRequestFormProps> = ({
     },
     mode: 'onChange', // Validate on change for better UX
   });
+
+  // Log action data for debugging
+  useEffect(() => {
+    console.log('🎯 FORM: useEffect triggered with actionData:', actionData);
+    
+    if (actionData) {
+      console.log('🎯 FORM: Action data received:', actionData);
+    }
+  }, [actionData]);
 
   const nextStep = () => {
     if (currentStep < STEPS.length) {
@@ -65,24 +85,30 @@ export const EventRequestForm: FC<EventRequestFormProps> = ({
 
   const canProceed = () => {
     const values = form.getValues();
+    const errors = form.formState.errors;
     
     switch (currentStep) {
       case 1:
         return true; // Menu selection is optional
       case 2:
-        return !!values.eventType;
+        return !!values.eventType && !errors.eventType;
       case 3:
-        return !!values.requestedDate && !!values.requestedTime;
+        return !!values.requestedDate && !!values.requestedTime && 
+               !errors.requestedDate && !errors.requestedTime;
       case 4:
-        return values.partySize >= 2 && values.partySize <= 50;
+        return values.partySize >= 2 && values.partySize <= 50 && !errors.partySize;
       case 5:
-        return !!values.locationType && !!values.locationAddress;
+        return !!values.locationType && !!values.locationAddress && 
+               values.locationAddress.length >= 10 &&
+               !errors.locationType && !errors.locationAddress;
       case 6:
-        return !!values.firstName && !!values.lastName && !!values.email;
+        return !!values.firstName && !!values.lastName && !!values.email &&
+               !errors.firstName && !errors.lastName && !errors.email &&
+               (!values.phone || !errors.phone); // Phone is optional but must be valid if provided
       case 7:
-        return true; // Special requests are optional
+        return !errors.specialRequirements && !errors.notes; // Optional but must be valid if provided
       case 8:
-        return true; // Final review step
+        return Object.keys(errors).length === 0; // No validation errors on final step
       default:
         return false;
     }
@@ -105,7 +131,55 @@ export const EventRequestForm: FC<EventRequestFormProps> = ({
       case 7:
         return <SpecialRequests />;
       case 8:
-        return <RequestSummary menus={menus} />;
+        return (
+          <RequestSummary 
+            menus={menus} 
+            onEditStep={(step: number) => setCurrentStep(step)}
+            onSubmit={() => {
+              console.log('🎯 FORM: Submit button clicked, triggering form submission');
+              console.log('🎯 FORM: Form values before submit:', form.getValues());
+              console.log('🎯 FORM: Form errors before submit:', form.formState.errors);
+              console.log('🎯 FORM: Form isValid:', form.formState.isValid);
+              console.log('🎯 FORM: Form isSubmitting:', form.formState.isSubmitting);
+              
+              // Force update hidden inputs with current values
+              const formValues = form.getValues();
+              Object.entries(formValues).forEach(([key, value]) => {
+                const input = document.querySelector(`input[name="${key}"]`) as HTMLInputElement;
+                if (input && input.type === 'hidden') {
+                  let processedValue = String(value || '');
+                  
+                  // Special handling for requestedDate - convert to datetime format
+                  if (key === 'requestedDate' && value) {
+                    const requestedTime = formValues.requestedTime || '12:00';
+                    // Create a proper local datetime and convert to ISO string
+                    const dateTime = new Date(`${value}T${requestedTime}:00`);
+                    processedValue = dateTime.toISOString();
+                    console.log(`🎯 FORM: Converting date ${value} + time ${requestedTime} to datetime: ${processedValue}`);
+                  }
+                  
+                  input.value = processedValue;
+                  console.log(`🎯 FORM: Updated hidden input ${key} = ${input.value}`);
+                }
+              });
+              
+              // Handle form submission
+              const form_element = document.querySelector('form') as HTMLFormElement;
+              if (form_element) {
+                console.log('🎯 FORM: Form element found, requesting submit');
+                
+                // Log all form data that will be submitted
+                const formData = new FormData(form_element);
+                console.log('🎯 FORM: FormData entries to be submitted:', Array.from(formData.entries()));
+                
+                form_element.requestSubmit();
+              } else {
+                console.error('🎯 FORM: No form element found!');
+              }
+            }}
+            isSubmitting={form.formState.isSubmitting}
+          />
+        );
       default:
         return null;
     }
@@ -158,8 +232,47 @@ export const EventRequestForm: FC<EventRequestFormProps> = ({
 
       {/* Form Content */}
       <RemixFormProvider {...form}>
-        <form method="post" className="space-y-8">
+        <form 
+          method="post" 
+          className="space-y-8"
+          onSubmit={(e) => {
+            console.log('📤 FORM: Form submission event triggered');
+            console.log('📤 FORM: Event details:', {
+              type: e.type,
+              target: e.target,
+              currentTarget: e.currentTarget,
+            });
+            console.log('📤 FORM: Current form values:', form.getValues());
+            console.log('📤 FORM: Form errors:', form.formState.errors);
+            console.log('📤 FORM: Is form valid:', form.formState.isValid);
+            console.log('📤 FORM: Current step:', currentStep);
+            
+
+            
+            // Log the actual FormData that will be sent
+            const formData = new FormData(e.currentTarget);
+            console.log('📤 FORM: Actual FormData being submitted:', Array.from(formData.entries()));
+            
+            // Don't prevent default - let remix-hook-form handle it
+          }}
+
+        >
           <input type="hidden" name="currentStep" value={currentStep} />
+          
+          {/* Hidden inputs to ensure form data is properly submitted */}
+          <input type="hidden" name="menuId" value={form.watch('menuId') || ''} />
+          <input type="hidden" name="eventType" value={form.watch('eventType') || ''} />
+          <input type="hidden" name="requestedDate" value={form.watch('requestedDate') || ''} />
+          <input type="hidden" name="requestedTime" value={form.watch('requestedTime') || ''} />
+          <input type="hidden" name="partySize" value={form.watch('partySize') || ''} />
+          <input type="hidden" name="locationType" value={form.watch('locationType') || ''} />
+          <input type="hidden" name="locationAddress" value={form.watch('locationAddress') || ''} />
+          <input type="hidden" name="firstName" value={form.watch('firstName') || ''} />
+          <input type="hidden" name="lastName" value={form.watch('lastName') || ''} />
+          <input type="hidden" name="email" value={form.watch('email') || ''} />
+          <input type="hidden" name="phone" value={form.watch('phone') || ''} />
+          <input type="hidden" name="specialRequirements" value={form.watch('specialRequirements') || ''} />
+          <input type="hidden" name="notes" value={form.watch('notes') || ''} />
           
           <div className="bg-white rounded-lg shadow-md p-8">
             {renderStepContent()}
@@ -180,7 +293,7 @@ export const EventRequestForm: FC<EventRequestFormProps> = ({
             </div>
             
             <div className="flex gap-4">
-              {currentStep < STEPS.length ? (
+              {currentStep < STEPS.length && (
                 <Button
                   type="button"
                   onClick={nextStep}
@@ -188,15 +301,8 @@ export const EventRequestForm: FC<EventRequestFormProps> = ({
                 >
                   Next Step
                 </Button>
-              ) : (
-                <Button
-                  type="submit"
-                  disabled={!canProceed()}
-                  className="bg-accent-500 hover:bg-accent-600"
-                >
-                  Submit Request
-                </Button>
               )}
+              {/* Note: Submit button is handled by RequestSummary component on final step */}
             </div>
           </div>
         </form>

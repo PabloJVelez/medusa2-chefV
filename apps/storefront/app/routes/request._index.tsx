@@ -1,7 +1,7 @@
 import { Container } from '@app/components/common/container/Container';
 import { getMergedPageMeta } from '@libs/util/page';
 import type { LoaderFunctionArgs, MetaFunction, ActionFunctionArgs } from 'react-router';
-import { useLoaderData, useSearchParams } from 'react-router';
+import { useLoaderData, useSearchParams, redirect } from 'react-router';
 import { fetchMenus } from '@libs/util/server/data/menus.server';
 import { createChefEventRequest } from '@libs/util/server/data/chef-events.server';
 import { getValidatedFormData } from 'remix-hook-form';
@@ -24,10 +24,30 @@ export const eventRequestSchema = z.object({
     const selectedDate = new Date(date);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    return selectedDate >= today;
-  }, "Date must be in the future"),
+    
+    // Must be at least 7 days from now
+    const minDate = new Date();
+    minDate.setDate(minDate.getDate() + 7);
+    minDate.setHours(0, 0, 0, 0);
+    
+    return selectedDate >= minDate;
+  }, "Events must be scheduled at least 7 days in advance").refine((date) => {
+    const selectedDate = new Date(date);
+    const maxDate = new Date();
+    maxDate.setMonth(maxDate.getMonth() + 6);
+    
+    return selectedDate <= maxDate;
+  }, "Events cannot be scheduled more than 6 months in advance"),
   
-  requestedTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Please enter a valid time"),
+  requestedTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Please enter a valid time (HH:MM format)").refine((time) => {
+    const [hours, minutes] = time.split(':').map(Number);
+    // Business hours: 10:00 AM to 8:30 PM
+    const startTime = 10 * 60; // 10:00 AM in minutes
+    const endTime = 20 * 60 + 30; // 8:30 PM in minutes
+    const timeInMinutes = hours * 60 + minutes;
+    
+    return timeInMinutes >= startTime && timeInMinutes <= endTime;
+  }, "Please select a time between 10:00 AM and 8:30 PM"),
   
   // Step 4: Party Size
   partySize: z.number().min(2, "Minimum 2 guests required").max(50, "Maximum 50 guests allowed"),
@@ -36,17 +56,28 @@ export const eventRequestSchema = z.object({
   locationType: z.enum(['customer_location', 'chef_location'], {
     required_error: "Please select a location type"
   }),
-  locationAddress: z.string().min(10, "Please provide a detailed address"),
+  locationAddress: z.string().min(10, "Please provide a detailed address").max(500, "Address is too long"),
   
   // Step 6: Contact Details
-  firstName: z.string().min(1, "First name is required"),
-  lastName: z.string().min(1, "Last name is required"),
-  email: z.string().email("Please enter a valid email address"),
-  phone: z.string().optional(),
+  firstName: z.string().min(1, "First name is required").max(50, "First name is too long"),
+  lastName: z.string().min(1, "Last name is required").max(50, "Last name is too long"),
+  email: z.string().email("Please enter a valid email address").max(255, "Email address is too long"),
+  phone: z.string().optional().refine((phone) => {
+    if (!phone) return true; // Optional field
+    // Remove all non-digits to check length
+    const digitsOnly = phone.replace(/\D/g, '');
+    return digitsOnly.length === 10;
+  }, "Please enter a valid 10-digit phone number"),
   
   // Step 7: Special Requests
-  specialRequirements: z.string().optional(),
-  notes: z.string().optional(),
+  specialRequirements: z.string().optional().refine((req) => {
+    if (!req) return true;
+    return req.length <= 1000;
+  }, "Special requirements must be less than 1000 characters"),
+  notes: z.string().optional().refine((notes) => {
+    if (!notes) return true;
+    return notes.length <= 1000;
+  }, "Notes must be less than 1000 characters"),
   
   // Hidden fields
   currentStep: z.number().optional(),
@@ -72,16 +103,43 @@ export const loader = async (args: LoaderFunctionArgs) => {
 };
 
 export const action = async (actionArgs: ActionFunctionArgs) => {
-  const { errors, data } = await getValidatedFormData<EventRequestFormData>(
-    actionArgs.request,
-    zodResolver(eventRequestSchema),
-  );
-
-  if (errors) {
-    return { errors, status: 400 };
-  }
-
+  console.log('🔄 REQUEST ACTION: Starting form submission');
+  
   try {
+    const { errors, data } = await getValidatedFormData<EventRequestFormData>(
+      actionArgs.request,
+      zodResolver(eventRequestSchema),
+    );
+
+    console.log('📝 REQUEST ACTION: Form data received:', {
+      hasData: !!data,
+      hasErrors: !!errors,
+      errorKeys: errors ? Object.keys(errors) : [],
+    });
+
+    if (errors) {
+      console.log('❌ REQUEST ACTION: Validation errors found:', errors);
+      return { errors, status: 400 };
+    }
+
+    console.log('✅ REQUEST ACTION: Form validation passed, creating request with data:', {
+      eventType: data.eventType,
+      partySize: data.partySize,
+      requestedDate: data.requestedDate,
+      requestedTime: data.requestedTime,
+      email: data.email,
+      firstName: data.firstName,
+      lastName: data.lastName,
+    });
+    
+    console.log('✅ REQUEST ACTION: Raw requestedDate received:', data.requestedDate);
+    console.log('✅ REQUEST ACTION: Date validation check:', {
+      isString: typeof data.requestedDate === 'string',
+      length: data.requestedDate?.length,
+      isValidDate: data.requestedDate ? !isNaN(Date.parse(data.requestedDate)) : false,
+      parsedDate: data.requestedDate ? new Date(data.requestedDate).toISOString() : null,
+    });
+
     // Create the chef event request
     const response = await createChefEventRequest({
       requestedDate: data.requestedDate,
@@ -99,14 +157,31 @@ export const action = async (actionArgs: ActionFunctionArgs) => {
       specialRequirements: data.specialRequirements,
     });
 
-    // Redirect to success page
-    return { 
-      success: true, 
-      eventId: response.chefEvent.id 
-    };
+    console.log('🎉 REQUEST ACTION: Chef event created successfully:', {
+      eventId: response.chefEvent.id,
+      status: response.chefEvent.status,
+    });
+
+    // Return success data instead of redirect for better client handling
+    const successUrl = `/request/success?eventId=${response.chefEvent.id}`;
+    console.log('🔀 REQUEST ACTION: Returning success data for client redirect:', successUrl);
+    
+    // Try using redirect directly instead of client-side redirect
+    console.log('🔀 REQUEST ACTION: Attempting server-side redirect to:', successUrl);
+    return redirect(successUrl);
 
   } catch (error) {
-    console.error('Failed to create chef event request:', error);
+    console.error('💥 REQUEST ACTION: Failed to create chef event request:', error);
+    
+    // Log more details about the error
+    if (error instanceof Error) {
+      console.error('💥 REQUEST ACTION: Error details:', {
+        name: error.name,
+        message: error.message,
+        stack: error.stack,
+      });
+    }
+    
     return {
       errors: { 
         root: { 

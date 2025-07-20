@@ -3,7 +3,7 @@ import { Image } from '@app/components/common/images/Image';
 import { Button } from '@app/components/common/buttons/Button';
 import type { StoreMenuDTO } from '@app/../types/menus';
 import { useFormContext } from 'react-hook-form';
-import type { EventRequestFormData } from '@app/routes/request';
+import type { EventRequestFormData } from '@app/routes/request._index';
 import clsx from 'clsx';
 import type { FC } from 'react';
 

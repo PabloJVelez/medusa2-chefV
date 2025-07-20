@@ -19,6 +19,14 @@ export const baseMedusaConfig = {
   publishableKey: config.MEDUSA_PUBLISHABLE_KEY,
 };
 
+// Log configuration for debugging
+console.log('⚙️ CLIENT CONFIG: Medusa configuration loaded:', {
+  baseUrl: baseMedusaConfig.baseUrl,
+  debug: baseMedusaConfig.debug,
+  hasPublishableKey: !!baseMedusaConfig.publishableKey,
+  publishableKeyPrefix: baseMedusaConfig.publishableKey?.slice(0, 10) + '...',
+});
+
 export const sdk = new MedusaPluginsSDK({
   ...baseMedusaConfig,
 });
