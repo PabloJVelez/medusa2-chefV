@@ -4,6 +4,7 @@ import {
   StepResponse,
   WorkflowResponse
 } from "@medusajs/workflows-sdk"
+import { emitEventStep } from "@medusajs/medusa/core-flows"
 import { CHEF_EVENT_MODULE } from "../modules/chef-event"
 
 type CreateChefEventWorkflowInput = {
@@ -54,6 +55,13 @@ export const createChefEventWorkflow = createWorkflow(
   "create-chef-event-workflow",
   function (input: CreateChefEventWorkflowInput) {
     const chefEvent = createChefEventStep(input)
+    
+    emitEventStep({
+      eventName: "chef-event.requested",
+      data: {
+        chefEventId: chefEvent.id
+      }
+    })
     
     return new WorkflowResponse({
       chefEvent

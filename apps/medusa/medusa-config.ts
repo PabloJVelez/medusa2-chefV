@@ -46,6 +46,23 @@ const workflowEngineModule = IS_TEST
       },
     };
 
+const notificationModule = {
+      resolve: "@medusajs/medusa/notification",
+      options: {
+        providers: [
+          {
+            resolve: "@medusajs/medusa/notification-sendgrid",
+            id: "sendgrid",
+            options: {
+              channels: ["email"],
+              api_key: process.env.SENDGRID_API_KEY,
+              from: process.env.SENDGRID_FROM,
+            },
+          },
+        ],
+      },
+    };
+
 module.exports = defineConfig({
   projectConfig: {
     databaseUrl: process.env.DATABASE_URL,
@@ -88,6 +105,7 @@ module.exports = defineConfig({
     cacheModule,
     eventBusModule,
     workflowEngineModule,
+    notificationModule,
   ],
   admin: {
     backendUrl: process.env.ADMIN_BACKEND_URL,
