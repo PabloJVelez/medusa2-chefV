@@ -41,6 +41,13 @@ export const ChefEvent = model.define("chef_event", {
   specialRequirements: model.text(),
   estimatedDuration: model.number().nullable(), // Duration in minutes
   
+  // Acceptance/Rejection tracking fields
+  productId: model.text().nullable(), // Link to created product for ticket sales
+  acceptedAt: model.dateTime().nullable(), // When chef accepted the event
+  acceptedBy: model.text().nullable(), // Chef who accepted (for multi-chef future)
+  rejectionReason: model.text().nullable(), // Reason for rejection
+  chefNotes: model.text().nullable(), // Chef's notes for acceptance/rejection
+  
 }).cascades({
   delete: [] // Add any cascading deletes if needed
 })
@@ -69,4 +76,10 @@ export type ChefEventType = {
   specialRequirements?: string
   estimatedDuration?: number
   assignedChefId?: string
+  // New fields for acceptance workflow
+  productId?: string
+  acceptedAt?: Date
+  acceptedBy?: string
+  rejectionReason?: string
+  chefNotes?: string
 }

@@ -20,6 +20,12 @@ export interface AdminChefEventDTO {
   depositPaid: boolean
   specialRequirements?: string
   estimatedDuration?: number
+  // New acceptance/rejection fields
+  productId?: string
+  acceptedAt?: Date
+  acceptedBy?: string
+  rejectionReason?: string
+  chefNotes?: string
   createdAt: Date
   updatedAt: Date
 }
@@ -62,21 +68,39 @@ export interface AdminUpdateChefEventDTO {
   depositPaid?: boolean
   specialRequirements?: string
   estimatedDuration?: number
+  // New acceptance/rejection fields
+  productId?: string
+  acceptedAt?: Date
+  acceptedBy?: string
+  rejectionReason?: string
+  chefNotes?: string
 }
 
 export interface AdminListChefEventsQuery {
   limit?: number
   offset?: number
-  order?: string
-  expand?: string[]
-  fields?: string[]
+  q?: string
+  status?: string
+  eventType?: string
+  locationType?: string
 }
 
 export interface AdminChefEventsResponse {
   chefEvents: AdminChefEventDTO[]
   count: number
-  offset: number
   limit: number
+  offset: number
+}
+
+export interface AdminAcceptChefEventDTO {
+  chefNotes?: string
+  acceptedBy?: string
+}
+
+export interface AdminRejectChefEventDTO {
+  rejectionReason: string
+  chefNotes?: string
+  rejectedBy?: string
 }
 
 export class AdminChefEventsResource {
@@ -141,6 +165,34 @@ export class AdminChefEventsResource {
   async delete(id: string) {
     const response = await this.client.fetch<{ deleted: boolean }>(`/admin/chef-events/${id}`, {
       method: 'DELETE',
+    })
+    return response
+  }
+
+  /**
+   * Accept a chef event
+   * @param id - Chef event ID
+   * @param data - Acceptance data
+   * @returns Acceptance result
+   */
+  async accept(id: string, data: AdminAcceptChefEventDTO = {}) {
+    const response = await this.client.fetch<{ success: boolean; data: any }>(`/admin/chef-events/${id}/accept`, {
+      method: 'POST',
+      body: data,
+    })
+    return response
+  }
+
+  /**
+   * Reject a chef event
+   * @param id - Chef event ID
+   * @param data - Rejection data
+   * @returns Rejection result
+   */
+  async reject(id: string, data: AdminRejectChefEventDTO) {
+    const response = await this.client.fetch<{ success: boolean; data: any }>(`/admin/chef-events/${id}/reject`, {
+      method: 'POST',
+      body: data,
     })
     return response
   }
