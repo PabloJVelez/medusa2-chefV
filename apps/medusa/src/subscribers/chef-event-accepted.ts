@@ -107,7 +107,7 @@ export default async function chefEventAcceptedHandler({
     await notificationService.createNotifications({
       to: chefEvent.email,
       channel: "email",
-      template: "d-c693ecebe49048d88e46d4dc26d30a19", // Customer acceptance template
+      template: "d-f077d97e69aa43bfa690f88dd372a779", // Customer acceptance template
       data: {
         ...emailData,
         emailType: "customer_acceptance",
