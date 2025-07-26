@@ -82,7 +82,7 @@ export default async function chefEventRejectedHandler({
     await notificationService.createNotifications({
       to: chefEvent.email,
       channel: "email",
-      template: "d-c693ecebe49048d88e46d4dc26d30a19", // Customer rejection template
+      template: "chef-event-rejected", // Updated template name for Resend
       data: {
         ...emailData,
         emailType: "customer_rejection",
