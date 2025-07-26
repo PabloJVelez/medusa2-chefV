@@ -822,33 +822,53 @@ const eventRequestSchema = z.object({
 - [x] Add `rejectionReason` field for rejected events
 - [x] Add `chefNotes` field for acceptance/rejection notes
 
-### ✅ Checkpoint 6.4: Enhanced Product Display
-**Timeline: 2-3 days** | **Status: 🔄 PENDING**
+### ✅ Checkpoint 6.4: Enhanced Product Display ✅ COMPLETED
+**Timeline: 2-3 days** | **Status: ✅ COMPLETED**
 
-#### 6.4.1 Event Product Template
+#### 6.4.1 Event Product Template ✅ COMPLETED
 ```typescript
 // File: apps/storefront/app/components/product/EventProductDetails.tsx
-// Reference: apps/storefront/app/templates/ProductTemplate.tsx
 ```
 **Implementation Tasks:**
-- [ ] Detect event products vs regular products
-- [ ] Display event metadata (date, time, location, party size)
-- [ ] Show original menu details and courses
-- [ ] Display chef event status and acceptance details
-- [ ] Ticket quantity selector (limited to party size)
-- [ ] Share functionality for group purchases
-- [ ] Custom product template for events
+- [x] Detect event products vs regular products
+- [x] Display event metadata (date, time, location, party size)
+- [x] Show original menu details and courses
+- [x] Display chef event status and acceptance details
+- [x] Ticket quantity selector (limited to party size)
+- [x] Share functionality for group purchases
+- [x] Custom product template for events
 
-#### 6.4.2 Product Route Enhancement
+#### 6.4.2 Product Route Enhancement ✅ COMPLETED
 ```typescript
 // File: apps/storefront/app/routes/products.$productHandle.tsx
 ```
 **Implementation Tasks:**
-- [ ] Detect event products by product metadata
-- [ ] Load related chef event and menu data
-- [ ] Pass to enhanced product template
-- [ ] Handle special event product logic
-- [ ] Add event-specific SEO meta tags
+- [x] Detect event products by product metadata
+- [x] Load related chef event and menu data
+- [x] Pass to enhanced product template
+- [x] Handle special event product logic
+- [x] Add event-specific SEO meta tags
+
+#### 6.4.3 Backend API Support ✅ COMPLETED
+```typescript
+// File: apps/medusa/src/api/store/chef-events/[id]/route.ts
+```
+**Implementation Tasks:**
+- [x] Create GET endpoint for individual chef events
+- [x] Return only confirmed events for storefront
+- [x] Include all necessary event data
+- [x] Proper error handling and validation
+
+#### 6.4.4 Utility Functions ✅ COMPLETED
+```typescript
+// File: apps/storefront/libs/util/products.ts
+// File: apps/storefront/libs/util/server/data/event-products.server.ts
+```
+**Implementation Tasks:**
+- [x] Event product detection utilities
+- [x] SKU parsing for event information
+- [x] Server-side data fetching for event products
+- [x] Integration with existing product utilities
 
 ### ✅ Checkpoint 6.5: Cart & Checkout Integration
 **Timeline: 1-2 days** | **Status: 🔄 PENDING**

@@ -1,9 +1,11 @@
 import { ProductReviewSection } from '@app/components/reviews/ProductReviewSection';
 import ProductList from '@app/components/sections/ProductList';
 import { ProductTemplate } from '@app/templates/ProductTemplate';
-import { getMergedProductMeta } from '@libs/util/products';
+import { EventProductDetails } from '@app/components/product/EventProductDetails';
+import { getMergedProductMeta, isEventProduct } from '@libs/util/products';
 import { fetchProductReviewStats, fetchProductReviews } from '@libs/util/server/data/product-reviews.server';
 import { fetchProducts } from '@libs/util/server/products.server';
+import { fetchChefEventForProduct, fetchMenuForProduct } from '@libs/util/server/data/event-products.server';
 import { withPaginationParams } from '@libs/util/withPaginationParams';
 import { type LoaderFunctionArgs, type MetaFunction, redirect } from 'react-router';
 import { useLoaderData } from 'react-router';
@@ -41,7 +43,18 @@ export const loader = async (args: LoaderFunctionArgs) => {
     }),
   ]);
 
-  return { product, productReviews, productReviewStats };
+  // Check if this is an event product and fetch additional data
+  let chefEvent = null;
+  let menu = null;
+  
+  if (isEventProduct(product)) {
+    [chefEvent, menu] = await Promise.all([
+      fetchChefEventForProduct(product),
+      fetchMenuForProduct(product),
+    ]);
+  }
+
+  return { product, productReviews, productReviewStats, chefEvent, menu };
 };
 
 export type ProductPageLoaderData = typeof loader;
@@ -49,8 +62,24 @@ export type ProductPageLoaderData = typeof loader;
 export const meta: MetaFunction<ProductPageLoaderData> = getMergedProductMeta;
 
 export default function ProductDetailRoute() {
-  const { product, productReviews, productReviewStats } = useLoaderData<ProductPageLoaderData>();
+  const { product, productReviews, productReviewStats, chefEvent, menu } = useLoaderData<ProductPageLoaderData>();
 
+  // Check if this is an event product
+  if (isEventProduct(product)) {
+    return (
+      <>
+        <EventProductDetails
+          product={product}
+          chefEvent={chefEvent}
+          menu={menu}
+        />
+        <ProductList className="!pb-[100px] xl:px-9" heading="You may also like" />
+        <ProductReviewSection />
+      </>
+    );
+  }
+
+  // Regular product template
   return (
     <>
       <ProductTemplate
