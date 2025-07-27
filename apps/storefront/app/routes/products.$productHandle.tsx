@@ -18,7 +18,7 @@ export const loader = async (args: LoaderFunctionArgs) => {
 
   const { products } = await fetchProducts(args.request, {
     handle: args.params.productHandle,
-    fields: '*categories',
+    fields: '*categories,variants.sku,variants.options,variants.inventory_quantity,variants.manage_inventory',
   });
 
   if (!products.length) throw redirect('/404');
@@ -47,7 +47,9 @@ export const loader = async (args: LoaderFunctionArgs) => {
   let chefEvent = null;
   let menu = null;
   
-  if (isEventProduct(product)) {
+  const isEvent = isEventProduct(product);
+  
+  if (isEvent) {
     [chefEvent, menu] = await Promise.all([
       fetchChefEventForProduct(product),
       fetchMenuForProduct(product),
@@ -64,8 +66,21 @@ export const meta: MetaFunction<ProductPageLoaderData> = getMergedProductMeta;
 export default function ProductDetailRoute() {
   const { product, productReviews, productReviewStats, chefEvent, menu } = useLoaderData<ProductPageLoaderData>();
 
+  console.log('ProductDetailRoute Debug:', {
+    productId: product.id,
+    productTitle: product.title,
+    variants: product.variants?.map(v => ({
+      id: v.id,
+      sku: v.sku,
+      options: v.options,
+      inventory_quantity: v.inventory_quantity
+    })),
+    isEvent: isEventProduct(product)
+  });
+
   // Check if this is an event product
   if (isEventProduct(product)) {
+    console.log('Rendering EventProductDetails');
     return (
       <>
         <EventProductDetails
@@ -79,6 +94,7 @@ export default function ProductDetailRoute() {
     );
   }
 
+  console.log('Rendering regular ProductTemplate');
   // Regular product template
   return (
     <>

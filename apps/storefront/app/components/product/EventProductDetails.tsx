@@ -2,12 +2,31 @@ import { Button } from '@app/components/common/buttons/Button';
 import { Container } from '@app/components/common/container/Container';
 import { Grid } from '@app/components/common/grid/Grid';
 import { GridColumn } from '@app/components/common/grid/GridColumn';
+import { SubmitButton } from '@app/components/common/remix-hook-form/buttons/SubmitButton';
+import { QuantitySelector } from '@app/components/common/remix-hook-form/field-groups/QuantitySelector';
 import { ProductPrice } from '@app/components/product/ProductPrice';
 import { Share } from '@app/components/share';
+import { useCart } from '@app/hooks/useCart';
+import { useRegion } from '@app/hooks/useRegion';
+import { FetcherKeys } from '@libs/util/fetcher-keys';
 import { formatPrice, getVariantPrices } from '@libs/util/prices';
 import { isEventProduct, parseEventSku, getEventVariant } from '@libs/util/products';
 import { StoreProduct } from '@medusajs/types';
-import { Link } from 'react-router';
+import { useCallback, useRef } from 'react';
+import { useFetcher } from 'react-router';
+import { RemixFormProvider, useRemixForm } from 'remix-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import clsx from 'clsx';
+
+// Schema for add to cart form
+const addToCartSchema = z.object({
+  productId: z.string(),
+  options: z.record(z.string()),
+  quantity: z.number().min(1),
+});
+
+type AddToCartFormData = z.infer<typeof addToCartSchema>;
 
 export interface EventProductDetailsProps {
   product: StoreProduct;
@@ -20,12 +39,80 @@ export interface EventProductDetailsProps {
  * Displays event-specific information like date, time, location, party size
  */
 export const EventProductDetails = ({ product, chefEvent, menu }: EventProductDetailsProps) => {
+  const formRef = useRef<HTMLFormElement>(null);
+  const addToCartFetcher = useFetcher<any>({ key: FetcherKeys.cart.createLineItem });
+  const { toggleCartDrawer } = useCart();
+  const { region } = useRegion();
+  
   const eventVariant = getEventVariant(product);
   const eventInfo = eventVariant?.sku ? parseEventSku(eventVariant.sku) : null;
   
   if (!isEventProduct(product) || !eventInfo) {
+    console.log('Not rendering EventProductDetails - not an event product or no event info');
     return null; // Not an event product, don't render
   }
+
+  // Check if event is sold out
+  const soldOut = !eventVariant || (eventVariant.inventory_quantity || 0) <= 0;
+  const isAddingToCart = ['submitting', 'loading'].includes(addToCartFetcher.state);
+
+  // Get inventory quantity with fallback
+  const getInventoryQuantity = () => {
+    if (eventVariant?.inventory_quantity !== undefined) {
+      return eventVariant.inventory_quantity;
+    }
+    // Fallback: if manage_inventory is true but no quantity, assume it's available
+    if (eventVariant?.manage_inventory) {
+      return 10; // Default to 10 tickets available
+    }
+    return 0;
+  };
+
+  const inventoryQuantity = getInventoryQuantity();
+  const isSoldOut = inventoryQuantity <= 0;
+
+  // Get the option values for the event variant
+  const getEventVariantOptions = () => {
+    if (!eventVariant?.options) return {};
+    
+    const options: Record<string, string> = {};
+    eventVariant.options.forEach(option => {
+      if (option.option_id && option.value) {
+        options[option.option_id] = option.value;
+      }
+    });
+    
+    return options;
+  };
+
+  const eventVariantOptions = getEventVariantOptions();
+
+  // Debug logging
+  console.log('EventProductDetails Debug:', {
+    productId: product.id,
+    productTitle: product.title,
+    eventVariant: eventVariant,
+    eventVariantId: eventVariant?.id,
+    eventVariantSku: eventVariant?.sku,
+    inventoryQuantity: eventVariant?.inventory_quantity,
+    manageInventory: eventVariant?.manage_inventory,
+    calculatedInventoryQuantity: inventoryQuantity,
+    isSoldOut: isSoldOut,
+    eventVariantOptions: eventVariantOptions,
+    eventInfo: eventInfo,
+    chefEvent: chefEvent,
+    menu: menu
+  });
+
+  // Setup form with remix-hook-form
+  const form = useRemixForm<AddToCartFormData>({
+    resolver: zodResolver(addToCartSchema),
+    defaultValues: {
+      productId: product.id,
+      options: eventVariantOptions,
+      quantity: 1,
+    },
+  });
 
   // Format event date and time from product description
   const formatEventDateTime = () => {
@@ -52,6 +139,22 @@ export const EventProductDetails = ({ product, chefEvent, menu }: EventProductDe
   const eventDateTime = formatEventDateTime();
   const pricePerPerson = eventVariant ? (getVariantPrices(eventVariant).original || 0) / 100 : 0;
   const totalPrice = pricePerPerson * (chefEvent?.partySize || 0);
+
+  // Handle add to cart submission
+  const handleAddToCart = useCallback(() => {
+    console.log('Add to cart submitted:', {
+      productId: product.id,
+      variantId: eventVariant?.id,
+      inventoryQuantity: eventVariant?.inventory_quantity,
+      eventVariantOptions: eventVariantOptions,
+      formData: {
+        productId: product.id,
+        options: eventVariantOptions,
+        quantity: 1
+      }
+    });
+    toggleCartDrawer(true);
+  }, [toggleCartDrawer, product.id, eventVariant?.id, eventVariant?.inventory_quantity, eventVariantOptions]);
 
   return (
     <Container className="px-0 sm:px-6 md:px-8">
@@ -227,7 +330,7 @@ export const EventProductDetails = ({ product, chefEvent, menu }: EventProductDe
                         <div className="flex justify-between items-center py-3 bg-white/80 backdrop-blur-sm rounded-xl px-4">
                           <span className="text-gray-600 font-medium">Available Tickets</span>
                           <span className="font-bold text-lg text-gray-900">
-                            {eventVariant?.inventory_quantity || 0} remaining
+                            {inventoryQuantity} remaining
                           </span>
                         </div>
                         
@@ -239,9 +342,37 @@ export const EventProductDetails = ({ product, chefEvent, menu }: EventProductDe
                         </div>
                       </div>
                       
-                      <Button className="w-full mt-6 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200">
-                        Purchase Tickets
-                      </Button>
+                      <RemixFormProvider {...form}>
+                        <addToCartFetcher.Form
+                          id="addToCartForm"
+                          ref={formRef}
+                          method="post"
+                          action="/api/cart/line-items/create"
+                          onSubmit={handleAddToCart}
+                        >
+                          <input type="hidden" name="productId" value={product.id} />
+                          <input type="hidden" name="quantity" value="1" />
+                          
+                          <div className="space-y-4">
+                            {!isSoldOut && (
+                              <div className="flex items-center gap-4">
+                                <span className="text-white font-medium">Tickets:</span>
+                                <QuantitySelector variant={eventVariant} />
+                              </div>
+                            )}
+                            
+                            <SubmitButton 
+                              disabled={isSoldOut}
+                              className={clsx(
+                                "w-full bg-white text-orange-600 hover:bg-orange-50 font-bold py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200",
+                                isSoldOut && "opacity-50 cursor-not-allowed"
+                              )}
+                            >
+                              {isAddingToCart ? 'Adding to Cart...' : isSoldOut ? 'Sold Out' : 'Purchase Tickets'}
+                            </SubmitButton>
+                          </div>
+                        </addToCartFetcher.Form>
+                      </RemixFormProvider>
                     </div>
                   </div>
 

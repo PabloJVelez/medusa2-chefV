@@ -278,7 +278,7 @@ export const isEventProduct = (product: StoreProduct): boolean => {
   // Check if any variant has an EVENT- SKU pattern
   return product.variants?.some(variant => 
     variant.sku?.startsWith('EVENT-')
-  ) ?? false
+  ) ?? false;
 }
 
 /**
