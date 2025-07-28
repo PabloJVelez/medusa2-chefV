@@ -79,6 +79,16 @@ export const CheckoutAccountDetails = () => {
     },
   });
 
+  // Debug form submission
+  useEffect(() => {
+    if (checkoutAccountDetailsFormFetcher.state === 'submitting') {
+      console.log('📤 Form submitting...', form.getValues());
+    }
+    if (checkoutAccountDetailsFormFetcher.state === 'idle' && checkoutAccountDetailsFormFetcher.data) {
+      console.log('📥 Form response received:', checkoutAccountDetailsFormFetcher.data);
+    }
+  }, [checkoutAccountDetailsFormFetcher.state, checkoutAccountDetailsFormFetcher.data]);
+
   const setShippingAddress = (address: StripeAddress) => {
     form.setValue('shippingAddress.address1', address.address.address1 ?? '');
     form.setValue('shippingAddress.address2', address.address.address2 ?? '');
@@ -96,11 +106,23 @@ export const CheckoutAccountDetails = () => {
   const shippingAddress = form.watch('shippingAddress');
 
   useEffect(() => {
+    console.log('🔍 CheckoutAccountDetails Debug:', {
+      isActiveStep,
+      isSubmitting,
+      hasErrors,
+      isComplete,
+      fetcherState: checkoutAccountDetailsFormFetcher.state,
+      step,
+      cartEmail: cart.email,
+      cartShippingAddress: cart.shipping_address
+    });
+
     if (isActiveStep && !isSubmitting && !hasErrors && isComplete) {
+      console.log('✅ All conditions met, proceeding to next step');
       form.reset();
       goToNextStep();
     }
-  }, [isSubmitting, isComplete]);
+  }, [isSubmitting, isComplete, hasErrors, isActiveStep, form, goToNextStep, step, cart.email, cart.shipping_address]);
 
   const handleCancel = () => {
     goToNextStep();

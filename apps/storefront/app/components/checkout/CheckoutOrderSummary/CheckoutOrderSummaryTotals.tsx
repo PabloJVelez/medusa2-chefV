@@ -21,12 +21,24 @@ const CheckoutOrderSummaryTotalsItem: FC<CheckoutOrderSummaryTotalsItemProps> = 
   amount,
   className,
   region,
-}) => (
-  <div className={clsx('flex items-center justify-between text-sm', className)}>
-    <dt>{label}</dt>
-    <dd className="font-bold text-gray-900">{formatPrice(amount || 0, { currency: region?.currency_code })}</dd>
-  </div>
-);
+}) => {
+  console.log('💰 CheckoutOrderSummaryTotalsItem Debug:', {
+    label,
+    amount,
+    amountInDollars: amount ? amount / 100 : null,
+    currency: region?.currency_code
+  });
+
+  // FIXED: Convert cents to dollars
+  const amountInDollars = (amount || 0) / 100;
+  
+  return (
+    <div className={clsx('flex items-center justify-between text-sm', className)}>
+      <dt>{label}</dt>
+      <dd className="font-bold text-gray-900">{formatPrice(amountInDollars, { currency: region?.currency_code })}</dd>
+    </div>
+  );
+};
 
 export const CheckoutOrderSummaryTotals: FC<CheckoutOrderSummaryTotalsProps> = ({ shippingOptions, cart }) => {
   const shippingMethods = cart.shipping_methods || [];
@@ -42,7 +54,7 @@ export const CheckoutOrderSummaryTotals: FC<CheckoutOrderSummaryTotalsProps> = (
       <CheckoutOrderSummaryDiscountCode cart={cart} />
 
       <dl className="flex flex-col gap-2">
-        <CheckoutOrderSummaryTotalsItem label="Subtotal" amount={cart.item_subtotal} region={cart.region!} />
+        <CheckoutOrderSummaryTotalsItem label="Subtotal" amount={cart.item_subtotal / 100} region={cart.region!} />
         {discountTotal > 0 && (
           <CheckoutOrderSummaryTotalsItem label="Discount" amount={-discountTotal} region={cart.region!} />
         )}

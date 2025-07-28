@@ -38,7 +38,7 @@ export const ShippingOptionsRadioGroupOption: FC<ShippingOptionsRadioGroupOption
             />
           </div>
           <div className="mt-6 flex items-end justify-between text-sm text-gray-500">
-            <div>{formatPrice(shippingOption.amount, { currency: region.currency_code })}</div>
+            <div>{formatPrice((shippingOption.amount || 0) / 100, { currency: region.currency_code })}</div>
           </div>
           <div
             className={clsx(

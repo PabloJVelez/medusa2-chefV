@@ -153,11 +153,16 @@ export default async function seedDemoData({ container }: ExecArgs) {
           name: 'Default',
           type: 'default',
         },
+        {
+          name: 'Digital Products',
+          type: 'digital',
+        },
       ],
     },
   });
 
   const shippingProfile = shippingProfileResult[0];
+  const digitalShippingProfile = shippingProfileResult[1];
 
   const northAmericanFulfillmentSet = await fulfillmentModuleService.createFulfillmentSets({
     name: 'North American delivery',
@@ -283,6 +288,48 @@ export default async function seedDemoData({ container }: ExecArgs) {
           {
             region_id: caRegion.id,
             amount: 10,
+          },
+        ],
+        rules: [
+          {
+            attribute: 'enabled_in_store',
+            value: 'true',
+            operator: 'eq',
+          },
+          {
+            attribute: 'is_return',
+            value: 'false',
+            operator: 'eq',
+          },
+        ],
+      },
+      {
+        name: 'Digital Delivery',
+        price_type: 'flat',
+        provider_id: 'manual_manual',
+        service_zone_id: northAmericanFulfillmentSet.service_zones[0].id,
+        shipping_profile_id: digitalShippingProfile.id,
+        type: {
+          label: 'Digital',
+          description: 'Instant delivery - No physical shipping required.',
+          code: 'digital',
+        },
+        prices: [
+          {
+            currency_code: 'usd',
+            amount: 0,
+          },
+          {
+            currency_code: 'cad',
+            amount: 0,
+          },
+          {
+            region_id: usRegion.id,
+            amount: 0,
+          },
+          {
+            region_id: caRegion.id,
+            amount: 0,
           },
         ],
         rules: [

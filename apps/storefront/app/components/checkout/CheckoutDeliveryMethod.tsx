@@ -101,7 +101,7 @@ export const CheckoutDeliveryMethod: FC = () => {
                   </dt>
                   <dd className="mt-0.5">
                     {shipping_option?.name} (
-                    {formatPrice(amount, {
+                    {formatPrice((amount || 0) / 100, {
                       currency: cart?.region?.currency_code,
                     })}
                     )

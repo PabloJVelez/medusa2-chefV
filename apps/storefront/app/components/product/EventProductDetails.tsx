@@ -88,19 +88,31 @@ export const EventProductDetails = ({ product, chefEvent, menu }: EventProductDe
   const eventVariantOptions = getEventVariantOptions();
 
   // Debug logging
-  console.log('EventProductDetails Debug:', {
+  console.log('💰 EventProductDetails PRICING Debug:', {
     productId: product.id,
     productTitle: product.title,
-    eventVariant: eventVariant,
-    eventVariantId: eventVariant?.id,
-    eventVariantSku: eventVariant?.sku,
-    inventoryQuantity: eventVariant?.inventory_quantity,
-    manageInventory: eventVariant?.manage_inventory,
+    eventVariant: eventVariant ? {
+      id: eventVariant.id,
+      sku: eventVariant.sku,
+      inventory_quantity: eventVariant.inventory_quantity,
+      manage_inventory: eventVariant.manage_inventory,
+             calculated_price: eventVariant.calculated_price ? {
+         calculated_amount: eventVariant.calculated_price.calculated_amount,
+         currency_code: eventVariant.calculated_price.currency_code,
+         calculated_amount_in_dollars: (eventVariant.calculated_price.calculated_amount || 0) / 100
+       } : null
+    } : null,
     calculatedInventoryQuantity: inventoryQuantity,
     isSoldOut: isSoldOut,
     eventVariantOptions: eventVariantOptions,
     eventInfo: eventInfo,
-    chefEvent: chefEvent,
+    chefEvent: chefEvent ? {
+      id: chefEvent.id,
+      eventType: chefEvent.eventType,
+      partySize: chefEvent.partySize,
+      totalPrice: chefEvent.totalPrice,
+      expectedPricePerPerson: chefEvent.totalPrice ? chefEvent.totalPrice / chefEvent.partySize : null
+    } : null,
     menu: menu
   });
 
@@ -237,17 +249,10 @@ export const EventProductDetails = ({ product, chefEvent, menu }: EventProductDe
                       </span>
                     </div>
                     
-                    <div className="flex justify-between items-center py-3 border-b border-gray-100">
-                      <span className="text-gray-600 font-medium">Price per Person</span>
-                      <span className="font-bold text-lg text-gray-900">
-                        {formatPrice(pricePerPerson, { currency: 'usd' })}
-                      </span>
-                    </div>
-                    
                     <div className="flex justify-between items-center py-3">
-                      <span className="text-gray-600 font-medium">Total Price</span>
+                      <span className="text-gray-600 font-medium">Price per Person</span>
                       <span className="font-bold text-2xl text-gray-900">
-                        {formatPrice(totalPrice, { currency: 'usd' })}
+                        {formatPrice(pricePerPerson, { currency: 'usd' })}
                       </span>
                     </div>
                   </div>

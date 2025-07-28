@@ -4,9 +4,10 @@ import {
   StepResponse,
   WorkflowResponse
 } from "@medusajs/workflows-sdk"
-import { emitEventStep, createProductsWorkflow } from "@medusajs/medusa/core-flows"
+import { emitEventStep, createProductsWorkflow, createShippingProfilesWorkflow } from "@medusajs/medusa/core-flows"
 import { CHEF_EVENT_MODULE } from "../modules/chef-event"
 import ChefEventModuleService from "../modules/chef-event/service"
+import { Modules } from "@medusajs/framework/utils"
 
 type AcceptChefEventWorkflowInput = {
   chefEventId: string
@@ -17,11 +18,11 @@ type AcceptChefEventWorkflowInput = {
 type ChefEventData = {
   id: string
   eventType: 'cooking_class' | 'plated_dinner' | 'buffet_style'
-  firstName: string
-  lastName: string
   requestedDate: Date
   requestedTime: string
   partySize: number
+  firstName: string
+  lastName: string
   locationAddress: string
 }
 
@@ -30,14 +31,10 @@ const acceptChefEventStep = createStep(
   async (input: AcceptChefEventWorkflowInput, { container }: { container: any }) => {
     const chefEventModuleService: ChefEventModuleService = container.resolve(CHEF_EVENT_MODULE)
     
-    // First, retrieve the chef event to get all the data we need
-    const chefEvent = await chefEventModuleService.retrieveChefEvent(input.chefEventId)
+    // Get the original chef event data
+    const originalChefEvent = await chefEventModuleService.retrieveChefEvent(input.chefEventId)
     
-    if (!chefEvent) {
-      throw new Error(`Chef event with id ${input.chefEventId} not found`)
-    }
-    
-    // Update the chef event to confirmed status
+    // Update the chef event status to confirmed
     const updatedChefEvent = await chefEventModuleService.updateChefEvents({
       id: input.chefEventId,
       status: 'confirmed',
@@ -47,15 +44,45 @@ const acceptChefEventStep = createStep(
     })
     
     return new StepResponse({
-      originalChefEvent: chefEvent,
-      updatedChefEvent: updatedChefEvent
+      updatedChefEvent,
+      originalChefEvent
     })
+  }
+)
+
+const ensureDigitalShippingProfileStep = createStep(
+  "ensure-digital-shipping-profile-step",
+  async (input: {}, { container }: { container: any }) => {
+    const fulfillmentModuleService = container.resolve(Modules.FULFILLMENT)
+    
+    // Check if digital shipping profile already exists
+    const existingProfiles = await fulfillmentModuleService.listShippingProfiles({
+      name: "Digital Products"
+    })
+    
+    if (existingProfiles.length > 0) {
+      return new StepResponse(existingProfiles[0])
+    }
+    
+    // Create digital shipping profile if it doesn't exist
+    const { result } = await createShippingProfilesWorkflow(container).run({
+      input: {
+        data: [
+          {
+            name: "Digital Products",
+            type: "digital"
+          }
+        ]
+      }
+    })
+    
+    return new StepResponse(result[0])
   }
 )
 
 const createEventProductStep = createStep(
   "create-event-product-step",
-  async (input: { originalChefEvent: ChefEventData }, { container }: { container: any }) => {
+  async (input: { originalChefEvent: ChefEventData, digitalShippingProfile: any }, { container }: { container: any }) => {
     const chefEvent = input.originalChefEvent
     
     // Helper functions
@@ -68,14 +95,18 @@ const createEventProductStep = createStep(
       return eventTypeLabels[eventType]
     }
 
-    function calculateTotalPrice(chefEvent: ChefEventData): number {
+    function calculatePricePerPerson(chefEvent: ChefEventData): number {
       const pricing: Record<ChefEventData['eventType'], number> = {
         'cooking_class': 119.99,
         'plated_dinner': 149.99,
         'buffet_style': 99.99
       }
       
-      const pricePerPerson = pricing[chefEvent.eventType]
+      return pricing[chefEvent.eventType]
+    }
+
+    function calculateTotalPrice(chefEvent: ChefEventData): number {
+      const pricePerPerson = calculatePricePerPerson(chefEvent)
       return pricePerPerson * chefEvent.partySize
     }
 
@@ -86,6 +117,20 @@ const createEventProductStep = createStep(
       return `event-${eventType}-${customerName}-${date}`
     }
     
+    // Calculate pricing
+    const pricePerPerson = calculatePricePerPerson(chefEvent)
+    const totalPrice = calculateTotalPrice(chefEvent)
+    const priceInCents = Math.round(pricePerPerson * 100) // FIXED: Use price per person, not total price
+    
+    console.log('💰 PRICING DEBUG:', {
+      eventType: chefEvent.eventType,
+      partySize: chefEvent.partySize,
+      pricePerPerson: pricePerPerson,
+      totalPrice: totalPrice,
+      priceInCents: priceInCents,
+      priceInDollars: priceInCents / 100
+    })
+    
     // Create product using the createProductsWorkflow
     const { result } = await createProductsWorkflow(container).run({
       input: {
@@ -94,6 +139,7 @@ const createEventProductStep = createStep(
           handle: createUrlSafeHandle(chefEvent),
           description: `Private chef event for ${chefEvent.firstName} ${chefEvent.lastName} on ${new Date(chefEvent.requestedDate).toLocaleDateString()} at ${chefEvent.requestedTime}. Event type: ${getEventTypeLabel(chefEvent.eventType)}. Location: ${chefEvent.locationAddress}.`,
           status: 'published',
+          shipping_profile_id: input.digitalShippingProfile.id,
           options: [
             {
               title: 'Ticket Type',
@@ -108,7 +154,7 @@ const createEventProductStep = createStep(
               'Ticket Type': 'Event Ticket'
             },
             prices: [{
-              amount: Math.round(calculateTotalPrice(chefEvent) * 100), // Convert to cents
+              amount: priceInCents,
               currency_code: 'usd'
             }]
           }]
@@ -139,20 +185,21 @@ export const acceptChefEventWorkflow = createWorkflow(
   "accept-chef-event-workflow",
   function (input: AcceptChefEventWorkflowInput) {
     const chefEventData = acceptChefEventStep(input)
-    const product = createEventProductStep({ originalChefEvent: chefEventData.originalChefEvent })
+    const digitalShippingProfile = ensureDigitalShippingProfileStep()
+    const product = createEventProductStep({ 
+      originalChefEvent: chefEventData.originalChefEvent,
+      digitalShippingProfile 
+    })
     const linkedChefEvent = linkChefEventToProductStep({ 
       originalChefEvent: chefEventData.originalChefEvent, 
       product 
     })
     
-    // Emit event for email notifications
-    emitEventStep({
-      eventName: "chef-event.accepted",
-      data: {
-        chefEventId: chefEventData.originalChefEvent.id,
-        productId: product.id
-      }
-    })
+    // TODO: Emit event for email notifications
+    // emitEventStep("chef-event.accepted", {
+    //   chefEventId: chefEventData.originalChefEvent.id,
+    //   productId: product.id
+    // })
     
     return new WorkflowResponse({
       success: true,
