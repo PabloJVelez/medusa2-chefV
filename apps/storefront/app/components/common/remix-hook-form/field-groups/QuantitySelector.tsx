@@ -35,15 +35,15 @@ export const QuantitySelector: FC<QuantitySelectorProps> = ({ className, variant
       name="quantity"
       control={control}
       render={({ field }) => (
-        <div className={clsx('w-28 flex-grow-0', className)}>
+        <div className={clsx('w-full', className)}>
           <label htmlFor="quantity" className="sr-only">
             Quantity
           </label>
           <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">Qty</span>
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 font-medium">Tickets</span>
             <select
               {...field}
-              className="focus:border-primary-500 focus:ring-primary-500 !h-12 !w-full rounded-md border-gray-300 pl-12 pr-4"
+              className="focus:border-orange-500 focus:ring-orange-500 !h-14 !w-full rounded-xl border-2 border-gray-200 pl-20 pr-4 text-lg font-semibold bg-white shadow-sm hover:border-orange-300 transition-colors"
               value={field.value || '1'}
               onChange={(e) => {
                 const value = parseInt(e.target.value, 10);
@@ -53,7 +53,7 @@ export const QuantitySelector: FC<QuantitySelectorProps> = ({ className, variant
             >
               {optionsArray.map((option) => (
                 <option key={option.value} value={option.value}>
-                  {option.label}
+                  {option.label} {option.value === 1 ? 'Ticket' : 'Tickets'}
                 </option>
               ))}
             </select>

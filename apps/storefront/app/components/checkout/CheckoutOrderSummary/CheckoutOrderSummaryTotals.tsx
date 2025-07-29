@@ -48,12 +48,23 @@ export const CheckoutOrderSummaryTotals: FC<CheckoutOrderSummaryTotalsProps> = (
   const cartTotal = cart.total ?? 0;
   const total = hasShippingMethod ? cartTotal : cartTotal + estimatedShipping;
 
+  console.log('💰 CheckoutOrderSummaryTotals Debug:', {
+    itemSubtotal: cart.item_subtotal,
+    total: cart.total,
+    shippingTotal: cart.shipping_total,
+    taxTotal: cart.tax_total,
+    discountTotal: cart.discount_total,
+    estimatedShipping,
+    hasShippingMethod,
+    finalTotal: total
+  });
+
   return (
     <div className="border-t border-gray-200 px-4 py-6 sm:px-6">
       <CheckoutOrderSummaryDiscountCode cart={cart} />
 
       <dl className="flex flex-col gap-2">
-        <CheckoutOrderSummaryTotalsItem label="Subtotal" amount={cart.item_subtotal / 100} region={cart.region!} />
+        <CheckoutOrderSummaryTotalsItem label="Subtotal" amount={cart.item_subtotal} region={cart.region!} />
         {discountTotal > 0 && (
           <CheckoutOrderSummaryTotalsItem label="Discount" amount={-discountTotal} region={cart.region!} />
         )}

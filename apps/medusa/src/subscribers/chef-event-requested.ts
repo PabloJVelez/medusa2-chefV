@@ -95,9 +95,9 @@ export default async function chefEventRequestedHandler({
       to: chefEvent.email,
       channel: "email",
       template: "chef-event-requested", // Updated template name for Resend
-      data: {
-        ...emailData,
-        emailType: "customer_confirmation",
+              data: {
+          ...emailData,
+          emailType: "customer_confirmation",
         requestReference: chefEvent.id.slice(0, 8).toUpperCase(),
         chefContact: {
           email: "hello@chefelenar.com",
@@ -107,16 +107,20 @@ export default async function chefEventRequestedHandler({
     } as CreateNotificationDTO)
 
     // Send notification email to chef
-    // await notificationService.createNotifications({
-    //   to: "hello@chefelenar.com", // Chef's email
-    //   channel: "email",
-    //   template: "d-c693ecebe49048d88e46d4dc26d30a19", // Chef notification template
-    //   data: {
-    //     ...emailData,
-    //     emailType: "chef_notification",
-    //     requestReference: chefEvent.id.slice(0, 8).toUpperCase()
-    //   }
-    // } as CreateNotificationDTO)
+    await notificationService.createNotifications({
+      to: "pablo_3@icloud.com", // Chef's email (hardcoded for now)
+      channel: "email",
+      template: "chef-event-requested", // Using the same template
+      data: {
+        ...emailData,
+        emailType: "chef_notification",
+        requestReference: chefEvent.id.slice(0, 8).toUpperCase(),
+        chefContact: {
+          email: "hello@chefelenar.com",
+          phone: "(555) 123-4567"
+        }
+      }
+    } as CreateNotificationDTO)
 
   } catch (error) {
     console.error("❌ CHEF EVENT SUBSCRIBER: Failed to process event:", error)

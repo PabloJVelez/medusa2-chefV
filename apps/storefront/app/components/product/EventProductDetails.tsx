@@ -356,21 +356,29 @@ export const EventProductDetails = ({ product, chefEvent, menu }: EventProductDe
                           onSubmit={handleAddToCart}
                         >
                           <input type="hidden" name="productId" value={product.id} />
-                          <input type="hidden" name="quantity" value="1" />
+                          {Object.entries(eventVariantOptions).map(([optionId, value]) => (
+                            <input key={optionId} type="hidden" name={`options.${optionId}`} value={value} />
+                          ))}
                           
                           <div className="space-y-4">
                             {!isSoldOut && (
-                              <div className="flex items-center gap-4">
-                                <span className="text-white font-medium">Tickets:</span>
-                                <QuantitySelector variant={eventVariant} />
+                              <div className="bg-white/90 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                                <div className="flex items-center justify-between mb-3">
+                                  <span className="text-white font-semibold text-lg">Number of Tickets</span>
+                                  <span className="text-orange-200 text-sm font-medium">Max: {inventoryQuantity}</span>
+                                </div>
+                                <QuantitySelector 
+                                  variant={eventVariant} 
+                                  className="w-full"
+                                />
                               </div>
                             )}
                             
                             <SubmitButton 
                               disabled={isSoldOut}
                               className={clsx(
-                                "w-full bg-white text-orange-600 hover:bg-orange-50 font-bold py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200",
-                                isSoldOut && "opacity-50 cursor-not-allowed"
+                                "w-full bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-orange-600 hover:to-red-600 font-bold py-5 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 text-lg",
+                                isSoldOut && "opacity-50 cursor-not-allowed bg-gray-400 hover:from-gray-400 hover:to-gray-400"
                               )}
                             >
                               {isAddingToCart ? 'Adding to Cart...' : isSoldOut ? 'Sold Out' : 'Purchase Tickets'}
