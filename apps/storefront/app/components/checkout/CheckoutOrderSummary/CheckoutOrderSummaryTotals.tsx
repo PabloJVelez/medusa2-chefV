@@ -25,12 +25,11 @@ const CheckoutOrderSummaryTotalsItem: FC<CheckoutOrderSummaryTotalsItemProps> = 
   console.log('💰 CheckoutOrderSummaryTotalsItem Debug:', {
     label,
     amount,
-    amountInDollars: amount ? amount / 100 : null,
     currency: region?.currency_code
   });
 
-  // FIXED: Convert cents to dollars
-  const amountInDollars = (amount || 0) / 100;
+  // Medusa stores prices in dollars
+  const amountInDollars = amount || 0;
   
   return (
     <div className={clsx('flex items-center justify-between text-sm', className)}>

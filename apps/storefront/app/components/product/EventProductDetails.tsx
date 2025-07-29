@@ -149,7 +149,7 @@ export const EventProductDetails = ({ product, chefEvent, menu }: EventProductDe
   };
 
   const eventDateTime = formatEventDateTime();
-  const pricePerPerson = eventVariant ? (getVariantPrices(eventVariant).original || 0) / 100 : 0;
+  const pricePerPerson = eventVariant ? (getVariantPrices(eventVariant).original || 0) : 0;
   const totalPrice = pricePerPerson * (chefEvent?.partySize || 0);
 
   // Handle add to cart submission

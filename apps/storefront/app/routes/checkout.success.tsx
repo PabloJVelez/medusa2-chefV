@@ -69,7 +69,7 @@ export default function CheckoutSuccessRoute() {
                     </div>
                   </div>
                   <p className="flex-none font-bold text-gray-900">
-                    {formatPrice((item.unit_price || 0) / 100, {
+                    {formatPrice((item.unit_price || 0), {
                       currency: order.currency_code,
                     })}
                   </p>
@@ -81,7 +81,7 @@ export default function CheckoutSuccessRoute() {
               <div className="flex justify-between">
                 <dt>Subtotal</dt>
                 <dd className="text-gray-900">
-                  {formatPrice((order.item_subtotal || 0) / 100, {
+                  {formatPrice((order.item_subtotal || 0), {
                     currency: order.currency_code,
                   })}
                 </dd>
@@ -91,7 +91,7 @@ export default function CheckoutSuccessRoute() {
                 <div className="flex justify-between">
                   <dt>Discount</dt>
                   <dd className="text-gray-900">
-                    {formatPrice(-discountTotal / 100, {
+                    {formatPrice(-discountTotal, {
                       currency: order.currency_code,
                     })}
                   </dd>
@@ -101,7 +101,7 @@ export default function CheckoutSuccessRoute() {
               <div className="flex justify-between">
                 <dt>Shipping</dt>
                 <dd className="text-gray-900">
-                  {formatPrice((order.shipping_total || 0) / 100, {
+                  {formatPrice((order.shipping_total || 0), {
                     currency: order.currency_code,
                   })}
                 </dd>
@@ -110,7 +110,7 @@ export default function CheckoutSuccessRoute() {
               <div className="flex justify-between">
                 <dt>Taxes</dt>
                 <dd className="text-gray-900">
-                  {formatPrice((order.tax_total || 0) / 100, {
+                  {formatPrice((order.tax_total || 0), {
                     currency: order.currency_code,
                   })}
                 </dd>
@@ -119,7 +119,7 @@ export default function CheckoutSuccessRoute() {
               <div className="flex items-center justify-between border-t border-gray-200 pt-6 text-gray-900">
                 <dt className="text-base">Total</dt>
                 <dd className="text-gray-900">
-                  {formatPrice((order.total || 0) / 100, {
+                  {formatPrice((order.total || 0), {
                     currency: order.currency_code,
                   })}
                 </dd>

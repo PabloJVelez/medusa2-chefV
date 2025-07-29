@@ -48,14 +48,13 @@ export function formatLineItemPrice(lineItem: StoreCartLineItem, regionCurrency:
     lineItemId: lineItem.id,
     productTitle: lineItem.product_title,
     unitPrice: lineItem.unit_price,
-    unitPriceInDollars: lineItem.unit_price ? lineItem.unit_price / 100 : null,
     quantity: lineItem.quantity,
     regionCurrency: regionCurrency,
     totalBeforeFormat: lineItem.unit_price && lineItem.quantity ? lineItem.unit_price * lineItem.quantity : null
   });
 
-  // FIXED: Medusa stores prices in cents, so divide by 100
-  const priceInDollars = (lineItem.unit_price || 0) / 100;
+  // Medusa stores prices in dollars
+  const priceInDollars = lineItem.unit_price || 0;
   
   return formatPrice(priceInDollars, {
     currency: regionCurrency,
@@ -66,12 +65,11 @@ export function formatLineItemPrice(lineItem: StoreCartLineItem, regionCurrency:
 export function formatCartSubtotal(cart: StoreCart) {
   console.log('💰 formatCartSubtotal Debug:', {
     itemSubtotal: cart.item_subtotal,
-    itemSubtotalInDollars: cart.item_subtotal ? cart.item_subtotal / 100 : null,
     currencyCode: cart.region?.currency_code
   });
 
-  // FIXED: Medusa stores prices in cents, so divide by 100
-  const subtotalInDollars = (cart.item_subtotal || 0) / 100;
+  // Medusa stores prices in dollars
+  const subtotalInDollars = cart.item_subtotal || 0;
   
   return formatPrice(subtotalInDollars, {
     currency: cart.region?.currency_code,

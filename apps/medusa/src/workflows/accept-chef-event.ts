@@ -120,15 +120,13 @@ const createEventProductStep = createStep(
     // Calculate pricing
     const pricePerPerson = calculatePricePerPerson(chefEvent)
     const totalPrice = calculateTotalPrice(chefEvent)
-    const priceInCents = Math.round(pricePerPerson * 100) // FIXED: Use price per person, not total price
     
     console.log('💰 PRICING DEBUG:', {
       eventType: chefEvent.eventType,
       partySize: chefEvent.partySize,
       pricePerPerson: pricePerPerson,
       totalPrice: totalPrice,
-      priceInCents: priceInCents,
-      priceInDollars: priceInCents / 100
+      priceInDollars: pricePerPerson
     })
     
     // Create product using the createProductsWorkflow
@@ -154,7 +152,7 @@ const createEventProductStep = createStep(
               'Ticket Type': 'Event Ticket'
             },
             prices: [{
-              amount: priceInCents,
+              amount: pricePerPerson,
               currency_code: 'usd'
             }]
           }]
