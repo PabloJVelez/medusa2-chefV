@@ -32,7 +32,7 @@ export const LocationForm: FC<LocationFormProps> = ({ className }) => {
         return {
           title: 'Your Location',
           icon: '🏠',
-          description: 'Chef Elena comes to you with all equipment and ingredients',
+          description: 'Chef Luis comes to you with all equipment and ingredients',
           benefits: [
             'Comfortable in your own space',
             'No travel required for you',
@@ -47,7 +47,7 @@ export const LocationForm: FC<LocationFormProps> = ({ className }) => {
         };
       case 'chef_location':
         return {
-          title: "Chef Elena's Kitchen",
+          title: "Chef Luis's Kitchen",
           icon: '👩‍🍳',
           description: 'Experience a professional culinary environment',
           benefits: [
@@ -73,7 +73,7 @@ export const LocationForm: FC<LocationFormProps> = ({ className }) => {
           Where Should Your Culinary Experience Take Place?
         </h3>
         <p className="text-primary-600">
-          Choose between the comfort of your own space or the professional setting of Chef Elena's kitchen.
+          Choose between the comfort of your own space or the professional setting of Chef Luis's kitchen.
         </p>
       </div>
 
@@ -287,7 +287,7 @@ export const LocationForm: FC<LocationFormProps> = ({ className }) => {
             <span>Included</span>
           </div>
           <p className="text-xs text-gray-500 mt-2">
-            * Travel fees may apply for locations over 30 miles from Chef Elena's base
+            * Travel fees may apply for locations over 30 miles from Chef Luis's base
           </p>
         </div>
       </div>

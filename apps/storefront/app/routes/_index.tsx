@@ -28,12 +28,12 @@ export const loader = async (args: LoaderFunctionArgs) => {
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
   return [
-    { title: 'Chef Elena Rodriguez - Premium Culinary Experiences' },
+    { title: 'Chef Luis Velez - Premium Culinary Experiences' },
     { 
       name: 'description', 
-      content: 'Transform your special occasions with Chef Elena\'s premium culinary experiences. From intimate cooking classes to elegant plated dinners, bringing restaurant-quality cuisine to your home.'
+      content: 'Transform your special occasions with Chef Luis\'s premium culinary experiences. From intimate cooking classes to elegant plated dinners, bringing restaurant-quality cuisine to your home.'
     },
-    { property: 'og:title', content: 'Chef Elena Rodriguez - Premium Culinary Experiences' },
+          { property: 'og:title', content: 'Chef Luis Velez - Premium Culinary Experiences' },
     { 
       property: 'og:description', 
       content: 'Professional chef services for cooking classes, plated dinners, and buffet-style events. Personalized culinary experiences in your home.'
@@ -73,7 +73,7 @@ export default function IndexRoute() {
               <Image
                 src="https://images.unsplash.com/photo-1583394838336-acd977736f90?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80"
                 loading="lazy"
-                alt="Chef Elena Rodriguez in her kitchen"
+                alt="Chef Luis Velez in his kitchen"
                 className="rounded-2xl shadow-lg w-full h-[500px] object-cover"
                 height={500}
                 width={600}
@@ -87,7 +87,7 @@ export default function IndexRoute() {
           <div className="order-1 lg:order-2 text-center lg:text-left space-y-6">
             <div className="space-y-4">
               <h2 className="text-5xl md:text-6xl lg:text-7xl font-italiana text-primary-900">
-                Meet Chef Elena
+                Meet Chef Luis
               </h2>
               <p className="text-2xl md:text-3xl lg:text-4xl font-italiana text-accent-600">
                 Culinary Artistry
@@ -96,7 +96,7 @@ export default function IndexRoute() {
             
             <div className="space-y-4 text-primary-700">
               <p className="text-lg leading-relaxed">
-                With over 15 years of culinary excellence, Chef Elena Rodriguez brings world-class expertise 
+                With over 15 years of culinary excellence, Chef Luis Velez brings world-class expertise 
                 from Michelin-starred restaurants directly to your home.
               </p>
               <p className="text-base leading-relaxed">
@@ -131,7 +131,7 @@ export default function IndexRoute() {
           <div className="bg-black bg-opacity-50 rounded-2xl p-8 max-w-2xl text-white text-center">
             <h3 className="text-3xl font-italiana mb-4">15+ Years of Culinary Excellence</h3>
             <p className="text-lg leading-relaxed">
-              From Michelin-starred restaurants to intimate home kitchens, Chef Elena brings world-class 
+                              From Michelin-starred restaurants to intimate home kitchens, Chef Luis brings world-class 
               culinary expertise directly to your table. Trained in classical French techniques with a 
               modern innovative approach.
             </p>
@@ -152,7 +152,7 @@ export default function IndexRoute() {
           <div className="bg-white rounded-2xl shadow-lg p-8 text-center">
             <div className="text-4xl mb-4">⭐⭐⭐⭐⭐</div>
             <p className="text-gray-700 italic mb-4">
-              "Chef Elena created the most incredible anniversary dinner for us. Every course was a masterpiece, 
+                              "Chef Luis created the most incredible anniversary dinner for us. Every course was a masterpiece, 
               and the cooking class was so much fun!"
             </p>
             <div className="font-semibold text-gray-900">— Sarah & Michael K.</div>
@@ -187,7 +187,7 @@ export default function IndexRoute() {
           <div className="order-2 lg:order-1">
             <Image
               src="https://images.unsplash.com/photo-1559181567-c3190ca9959b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80"
-              alt="Chef Elena plating an elegant dish"
+              alt="Chef Luis plating an elegant dish"
               className="rounded-3xl shadow-lg"
               width={600}
               height={400}

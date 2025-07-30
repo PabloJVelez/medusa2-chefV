@@ -89,7 +89,7 @@ export const DateTimeForm: FC<DateTimeFormProps> = ({ className }) => {
           Select Your Preferred Date & Time
         </h3>
         <p className="text-primary-600">
-          Choose when you'd like Chef Elena to create your culinary experience. Events require minimum 7 days advance notice.
+          Choose when you'd like Chef Luis to create your culinary experience. Events require minimum 7 days advance notice.
         </p>
       </div>
 
@@ -231,7 +231,7 @@ export const DateTimeForm: FC<DateTimeFormProps> = ({ className }) => {
           <li>• Minimum 7 days advance notice required</li>
           <li>• Events can be scheduled up to 6 months in advance</li>
           <li>• Start times available from 10:00 AM to 8:30 PM</li>
-          <li>• Chef Elena will confirm availability within 24 hours</li>
+                      <li>• Chef Luis will confirm availability within 24 hours</li>
           <li>• Alternative dates may be suggested if requested time is unavailable</li>
         </ul>
       </div>
@@ -245,7 +245,7 @@ export const DateTimeForm: FC<DateTimeFormProps> = ({ className }) => {
           <li>• Weekend evenings (Friday-Sunday 6-8 PM) book fastest</li>
           <li>• Weekday lunches often have more availability</li>
           <li>• Holiday periods require extra advance notice</li>
-          <li>• Chef Elena accommodates special occasions with flexible scheduling</li>
+                      <li>• Chef Luis accommodates special occasions with flexible scheduling</li>
         </ul>
       </div>
 

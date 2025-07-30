@@ -6,15 +6,15 @@ import { useLoaderData, useSearchParams, Link, redirect } from 'react-router';
 
 export const meta: MetaFunction = () => {
   return [
-    { title: 'Request Submitted Successfully - Chef Elena Rodriguez' },
+    { title: 'Request Submitted Successfully - Chef Luis Velez' },
     { 
       name: 'description', 
-      content: 'Your culinary experience request has been submitted successfully. Chef Elena will review your request and respond within 24 hours.'
+      content: 'Your culinary experience request has been submitted successfully. Chef Luis will review your request and respond within 24 hours.'
     },
-    { property: 'og:title', content: 'Request Submitted Successfully - Chef Elena Rodriguez' },
+    { property: 'og:title', content: 'Request Submitted Successfully - Chef Luis Velez' },
     { 
       property: 'og:description', 
-      content: 'Your culinary experience request has been submitted successfully. Chef Elena will review your request and respond within 24 hours.'
+      content: 'Your culinary experience request has been submitted successfully. Chef Luis will review your request and respond within 24 hours.'
     },
     { property: 'og:type', content: 'website' },
     { name: 'robots', content: 'noindex' }, // Don't index success pages
@@ -71,7 +71,7 @@ export default function RequestSuccessPage() {
           Request Submitted Successfully!
         </h1>
         <p className="text-lg text-primary-600 max-w-2xl mx-auto mb-8">
-          Thank you for your interest in a personalized culinary experience with Chef Elena. 
+                      Thank you for your interest in a personalized culinary experience with Chef Luis. 
           Your request has been received and will be reviewed shortly.
         </p>
 
@@ -106,7 +106,7 @@ export default function RequestSuccessPage() {
                   Review & Assessment
                 </h3>
                 <p className="text-gray-600">
-                  Chef Elena will review your request details, including menu preferences, 
+                  Chef Luis will review your request details, including menu preferences, 
                   party size, and special requirements to ensure she can create the perfect experience.
                 </p>
               </div>
@@ -151,7 +151,7 @@ export default function RequestSuccessPage() {
                   Event Preparation
                 </h3>
                 <p className="text-gray-600">
-                  Chef Elena will coordinate final details, source ingredients, 
+                  Chef Luis will coordinate final details, source ingredients, 
                   and prepare everything needed for your exceptional culinary experience.
                 </p>
               </div>
@@ -172,7 +172,7 @@ export default function RequestSuccessPage() {
               <strong>Within {responseTime}</strong>
             </p>
             <p className="text-blue-700 text-sm">
-              Chef Elena personally reviews each request and will respond via email 
+              Chef Luis personally reviews each request and will respond via email 
               with either approval and next steps, or questions for clarification.
             </p>
           </div>
@@ -220,7 +220,7 @@ export default function RequestSuccessPage() {
               • <strong>No payment required:</strong> Payment is only collected after your event is confirmed and tickets are made available.
             </p>
             <p>
-              • <strong>Flexible planning:</strong> Chef Elena can accommodate most dietary restrictions and special requests.
+              • <strong>Flexible planning:</strong> Chef Luis can accommodate most dietary restrictions and special requests.
             </p>
             <p>
               • <strong>Group bookings:</strong> Once approved, you'll receive a unique booking link to share with your guests.

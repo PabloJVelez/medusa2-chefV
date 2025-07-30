@@ -216,7 +216,7 @@ export const PartySizeSelector: FC<PartySizeSelectorProps> = ({ className }) => 
           <li>• Final pricing confirmed after chef approval</li>
           <li>• Group size affects menu options and setup requirements</li>
           <li>• Additional guests can often be accommodated with advance notice</li>
-          <li>• Chef Elena will work with you to optimize the experience for your group size</li>
+                      <li>• Chef Luis will work with you to optimize the experience for your group size</li>
         </ul>
       </div>
 

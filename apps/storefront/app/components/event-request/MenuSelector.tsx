@@ -205,7 +205,7 @@ export const MenuSelector: FC<MenuSelectorProps> = ({ menus }) => {
         </h4>
         <ul className="text-sm text-gray-600 space-y-1">
           <li>• Menu templates provide inspiration and starting points for your event</li>
-          <li>• Chef Elena will customize any template based on your preferences</li>
+                      <li>• Chef Luis will customize any template based on your preferences</li>
           <li>• You can skip this step and create a completely custom menu</li>
           <li>• Final pricing depends on your chosen experience type, not the menu template</li>
         </ul>

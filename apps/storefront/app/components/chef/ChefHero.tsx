@@ -19,12 +19,12 @@ export const ChefHero: FC<ChefHeroProps> = ({
   className, 
   backgroundClassName, 
   actionsClassName,
-  chefName = "Chef Elena Rodriguez",
+  chefName = "Chef Luis Velez",
   tagline = "CULINARY EXPERIENCES & PRIVATE DINING",
   description = "Transform your special occasions into unforgettable culinary experiences. From intimate cooking classes to elegant plated dinners, I bring restaurant-quality cuisine directly to your home.",
   image = {
-    url: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
-    alt: 'Chef Elena Rodriguez preparing an elegant dish'
+    url: '/assets/images/chef-hero.png',
+    alt: 'Chef Luis Velez preparing an elegant dish'
   },
   actions = [
     {
@@ -52,9 +52,9 @@ export const ChefHero: FC<ChefHeroProps> = ({
         />
         <div className="overflow-hidden z-10 w-full text-white">
           <div className="inline-grid gap-6 w-full text-center">
-            <h4 className="font-italiana text-xl md:text-2xl tracking-wider text-accent-100">{tagline}</h4>
+            <h4 className="font-italiana text-xl md:text-2xl tracking-wider text-white">{tagline}</h4>
             <h1 className="text-5xl md:text-7xl lg:text-8xl font-italiana text-white drop-shadow-lg">{chefName}</h1>
-            <p className="max-w-2xl mx-auto text-base md:text-lg leading-relaxed text-accent-100 drop-shadow-md">
+            <p className="max-w-2xl mx-auto text-base md:text-lg leading-relaxed text-white drop-shadow-md">
               {description}
             </p>
           </div>

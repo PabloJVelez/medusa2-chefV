@@ -75,7 +75,7 @@ export const RequestSummary: FC<RequestSummaryProps> = ({
       case 'customer_location':
         return 'Your Location';
       case 'chef_location':
-        return "Chef Elena's Kitchen";
+        return "Chef Luis's Kitchen";
       default:
         return '';
     }
@@ -89,7 +89,7 @@ export const RequestSummary: FC<RequestSummaryProps> = ({
           Review Your Event Request
         </h3>
         <p className="text-primary-600">
-          Please review all details before submitting your request to Chef Elena.
+          Please review all details before submitting your request to Chef Luis.
         </p>
       </div>
 
@@ -135,7 +135,7 @@ export const RequestSummary: FC<RequestSummaryProps> = ({
               )}
             </div>
           ) : (
-            <p className="text-primary-600">Custom menu - Chef Elena will design a unique experience for you</p>
+            <p className="text-primary-600">Custom menu - Chef Luis will design a unique experience for you</p>
           )}
         </div>
 
@@ -321,7 +321,7 @@ export const RequestSummary: FC<RequestSummaryProps> = ({
             </div>
             
             <p className="text-sm text-accent-600 mt-3">
-              * Final pricing will be confirmed by Chef Elena and may include adjustments for location, special requirements, or menu customizations.
+              * Final pricing will be confirmed by Chef Luis and may include adjustments for location, special requirements, or menu customizations.
             </p>
           </div>
         )}
@@ -334,11 +334,11 @@ export const RequestSummary: FC<RequestSummaryProps> = ({
             📋 What Happens Next
           </h4>
           <ul className="text-sm text-blue-800 space-y-1">
-            <li>• <span className="font-medium">Within 24 hours:</span> Chef Elena will review your request and respond via email</li>
+            <li>• <span className="font-medium">Within 24 hours:</span> Chef Luis will review your request and respond via email</li>
             <li>• <span className="font-medium">Menu Planning:</span> Personalized menu discussion and customization based on your preferences</li>
             <li>• <span className="font-medium">Confirmation:</span> Final details, pricing, and booking confirmation</li>
             <li>• <span className="font-medium">Payment:</span> Secure payment link will be provided after confirmation</li>
-            <li>• <span className="font-medium">Event Day:</span> Chef Elena arrives with everything needed for your perfect culinary experience</li>
+            <li>• <span className="font-medium">Event Day:</span> Chef Luis arrives with everything needed for your perfect culinary experience</li>
           </ul>
         </div>
 
@@ -347,11 +347,11 @@ export const RequestSummary: FC<RequestSummaryProps> = ({
             📜 Terms & Conditions
           </h4>
           <ul className="text-sm text-gray-600 space-y-1">
-            <li>• This request is not a confirmed booking until approved by Chef Elena</li>
+            <li>• This request is not a confirmed booking until approved by Chef Luis</li>
             <li>• Final pricing may vary based on menu customizations and special requirements</li>
             <li>• Minimum 7 days advance notice required for all events</li>
             <li>• Cancellation policy and payment terms will be provided with booking confirmation</li>
-            <li>• Chef Elena reserves the right to decline requests that don't align with service capabilities</li>
+            <li>• Chef Luis reserves the right to decline requests that don't align with service capabilities</li>
           </ul>
         </div>
       </div>
@@ -373,12 +373,12 @@ export const RequestSummary: FC<RequestSummaryProps> = ({
               Submitting Request...
             </span>
           ) : (
-            'Submit Event Request to Chef Elena'
+                          'Submit Event Request to Chef Luis'
           )}
         </Button>
         
         <p className="text-sm text-primary-600 mt-2">
-          No payment required now - you'll receive a secure payment link after Chef Elena confirms your event
+          No payment required now - you'll receive a secure payment link after Chef Luis confirms your event
         </p>
       </div>
     </div>

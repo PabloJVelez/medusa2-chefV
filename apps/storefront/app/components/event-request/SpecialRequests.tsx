@@ -58,7 +58,7 @@ export const SpecialRequests: FC<SpecialRequestsProps> = ({ className }) => {
           Special Requests & Dietary Needs
         </h3>
         <p className="text-primary-600">
-          Help Chef Elena customize your experience by sharing any dietary restrictions, preferences, or special requests.
+          Help Chef Luis customize your experience by sharing any dietary restrictions, preferences, or special requests.
         </p>
       </div>
 
@@ -123,7 +123,7 @@ export const SpecialRequests: FC<SpecialRequestsProps> = ({ className }) => {
           )}
         />
         <p className="text-sm text-primary-600 mt-1">
-          Be as specific as possible to help Chef Elena plan the perfect menu for your group
+                        Be as specific as possible to help Chef Luis plan the perfect menu for your group
         </p>
         {errors.specialRequirements && (
           <p className="text-red-600 text-sm mt-1">
@@ -140,7 +140,7 @@ export const SpecialRequests: FC<SpecialRequestsProps> = ({ className }) => {
         <textarea
           value={notes || ''}
           onChange={(e) => handleNotesChange(e.target.value)}
-          placeholder="Share any other details, special occasions, preferences, or questions for Chef Elena..."
+                      placeholder="Share any other details, special occasions, preferences, or questions for Chef Luis..."
           rows={5}
           className={clsx(
             "w-full px-4 py-3 border-2 rounded-lg focus:ring-2 focus:ring-accent-500 focus:border-accent-500 resize-none",
@@ -189,13 +189,13 @@ export const SpecialRequests: FC<SpecialRequestsProps> = ({ className }) => {
       {/* Chef's accommodation promise */}
       <div className="bg-green-50 border border-green-200 rounded-lg p-4">
         <h4 className="text-sm font-medium text-green-900 mb-2">
-          👩‍🍳 Chef Elena's Promise
+          👨‍🍳 Chef Luis's Promise
         </h4>
         <ul className="text-sm text-green-800 space-y-1">
           <li>• Every dietary restriction and allergy will be carefully accommodated</li>
           <li>• Menus can be customized to fit your specific needs and preferences</li>
           <li>• Alternative ingredients and cooking methods available for any restrictions</li>
-          <li>• No request is too small - Chef Elena wants everyone to enjoy the experience</li>
+                      <li>• No request is too small - Chef Luis wants everyone to enjoy the experience</li>
         </ul>
       </div>
 

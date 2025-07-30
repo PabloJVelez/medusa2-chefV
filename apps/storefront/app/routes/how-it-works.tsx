@@ -11,15 +11,15 @@ export const loader = async (args: LoaderFunctionArgs) => {
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
   return [
-    { title: 'How It Works - Chef Elena Rodriguez' },
+    { title: 'How It Works - Chef Luis Velez' },
     { 
       name: 'description', 
       content: 'Learn how our culinary experience booking process works. From browsing menus to enjoying your event, we make it simple and transparent.'
     },
-    { property: 'og:title', content: 'How It Works - Chef Elena Rodriguez' },
+          { property: 'og:title', content: 'How It Works - Chef Luis Velez' },
     { 
       property: 'og:description', 
-      content: 'Step-by-step guide to booking your personalized culinary experience with Chef Elena Rodriguez.'
+              content: 'Step-by-step guide to booking your personalized culinary experience with Chef Luis Velez.'
     },
     { property: 'og:type', content: 'website' },
     { name: 'keywords', content: 'how it works, booking process, private chef, culinary experience, chef services' },
@@ -52,7 +52,7 @@ const processSteps: ProcessStep[] = [
   {
     step: 2,
     title: "Chef Review & Approval",
-    description: "Chef Elena reviews your request and confirms availability. You'll receive a detailed proposal with menu customizations.",
+          description: "Chef Luis reviews your request and confirms availability. You'll receive a detailed proposal with menu customizations.",
     timeline: "24-48 hours",
     details: [
       "Chef reviews your event requirements",
@@ -78,7 +78,7 @@ const processSteps: ProcessStep[] = [
   {
     step: 4,
     title: "Experience & Enjoy",
-    description: "Chef Elena arrives at your location with all ingredients and equipment. Relax and enjoy your personalized culinary experience.",
+          description: "Chef Luis arrives at your location with all ingredients and equipment. Relax and enjoy your personalized culinary experience.",
     timeline: "Event day",
     details: [
       "Chef arrives with all necessary equipment",
@@ -163,7 +163,7 @@ const faqItems: FAQItem[] = [
   },
   {
     question: "Can menus be customized?",
-    answer: "Absolutely! Chef Elena works with you to customize any menu based on dietary restrictions, preferences, and seasonal availability."
+          answer: "Absolutely! Chef Luis works with you to customize any menu based on dietary restrictions, preferences, and seasonal availability."
   },
   {
     question: "What is your service area?",

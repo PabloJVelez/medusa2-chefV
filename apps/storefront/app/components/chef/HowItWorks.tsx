@@ -35,7 +35,7 @@ const processSteps: ProcessStep[] = [
   {
     step: 2,
     title: "Chef Review & Approval",
-    description: "Chef Elena reviews your request and confirms availability. You'll receive a detailed proposal with menu customizations.",
+          description: "Chef Luis reviews your request and confirms availability. You'll receive a detailed proposal with menu customizations.",
     timeline: "24-48 hours",
     details: [
       "Chef reviews your event requirements",
@@ -61,7 +61,7 @@ const processSteps: ProcessStep[] = [
   {
     step: 4,
     title: "Experience & Enjoy",
-    description: "Chef Elena arrives at your location with all ingredients and equipment. Relax and enjoy your personalized culinary experience.",
+          description: "Chef Luis arrives at your location with all ingredients and equipment. Relax and enjoy your personalized culinary experience.",
     timeline: "Event day",
     details: [
       "Chef arrives with all necessary equipment",

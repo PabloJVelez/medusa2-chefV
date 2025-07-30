@@ -42,12 +42,12 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
   const searchQuery = data?.searchQuery;
   
   const title = searchQuery 
-    ? `Search Results for "${searchQuery}" - Menu Templates | Chef Elena Rodriguez`
-    : `Menu Templates (${count}) | Chef Elena Rodriguez`;
+            ? `Search Results for "${searchQuery}" - Menu Templates | Chef Luis Velez`
+        : `Menu Templates (${count}) | Chef Luis Velez`;
     
   const description = searchQuery
     ? `Found ${count} menu templates matching "${searchQuery}". Browse our curated collection of chef-designed menus for your culinary experience.`
-    : `Browse ${count} professionally designed menu templates by Chef Elena Rodriguez. From intimate dinners to group celebrations, find the perfect menu for your culinary experience.`;
+          : `Browse ${count} professionally designed menu templates by Chef Luis Velez. From intimate dinners to group celebrations, find the perfect menu for your culinary experience.`;
 
   return [
     { title },
@@ -55,7 +55,7 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
     { property: 'og:title', content: title },
     { property: 'og:description', content: description },
     { property: 'og:type', content: 'website' },
-    { name: 'keywords', content: 'chef menus, culinary templates, private dining menus, cooking class menus, chef Elena Rodriguez' },
+          { name: 'keywords', content: 'chef menus, culinary templates, private dining menus, cooking class menus, chef Luis Velez' },
     ...(count === 0 ? [{ name: 'robots', content: 'noindex' }] : []),
   ];
 };

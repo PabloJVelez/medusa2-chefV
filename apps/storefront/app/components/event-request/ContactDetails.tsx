@@ -46,7 +46,7 @@ export const ContactDetails: FC<ContactDetailsProps> = ({ className }) => {
           Contact Information
         </h3>
         <p className="text-primary-600">
-          Please provide your contact details so Chef Elena can reach you about your event request.
+                      Please provide your contact details so Chef Luis can reach you about your event request.
         </p>
       </div>
 
@@ -117,7 +117,7 @@ export const ContactDetails: FC<ContactDetailsProps> = ({ className }) => {
           )}
         />
         <p className="text-sm text-primary-600 mt-1">
-          Used for event confirmations and communication with Chef Elena
+                          Used for event confirmations and communication with Chef Luis
         </p>
         {errors.email && (
           <p className="text-red-600 text-sm mt-1">
@@ -171,7 +171,7 @@ export const ContactDetails: FC<ContactDetailsProps> = ({ className }) => {
       {/* Communication preferences */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
         <h4 className="text-sm font-medium text-blue-900 mb-2">
-          📞 How Chef Elena Will Contact You
+                      📞 How Chef Luis Will Contact You
         </h4>
         <ul className="text-sm text-blue-800 space-y-1">
           <li>• <span className="font-medium">Initial Response:</span> Email within 24 hours to confirm receipt of your request</li>
@@ -200,10 +200,10 @@ export const ContactDetails: FC<ContactDetailsProps> = ({ className }) => {
           💡 Communication Tips
         </h4>
         <ul className="text-sm text-green-800 space-y-1">
-          <li>• Check your email (including spam folder) for Chef Elena's response</li>
+                      <li>• Check your email (including spam folder) for Chef Luis's response</li>
           <li>• Providing a phone number enables faster communication and coordination</li>
           <li>• Response times are typically faster on weekdays</li>
-          <li>• Feel free to ask questions - Chef Elena loves discussing food and events!</li>
+                      <li>• Feel free to ask questions - Chef Luis loves discussing food and events!</li>
         </ul>
       </div>
 
