@@ -16,6 +16,7 @@
     "nukedb": "docker compose down -v && docker compose up -d",
     "build": "medusa build",
     "seed": "medusa exec ./src/scripts/seed.ts",
+    "seed:menus": "medusa exec ./src/scripts/seed/menus.ts",
     "start": "medusa start",
     "dev": "medusa develop",
     "dev:email": "email dev --dir ./src/modules/resend/emails",

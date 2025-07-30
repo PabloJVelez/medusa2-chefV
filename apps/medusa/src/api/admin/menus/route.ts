@@ -31,7 +31,13 @@ export async function GET(
 ): Promise<void> {
   try {
     const query = listMenusSchema.parse(req.query)
+    console.log("=== DEBUG: Admin menus GET ===")
+    console.log("1. Query:", query)
+    console.log("2. MENU_MODULE:", MENU_MODULE)
+    
     const menuModuleService = req.scope.resolve(MENU_MODULE)
+    console.log("3. Service resolved:", !!menuModuleService)
+    console.log("4. Service methods:", Object.getOwnPropertyNames(Object.getPrototypeOf(menuModuleService)))
     
     const [menus, count] = await menuModuleService.listAndCountMenus(
       {
@@ -44,9 +50,12 @@ export async function GET(
       {
         take: query.limit || 10,
         skip: query.offset || 0,
-        relations: ["courses", "courses.dishes", "courses.dishes.ingredients"]
+        relations: ["courses"]
       }
     )
+    
+    console.log("5. Raw menus result:", menus)
+    console.log("6. Menus found:", menus?.length || 0, "Total count:", count)
 
     res.status(200).json({
       menus,

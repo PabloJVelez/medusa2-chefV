@@ -7,6 +7,8 @@ import { useState } from "react"
 import type { AdminCreateMenuDTO } from "../../../sdk/admin/admin-menus.js"
 
 const MenusPage = () => {
+  console.log("🏠 MenusPage component mounted")
+  
   const [showCreateModal, setShowCreateModal] = useState(false)
   const createMenu = useAdminCreateMenuMutation()
 

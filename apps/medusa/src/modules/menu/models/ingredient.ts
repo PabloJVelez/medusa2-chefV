@@ -8,4 +8,6 @@ export const Ingredient = model.define("ingredient", {
   dish: model.belongsTo(() => Dish, {
     mappedBy: "ingredients"
   })
-}) 
+})
+
+export default Ingredient 
