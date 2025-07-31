@@ -181,20 +181,7 @@ const linkChefEventToProductStep = createStep(
   }
 )
 
-const conditionalEmitEventStep = createStep(
-  "conditional-emit-event-step", 
-  async (input: { chefEvent: any; sendEmail: boolean }, { container }: { container: any }) => {
-    // Only emit event if email should be sent
-    if (input.sendEmail) {
-      const eventBusModuleService = container.resolve(Modules.EVENT_BUS)
-      await eventBusModuleService.emit("chef-event.accepted", {
-        chefEventId: input.chefEvent.id
-      })
-    }
-    
-    return new StepResponse({ emailSent: input.sendEmail })
-  }
-)
+
 
 export const acceptChefEventWorkflow = createWorkflow(
   "accept-chef-event-workflow",
@@ -209,16 +196,23 @@ export const acceptChefEventWorkflow = createWorkflow(
       originalChefEvent: chefEventData.originalChefEvent, 
       product 
     })
-    const emailResult = conditionalEmitEventStep({
-      chefEvent: linkedChefEvent,
-      sendEmail: input.sendAcceptanceEmail ?? true
-    })
+    
+    // Only emit event if email should be sent
+    if (input.sendAcceptanceEmail ?? true) {
+      emitEventStep({
+        eventName: "chef-event.accepted",
+        data: {
+          chefEventId: linkedChefEvent.id,
+          productId: product.id
+        }
+      })
+    }
     
     return new WorkflowResponse({
       success: true,
       chefEventId: linkedChefEvent.id,
       productId: product.id,
-      emailSent: emailResult.emailSent
+      emailSent: input.sendAcceptanceEmail ?? true
     })
   }
 ) 
