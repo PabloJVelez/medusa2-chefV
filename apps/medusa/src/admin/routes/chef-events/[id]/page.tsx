@@ -1,11 +1,11 @@
 import { defineRouteConfig } from "@medusajs/admin-sdk"
-import { Container, Heading, toast, Button, FocusModal, Textarea, Label } from "@medusajs/ui"
+import { Container, Heading, toast, Button, FocusModal, Textarea, Label, Checkbox } from "@medusajs/ui"
 import { useParams } from "react-router-dom"
 import { useState } from "react"
 import { ChefEventForm } from "../components/chef-event-form"
 import { MenuDetails } from "../components/menu-details"
+import { EmailManagementSection } from "../components/EmailManagementSection"
 import { useAdminRetrieveChefEvent, useAdminUpdateChefEventMutation, useAdminAcceptChefEventMutation, useAdminRejectChefEventMutation } from "../../../hooks/chef-events"
-import type { AdminUpdateChefEventDTO } from "../../../../sdk/admin/admin-chef-events"
 
 const ChefEventDetailPage = () => {
   const { id } = useParams<{ id: string }>()
@@ -18,6 +18,7 @@ const ChefEventDetailPage = () => {
   const [showRejectModal, setShowRejectModal] = useState(false)
   const [chefNotes, setChefNotes] = useState("")
   const [rejectionReason, setRejectionReason] = useState("")
+  const [sendAcceptanceEmail, setSendAcceptanceEmail] = useState(true)
 
   const handleUpdateChefEvent = async (data: any) => {
     try {
@@ -39,7 +40,10 @@ const ChefEventDetailPage = () => {
     try {
       await acceptChefEvent.mutateAsync({ 
         id: id!, 
-        data: { chefNotes: chefNotes || undefined }
+        data: { 
+          chefNotes: chefNotes || undefined,
+          sendAcceptanceEmail: sendAcceptanceEmail
+        }
       })
       toast.success("Event Accepted", {
         description: "The event has been accepted and a product has been created for ticket sales.",
@@ -47,6 +51,7 @@ const ChefEventDetailPage = () => {
       })
       setShowAcceptModal(false)
       setChefNotes("")
+      setSendAcceptanceEmail(true)
     } catch (error) {
       console.error("Error accepting chef event:", error)
       toast.error("Acceptance Failed", {
@@ -143,6 +148,21 @@ const ChefEventDetailPage = () => {
           onCancel={() => window.history.back()}
         />
         
+        {/* Email Management Section for confirmed events */}
+        {isConfirmed && (
+          <EmailManagementSection 
+            chefEvent={chefEvent}
+            onEmailSent={(emailData) => {
+              // Refresh event data to show updated email history
+              // refetch() - will be available once we update the hooks
+              toast.success("Email Sent", {
+                description: `Event details sent successfully`,
+                duration: 3000,
+              })
+            }}
+          />
+        )}
+        
         <MenuDetails templateProductId={(chefEvent as any).templateProductId} />
       </div>
 
@@ -155,7 +175,20 @@ const ChefEventDetailPage = () => {
             </FocusModal.Header>
             <FocusModal.Body>
               <div className="space-y-4">
-                <p>This will accept the event, create a product for ticket sales, and send an acceptance email to the customer.</p>
+                <p>This will accept the event and create a product for ticket sales.</p>
+                
+                {/* Email Notification Control */}
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="send-acceptance-email"
+                    checked={sendAcceptanceEmail}
+                    onCheckedChange={setSendAcceptanceEmail}
+                  />
+                  <Label htmlFor="send-acceptance-email">
+                    Send acceptance email to customer
+                  </Label>
+                </div>
+                
                 <div>
                   <Label htmlFor="chef-notes">Chef Notes (Optional)</Label>
                   <Textarea

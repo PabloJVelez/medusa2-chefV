@@ -48,6 +48,12 @@ export const ChefEvent = model.define("chef_event", {
   rejectionReason: model.text().nullable(), // Reason for rejection
   chefNotes: model.text().nullable(), // Chef's notes for acceptance/rejection
   
+  // Email management fields
+  sendAcceptanceEmail: model.boolean().default(true), // Chef preference for sending acceptance emails
+  emailHistory: model.json().nullable(), // Track sent emails with timestamps and recipients
+  lastEmailSentAt: model.dateTime().nullable(), // Last email activity timestamp
+  customEmailRecipients: model.json().nullable(), // Additional email recipients for resends
+  
 }).cascades({
   delete: [] // Add any cascading deletes if needed
 })
@@ -82,4 +88,15 @@ export type ChefEventType = {
   acceptedBy?: string
   rejectionReason?: string
   chefNotes?: string
+  // Email management fields
+  sendAcceptanceEmail?: boolean
+  emailHistory?: Array<{
+    type: string
+    recipients: string[]
+    notes?: string
+    sentAt: string
+    sentBy: string
+  }>
+  lastEmailSentAt?: Date
+  customEmailRecipients?: string[]
 }

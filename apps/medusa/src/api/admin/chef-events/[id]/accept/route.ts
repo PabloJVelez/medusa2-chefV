@@ -4,7 +4,8 @@ import { acceptChefEventWorkflow } from "../../../../../workflows/accept-chef-ev
 
 const acceptChefEventSchema = z.object({
   chefNotes: z.string().optional(),
-  acceptedBy: z.string().optional()
+  acceptedBy: z.string().optional(),
+  sendAcceptanceEmail: z.boolean().default(true) // New field
 })
 
 export async function POST(req: MedusaRequest, res: MedusaResponse) {
@@ -18,7 +19,8 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       input: {
         chefEventId: id,
         chefNotes: validatedBody.chefNotes,
-        acceptedBy: validatedBody.acceptedBy || 'chef'
+        acceptedBy: validatedBody.acceptedBy || 'chef',
+        sendAcceptanceEmail: validatedBody.sendAcceptanceEmail
       }
     })
     

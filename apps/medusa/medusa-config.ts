@@ -117,6 +117,9 @@ module.exports = defineConfig({
       };
     },
   },
+  storefront: {
+    url: process.env.STOREFRONT_URL || 'http://localhost:3000',
+  },
 });
 
 

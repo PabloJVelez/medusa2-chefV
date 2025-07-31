@@ -26,6 +26,17 @@ export interface AdminChefEventDTO {
   acceptedBy?: string
   rejectionReason?: string
   chefNotes?: string
+  // Email management fields
+  sendAcceptanceEmail?: boolean
+  emailHistory?: Array<{
+    type: string
+    recipients: string[]
+    notes?: string
+    sentAt: string
+    sentBy: string
+  }>
+  lastEmailSentAt?: Date
+  customEmailRecipients?: string[]
   createdAt: Date
   updatedAt: Date
 }
@@ -95,12 +106,19 @@ export interface AdminChefEventsResponse {
 export interface AdminAcceptChefEventDTO {
   chefNotes?: string
   acceptedBy?: string
+  sendAcceptanceEmail?: boolean // New field
 }
 
 export interface AdminRejectChefEventDTO {
   rejectionReason: string
   chefNotes?: string
   rejectedBy?: string
+}
+
+export interface AdminResendEventEmailDTO {
+  recipients: string[]
+  notes?: string
+  emailType?: "event_details_resend" | "custom_message"
 }
 
 export class AdminChefEventsResource {
@@ -170,7 +188,7 @@ export class AdminChefEventsResource {
   }
 
   /**
-   * Accept a chef event
+   * Accept a chef event with email preferences
    * @param id - Chef event ID
    * @param data - Acceptance data
    * @returns Acceptance result
@@ -178,7 +196,10 @@ export class AdminChefEventsResource {
   async accept(id: string, data: AdminAcceptChefEventDTO = {}) {
     const response = await this.client.fetch<{ success: boolean; data: any }>(`/admin/chef-events/${id}/accept`, {
       method: 'POST',
-      body: data,
+      body: {
+        ...data,
+        sendAcceptanceEmail: data.sendAcceptanceEmail ?? true
+      },
     })
     return response
   }
@@ -191,6 +212,20 @@ export class AdminChefEventsResource {
    */
   async reject(id: string, data: AdminRejectChefEventDTO) {
     const response = await this.client.fetch<{ success: boolean; data: any }>(`/admin/chef-events/${id}/reject`, {
+      method: 'POST',
+      body: data,
+    })
+    return response
+  }
+
+  /**
+   * Resend event details to specified recipients
+   * @param id - Chef event ID
+   * @param data - Resend email data
+   * @returns Resend result
+   */
+  async resendEmail(id: string, data: AdminResendEventEmailDTO) {
+    const response = await this.client.fetch<{ success: boolean; data: any }>(`/admin/chef-events/${id}/resend-email`, {
       method: 'POST',
       body: data,
     })

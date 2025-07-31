@@ -7,7 +7,8 @@ import type {
   AdminChefEventDTO,
   AdminChefEventsResponse,
   AdminAcceptChefEventDTO,
-  AdminRejectChefEventDTO
+  AdminRejectChefEventDTO,
+  AdminResendEventEmailDTO
 } from '../../sdk/admin/admin-chef-events'
 
 const QUERY_KEY = ['chef-events']
@@ -74,8 +75,9 @@ export const useAdminAcceptChefEventMutation = () => {
     mutationFn: async ({ id, data }: { id: string; data?: AdminAcceptChefEventDTO }) => {
       return await sdk.admin.chefEvents.accept(id, data || {})
     },
-    onSuccess: () => {
+    onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
+      queryClient.invalidateQueries({ queryKey: [...QUERY_KEY, variables.id] })
     },
   })
 }
@@ -88,6 +90,23 @@ export const useAdminRejectChefEventMutation = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
+    },
+  })
+}
+
+/**
+ * Hook for resending event emails
+ */
+export const useAdminResendEventEmailMutation = () => {
+  const queryClient = useQueryClient()
+  
+  return useMutation({
+    mutationFn: async ({ chefEventId, ...data }: { chefEventId: string } & AdminResendEventEmailDTO) => {
+      return await sdk.admin.chefEvents.resendEmail(chefEventId, data)
+    },
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEY })
+      queryClient.invalidateQueries({ queryKey: [...QUERY_KEY, variables.chefEventId] })
     },
   })
 }
