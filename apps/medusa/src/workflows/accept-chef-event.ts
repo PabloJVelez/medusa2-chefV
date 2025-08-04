@@ -7,13 +7,20 @@
  * 1. Chef event status is updated to 'confirmed'
  * 2. Digital shipping profile exists (for digital products)
  * 3. Digital sales channel exists (for product assignment)
- * 4. Event product is created with proper sales channel assignment
- * 5. Chef event is linked to the created product
- * 6. Acceptance email is sent (if enabled)
+ * 4. Digital location exists (for inventory management)
+ * 5. Event product is created with proper sales channel assignment
+ * 6. Inventory items are created and assigned to digital location
+ * 7. Initial stock is set to party size for ticket sales
+ * 8. Chef event is linked to the created product
+ * 9. Acceptance email is sent (if enabled)
  * 
  * FIXED: Sales channel assignment - Event products are now automatically
  * assigned to the "Digital Sales Channel" to ensure they appear in the
  * correct sales channel in the admin interface.
+ * 
+ * FIXED: Inventory location assignment - Event products are now automatically
+ * assigned to the "Digital Location" with initial stock equal to party size,
+ * enabling proper inventory management and ticket sales.
  */
 
 import { 
@@ -22,7 +29,7 @@ import {
   StepResponse,
   WorkflowResponse
 } from "@medusajs/workflows-sdk"
-import { emitEventStep, createProductsWorkflow, createShippingProfilesWorkflow, createSalesChannelsWorkflow } from "@medusajs/medusa/core-flows"
+import { emitEventStep, createProductsWorkflow, createShippingProfilesWorkflow, createSalesChannelsWorkflow, createStockLocationsWorkflow } from "@medusajs/medusa/core-flows"
 import { CHEF_EVENT_MODULE } from "../modules/chef-event"
 import ChefEventModuleService from "../modules/chef-event/service"
 import { Modules } from "@medusajs/framework/utils"
@@ -130,9 +137,45 @@ const ensureDigitalSalesChannelStep = createStep(
   }
 )
 
+const ensureDigitalLocationStep = createStep(
+  "ensure-digital-location-step",
+  async (input: {}, { container }: { container: any }) => {
+    const stockLocationModuleService = container.resolve(Modules.STOCK_LOCATION)
+    
+    // Check if digital location already exists
+    const existingLocations = await stockLocationModuleService.listStockLocations({
+      name: "Digital Location"
+    })
+    
+    if (existingLocations.length > 0) {
+      return new StepResponse(existingLocations[0])
+    }
+    
+    // Create digital location if it doesn't exist
+    const { result } = await createStockLocationsWorkflow(container).run({
+      input: {
+        locations: [
+          {
+            name: "Digital Location",
+            address: {
+              city: "Digital",
+              country_code: "US",
+              province: "Digital",
+              address_1: "Digital Product Location",
+              postal_code: "00000",
+            },
+          },
+        ],
+      },
+    })
+    
+    return new StepResponse(result[0])
+  }
+)
+
 const createEventProductStep = createStep(
   "create-event-product-step",
-  async (input: { originalChefEvent: ChefEventData, digitalShippingProfile: any, digitalSalesChannel: any }, { container }: { container: any }) => {
+  async (input: { originalChefEvent: ChefEventData, digitalShippingProfile: any, digitalSalesChannel: any, digitalLocation: any }, { container }: { container: any }) => {
     const chefEvent = input.originalChefEvent
     
     // Helper functions
@@ -211,7 +254,83 @@ const createEventProductStep = createStep(
       }
     })
     
-    return new StepResponse(result[0])
+    const product = result[0]
+    
+    // Create inventory items directly in this step
+    const inventoryModuleService = container.resolve(Modules.INVENTORY)
+    const inventoryItems = []
+    
+    console.log(`🏭 Creating inventory items for product: ${product.title}`)
+    console.log(`🏭 Product has ${product.variants.length} variants`)
+    
+    for (const variant of product.variants) {
+      console.log(`🏭 Processing variant: ${variant.title} with SKU: ${variant.sku}`)
+      
+      try {
+        // Check if inventory item already exists for this SKU
+        const existingInventoryItems = await inventoryModuleService.listInventoryItems({
+          sku: variant.sku
+        })
+        
+        let inventoryItem
+        
+        if (existingInventoryItems.length > 0) {
+          // Use existing inventory item
+          inventoryItem = existingInventoryItems[0]
+          console.log(`📦 Using existing inventory item for SKU: ${variant.sku}`)
+        } else {
+          // Create new inventory item
+          inventoryItem = await inventoryModuleService.createInventoryItems({
+            sku: variant.sku,
+            origin_country: "US",
+            hs_code: "",
+            mid_code: "",
+            material: "",
+            weight: 0,
+            length: 0,
+            height: 0,
+            width: 0,
+            requires_shipping: false, // Digital products don't require shipping
+            description: `Digital ticket for ${variant.title}`,
+            title: variant.title,
+          })
+          console.log(`📦 Created new inventory item for SKU: ${variant.sku}`)
+        }
+        
+        // Check if inventory level already exists for this item and location
+        const existingLevels = await inventoryModuleService.listInventoryLevels({
+          inventory_item_id: inventoryItem.id,
+          location_id: input.digitalLocation.id
+        })
+        
+        if (existingLevels.length === 0) {
+          // Assign inventory item to digital location with initial stock
+          await inventoryModuleService.createInventoryLevels({
+            inventory_item_id: inventoryItem.id,
+            location_id: input.digitalLocation.id,
+            stocked_quantity: input.originalChefEvent.partySize, // Set initial stock to party size
+            reserved_quantity: 0,
+          })
+          console.log(`📍 Created inventory level for location: ${input.digitalLocation.name} with stock: ${input.originalChefEvent.partySize}`)
+        } else {
+          console.log(`📍 Inventory level already exists for location: ${input.digitalLocation.name}`)
+        }
+        
+        inventoryItems.push(inventoryItem)
+        console.log(`✅ Successfully processed inventory for variant: ${variant.title}`)
+        
+      } catch (error) {
+        console.error(`❌ Error processing inventory for variant ${variant.title}:`, error)
+        throw error
+      }
+    }
+    
+    console.log(`🏭 Completed inventory creation for ${inventoryItems.length} items`)
+    
+    return new StepResponse({
+      product: product,
+      inventoryItems: inventoryItems
+    })
   }
 )
 
@@ -238,14 +357,16 @@ export const acceptChefEventWorkflow = createWorkflow(
     const chefEventData = acceptChefEventStep(input)
     const digitalShippingProfile = ensureDigitalShippingProfileStep()
     const digitalSalesChannel = ensureDigitalSalesChannelStep() // Ensure digital sales channel exists
-    const product = createEventProductStep({ 
+    const digitalLocation = ensureDigitalLocationStep() // Ensure digital location exists
+    const productAndInventory = createEventProductStep({ 
       originalChefEvent: chefEventData.originalChefEvent,
       digitalShippingProfile,
-      digitalSalesChannel // Pass digital sales channel to product creation
+      digitalSalesChannel, // Pass digital sales channel to product creation
+      digitalLocation // Pass digital location to inventory creation
     })
     const linkedChefEvent = linkChefEventToProductStep({ 
       originalChefEvent: chefEventData.originalChefEvent, 
-      product 
+      product: productAndInventory.product // Use the product from the combined step
     })
     
     // Only emit event if email should be sent
@@ -254,7 +375,7 @@ export const acceptChefEventWorkflow = createWorkflow(
         eventName: "chef-event.accepted",
         data: {
           chefEventId: linkedChefEvent.id,
-          productId: product.id
+          productId: productAndInventory.product.id
         }
       })
     }
@@ -262,7 +383,7 @@ export const acceptChefEventWorkflow = createWorkflow(
     return new WorkflowResponse({
       success: true,
       chefEventId: linkedChefEvent.id,
-      productId: product.id,
+      productId: productAndInventory.product.id,
       emailSent: input.sendAcceptanceEmail ?? true
     })
   }
