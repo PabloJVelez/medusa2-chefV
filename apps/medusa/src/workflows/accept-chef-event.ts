@@ -214,14 +214,6 @@ const createEventProductStep = createStep(
     const pricePerPerson = calculatePricePerPerson(chefEvent)
     const totalPrice = calculateTotalPrice(chefEvent)
     
-    console.log('💰 PRICING DEBUG:', {
-      eventType: chefEvent.eventType,
-      partySize: chefEvent.partySize,
-      pricePerPerson: pricePerPerson,
-      totalPrice: totalPrice,
-      priceInDollars: pricePerPerson
-    })
-    
     // Create product using the createProductsWorkflow
     const { result } = await createProductsWorkflow(container).run({
       input: {
@@ -272,7 +264,7 @@ const createEventProductStep = createStep(
         if (existingInventoryItems.length > 0) {
           // Use existing inventory item
           inventoryItem = existingInventoryItems[0]
-          console.log(`📦 Using existing inventory item for SKU: ${variant.sku}`)
+          
         } else {
           // Create new inventory item
           inventoryItem = await inventoryModuleService.createInventoryItems({
@@ -289,7 +281,7 @@ const createEventProductStep = createStep(
             description: `Digital ticket for ${variant.title}`,
             title: variant.title,
           })
-          console.log(`📦 Created new inventory item for SKU: ${variant.sku}`)
+          
         }
         
         // Check if inventory level already exists for this item and location
@@ -306,19 +298,15 @@ const createEventProductStep = createStep(
             stocked_quantity: input.originalChefEvent.partySize, // Set initial stock to party size
             reserved_quantity: 0,
           })
-          console.log(`📍 Created inventory level for location: ${input.digitalLocation.name} with stock: ${input.originalChefEvent.partySize}`)
-        } else {
-          console.log(`📍 Inventory level already exists for location: ${input.digitalLocation.name}`)
+          
         }
-        
         inventoryItems.push(inventoryItem)
-        console.log(`✅ Successfully processed inventory for variant: ${variant.title}`)
         
       } catch (error) {
         console.error(`❌ Error processing inventory for variant ${variant.title}:`, error)
         throw error
       }
-    }e.log(`🏭 Completed inventory creation for ${inventoryItems.length} items`)
+    }
     
     return new StepResponse({
       product: product,
