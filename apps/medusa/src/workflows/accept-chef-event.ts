@@ -260,12 +260,7 @@ const createEventProductStep = createStep(
     const inventoryModuleService = container.resolve(Modules.INVENTORY)
     const inventoryItems = []
     
-    console.log(`🏭 Creating inventory items for product: ${product.title}`)
-    console.log(`🏭 Product has ${product.variants.length} variants`)
-    
     for (const variant of product.variants) {
-      console.log(`🏭 Processing variant: ${variant.title} with SKU: ${variant.sku}`)
-      
       try {
         // Check if inventory item already exists for this SKU
         const existingInventoryItems = await inventoryModuleService.listInventoryItems({
@@ -323,9 +318,7 @@ const createEventProductStep = createStep(
         console.error(`❌ Error processing inventory for variant ${variant.title}:`, error)
         throw error
       }
-    }
-    
-    console.log(`🏭 Completed inventory creation for ${inventoryItems.length} items`)
+    }e.log(`🏭 Completed inventory creation for ${inventoryItems.length} items`)
     
     return new StepResponse({
       product: product,
