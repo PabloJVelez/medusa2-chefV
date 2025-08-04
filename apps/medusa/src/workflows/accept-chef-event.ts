@@ -1,10 +1,28 @@
+/**
+ * Accept Chef Event Workflow
+ * 
+ * This workflow handles the acceptance of chef event requests and creates
+ * corresponding event products. The workflow ensures:
+ * 
+ * 1. Chef event status is updated to 'confirmed'
+ * 2. Digital shipping profile exists (for digital products)
+ * 3. Digital sales channel exists (for product assignment)
+ * 4. Event product is created with proper sales channel assignment
+ * 5. Chef event is linked to the created product
+ * 6. Acceptance email is sent (if enabled)
+ * 
+ * FIXED: Sales channel assignment - Event products are now automatically
+ * assigned to the "Digital Sales Channel" to ensure they appear in the
+ * correct sales channel in the admin interface.
+ */
+
 import { 
   createStep,
   createWorkflow,
   StepResponse,
   WorkflowResponse
 } from "@medusajs/workflows-sdk"
-import { emitEventStep, createProductsWorkflow, createShippingProfilesWorkflow } from "@medusajs/medusa/core-flows"
+import { emitEventStep, createProductsWorkflow, createShippingProfilesWorkflow, createSalesChannelsWorkflow } from "@medusajs/medusa/core-flows"
 import { CHEF_EVENT_MODULE } from "../modules/chef-event"
 import ChefEventModuleService from "../modules/chef-event/service"
 import { Modules } from "@medusajs/framework/utils"
@@ -82,9 +100,39 @@ const ensureDigitalShippingProfileStep = createStep(
   }
 )
 
+const ensureDigitalSalesChannelStep = createStep(
+  "ensure-digital-sales-channel-step",
+  async (input: {}, { container }: { container: any }) => {
+    const salesChannelModuleService = container.resolve(Modules.SALES_CHANNEL)
+    
+    // Check if digital sales channel already exists
+    const existingChannels = await salesChannelModuleService.listSalesChannels({
+      name: "Digital Sales Channel"
+    })
+    
+    if (existingChannels.length > 0) {
+      return new StepResponse(existingChannels[0])
+    }
+    
+    // Create digital sales channel if it doesn't exist
+    const { result } = await createSalesChannelsWorkflow(container).run({
+      input: {
+        salesChannelsData: [
+          {
+            name: "Digital Sales Channel",
+            description: "Channel for digital products and chef events"
+          }
+        ]
+      }
+    })
+    
+    return new StepResponse(result[0])
+  }
+)
+
 const createEventProductStep = createStep(
   "create-event-product-step",
-  async (input: { originalChefEvent: ChefEventData, digitalShippingProfile: any }, { container }: { container: any }) => {
+  async (input: { originalChefEvent: ChefEventData, digitalShippingProfile: any, digitalSalesChannel: any }, { container }: { container: any }) => {
     const chefEvent = input.originalChefEvent
     
     // Helper functions
@@ -140,6 +188,7 @@ const createEventProductStep = createStep(
           description: `Private chef event for ${chefEvent.firstName} ${chefEvent.lastName} on ${new Date(chefEvent.requestedDate).toLocaleDateString()} at ${chefEvent.requestedTime}. Event type: ${getEventTypeLabel(chefEvent.eventType)}. Location: ${chefEvent.locationAddress}.`,
           status: 'published',
           shipping_profile_id: input.digitalShippingProfile.id,
+          sales_channels: [{ id: input.digitalSalesChannel.id }], // Assign sales channel
           options: [
             {
               title: 'Ticket Type',
@@ -188,9 +237,11 @@ export const acceptChefEventWorkflow = createWorkflow(
   function (input: AcceptChefEventWorkflowInput) {
     const chefEventData = acceptChefEventStep(input)
     const digitalShippingProfile = ensureDigitalShippingProfileStep()
+    const digitalSalesChannel = ensureDigitalSalesChannelStep() // Ensure digital sales channel exists
     const product = createEventProductStep({ 
       originalChefEvent: chefEventData.originalChefEvent,
-      digitalShippingProfile 
+      digitalShippingProfile,
+      digitalSalesChannel // Pass digital sales channel to product creation
     })
     const linkedChefEvent = linkChefEventToProductStep({ 
       originalChefEvent: chefEventData.originalChefEvent, 
