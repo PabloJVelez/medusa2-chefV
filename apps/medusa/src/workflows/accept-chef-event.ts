@@ -137,6 +137,36 @@ const ensureDigitalSalesChannelStep = createStep(
   }
 )
 
+const ensureDefaultSalesChannelStep = createStep(
+  "ensure-default-sales-channel-step",
+  async (input: {}, { container }: { container: any }) => {
+    const salesChannelModuleService = container.resolve(Modules.SALES_CHANNEL)
+    
+    // Check if default sales channel already exists
+    const existingChannels = await salesChannelModuleService.listSalesChannels({
+      name: "Default Sales Channel"
+    })
+    
+    if (existingChannels.length > 0) {
+      return new StepResponse(existingChannels[0])
+    }
+    
+    // Create default sales channel if it doesn't exist
+    const { result } = await createSalesChannelsWorkflow(container).run({
+      input: {
+        salesChannelsData: [
+          {
+            name: "Default Sales Channel",
+            description: "Default sales channel for all products"
+          }
+        ]
+      }
+    })
+    
+    return new StepResponse(result[0])
+  }
+)
+
 const ensureDigitalLocationStep = createStep(
   "ensure-digital-location-step",
   async (input: {}, { container }: { container: any }) => {
@@ -175,7 +205,7 @@ const ensureDigitalLocationStep = createStep(
 
 const createEventProductStep = createStep(
   "create-event-product-step",
-  async (input: { originalChefEvent: ChefEventData, digitalShippingProfile: any, digitalSalesChannel: any, digitalLocation: any }, { container }: { container: any }) => {
+  async (input: { originalChefEvent: ChefEventData, digitalShippingProfile: any, digitalSalesChannel: any, defaultSalesChannel: any, digitalLocation: any }, { container }: { container: any }) => {
     const chefEvent = input.originalChefEvent
     
     // Helper functions
@@ -223,7 +253,10 @@ const createEventProductStep = createStep(
           description: `Private chef event for ${chefEvent.firstName} ${chefEvent.lastName} on ${new Date(chefEvent.requestedDate).toLocaleDateString()} at ${chefEvent.requestedTime}. Event type: ${getEventTypeLabel(chefEvent.eventType)}. Location: ${chefEvent.locationAddress}.`,
           status: 'published',
           shipping_profile_id: input.digitalShippingProfile.id,
-          sales_channels: [{ id: input.digitalSalesChannel.id }], // Assign sales channel
+          sales_channels: [
+            { id: input.digitalSalesChannel.id }, // Assign to Digital Sales Channel
+            { id: input.defaultSalesChannel.id }  // Assign to Default Sales Channel
+          ],
           options: [
             {
               title: 'Ticket Type',
@@ -338,11 +371,13 @@ export const acceptChefEventWorkflow = createWorkflow(
     const chefEventData = acceptChefEventStep(input)
     const digitalShippingProfile = ensureDigitalShippingProfileStep()
     const digitalSalesChannel = ensureDigitalSalesChannelStep() // Ensure digital sales channel exists
+    const defaultSalesChannel = ensureDefaultSalesChannelStep() // Ensure default sales channel exists
     const digitalLocation = ensureDigitalLocationStep() // Ensure digital location exists
     const productAndInventory = createEventProductStep({ 
       originalChefEvent: chefEventData.originalChefEvent,
       digitalShippingProfile,
       digitalSalesChannel, // Pass digital sales channel to product creation
+      defaultSalesChannel, // Pass default sales channel to product creation
       digitalLocation // Pass digital location to inventory creation
     })
     const linkedChefEvent = linkChefEventToProductStep({ 
