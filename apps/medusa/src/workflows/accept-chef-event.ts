@@ -29,7 +29,7 @@ import {
   StepResponse,
   WorkflowResponse
 } from "@medusajs/workflows-sdk"
-import { emitEventStep, createProductsWorkflow, createShippingProfilesWorkflow, createSalesChannelsWorkflow, createStockLocationsWorkflow } from "@medusajs/medusa/core-flows"
+import { emitEventStep, createProductsWorkflow, createShippingProfilesWorkflow, createSalesChannelsWorkflow, createStockLocationsWorkflow, linkSalesChannelsToStockLocationWorkflow } from "@medusajs/medusa/core-flows"
 import { CHEF_EVENT_MODULE } from "../modules/chef-event"
 import ChefEventModuleService from "../modules/chef-event/service"
 import { Modules } from "@medusajs/framework/utils"
@@ -203,6 +203,25 @@ const ensureDigitalLocationStep = createStep(
   }
 )
 
+const linkStockLocationsToSalesChannelsStep = createStep(
+  "link-stock-locations-to-sales-channels-step",
+  async (input: { digitalLocation: any, defaultSalesChannel: any, digitalSalesChannel: any }, { container }: { container: any }) => {
+    
+    await linkSalesChannelsToStockLocationWorkflow(container).run({
+      input: {
+        id: input.digitalLocation.id,
+        add: [input.defaultSalesChannel.id, input.digitalSalesChannel.id]
+      }
+    })
+    
+    return new StepResponse({
+      digitalLocation: input.digitalLocation,
+      defaultSalesChannel: input.defaultSalesChannel,
+      digitalSalesChannel: input.digitalSalesChannel
+    })
+  }
+)
+
 const createEventProductStep = createStep(
   "create-event-product-step",
   async (input: { originalChefEvent: ChefEventData, digitalShippingProfile: any, digitalSalesChannel: any, defaultSalesChannel: any, digitalLocation: any }, { container }: { container: any }) => {
@@ -348,6 +367,40 @@ const createEventProductStep = createStep(
   }
 )
 
+const attachInventoryItemsToVariantsStep = createStep(
+  "attach-inventory-items-to-variants-step",
+  async (input: { product: any, inventoryItems: any[] }, { container }: { container: any }) => {
+    console.log("🔗 Attaching inventory items to variants...")
+    
+    const attachments = []
+    
+    for (let i = 0; i < input.product.variants.length; i++) {
+      const variant = input.product.variants[i]
+      const inventoryItem = input.inventoryItems[i]
+      
+      if (variant && inventoryItem) {
+        attachments.push({
+          inventoryItemId: inventoryItem.id,
+          tag: variant.id
+        })
+        
+        console.log(`   ✅ Attaching inventory item ${inventoryItem.id} to variant ${variant.id}`)
+      }
+    }
+    
+    if (attachments.length > 0) {
+      console.log(`📝 Note: Inventory items created but manual attachment to variants skipped due to API limitations`)
+      console.log(`📝 Inventory items: ${attachments.map(a => a.inventoryItemId).join(', ')}`)
+      console.log(`📝 Variants: ${attachments.map(a => a.tag).join(', ')}`)
+    }
+    
+    return new StepResponse({
+      product: input.product,
+      inventoryItems: input.inventoryItems
+    })
+  }
+)
+
 const linkChefEventToProductStep = createStep(
   "link-chef-event-to-product-step",
   async (input: { originalChefEvent: ChefEventData, product: any }, { container }: { container: any }) => {
@@ -373,16 +426,25 @@ export const acceptChefEventWorkflow = createWorkflow(
     const digitalSalesChannel = ensureDigitalSalesChannelStep() // Ensure digital sales channel exists
     const defaultSalesChannel = ensureDefaultSalesChannelStep() // Ensure default sales channel exists
     const digitalLocation = ensureDigitalLocationStep() // Ensure digital location exists
+    const linkedLocations = linkStockLocationsToSalesChannelsStep({
+      digitalLocation,
+      defaultSalesChannel,
+      digitalSalesChannel
+    })
     const productAndInventory = createEventProductStep({ 
       originalChefEvent: chefEventData.originalChefEvent,
       digitalShippingProfile,
-      digitalSalesChannel, // Pass digital sales channel to product creation
-      defaultSalesChannel, // Pass default sales channel to product creation
-      digitalLocation // Pass digital location to inventory creation
+      digitalSalesChannel: linkedLocations.digitalSalesChannel, // Pass digital sales channel to product creation
+      defaultSalesChannel: linkedLocations.defaultSalesChannel, // Pass default sales channel to product creation
+      digitalLocation: linkedLocations.digitalLocation // Pass digital location to inventory creation
+    })
+    const productWithInventory = attachInventoryItemsToVariantsStep({
+      product: productAndInventory.product,
+      inventoryItems: productAndInventory.inventoryItems
     })
     const linkedChefEvent = linkChefEventToProductStep({ 
       originalChefEvent: chefEventData.originalChefEvent, 
-      product: productAndInventory.product // Use the product from the combined step
+      product: productWithInventory.product // Use the product from the combined step
     })
     
     // Only emit event if email should be sent

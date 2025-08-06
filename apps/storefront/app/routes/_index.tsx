@@ -71,7 +71,7 @@ export default function IndexRoute() {
           <div className="order-2 lg:order-1">
             <div className="relative">
               <Image
-                src="https://images.unsplash.com/photo-1583394838336-acd977736f90?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80"
+                src="/assets/images/chef-luis-velez.png"
                 loading="lazy"
                 alt="Chef Luis Velez in his kitchen"
                 className="rounded-2xl shadow-lg w-full h-[500px] object-cover"

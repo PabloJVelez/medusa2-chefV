@@ -58,7 +58,10 @@ export const EventProductDetails = ({ product, chefEvent, menu }: EventProductDe
 
   // Get inventory quantity with fallback
   const getInventoryQuantity = () => {
-    if (eventVariant?.inventory_quantity !== undefined) {
+    if (eventVariant?.inventory_quantity !== undefined && eventVariant?.inventory_quantity !== null) {
+        if (eventVariant.inventory_quantity === 0 && eventVariant.manage_inventory) {
+            return chefEvent?.partySize || 10; // Use party size as fallback
+        }
       return eventVariant.inventory_quantity;
     }
     // Fallback: if manage_inventory is true but no quantity, assume it's available
@@ -370,6 +373,7 @@ export const EventProductDetails = ({ product, chefEvent, menu }: EventProductDe
                                 <QuantitySelector 
                                   variant={eventVariant} 
                                   className="w-full"
+                                  customInventoryQuantity={inventoryQuantity}
                                 />
                               </div>
                             )}

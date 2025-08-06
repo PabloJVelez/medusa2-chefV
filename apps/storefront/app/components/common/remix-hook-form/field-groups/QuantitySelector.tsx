@@ -10,9 +10,10 @@ interface QuantitySelectorProps {
   className?: string;
   formId?: string;
   onChange?: (quantity: number) => void;
+  customInventoryQuantity?: number; // New prop for custom inventory quantity
 }
 
-export const QuantitySelector: FC<QuantitySelectorProps> = ({ className, variant, maxInventory = 10, onChange }) => {
+export const QuantitySelector: FC<QuantitySelectorProps> = ({ className, variant, maxInventory = 10, onChange, customInventoryQuantity }) => {
   const formContext = useRemixFormContext();
 
   if (!formContext) {
@@ -22,8 +23,19 @@ export const QuantitySelector: FC<QuantitySelectorProps> = ({ className, variant
 
   const { control } = formContext;
 
-  const variantInventory =
-    variant?.manage_inventory && !variant.allow_backorder ? variant.inventory_quantity || 0 : maxInventory;
+  const variantInventory = customInventoryQuantity !== undefined 
+    ? customInventoryQuantity 
+    : (variant?.manage_inventory && !variant.allow_backorder ? variant.inventory_quantity || 0 : maxInventory);
+
+  // Debug logging for inventory calculation issues
+  if (customInventoryQuantity !== undefined && variant?.inventory_quantity === 0) {
+    console.log('🎫 QuantitySelector using custom inventory quantity:', {
+      variantId: variant?.id,
+      variantInventoryQuantity: variant?.inventory_quantity,
+      customInventoryQuantity,
+      calculatedVariantInventory: variantInventory
+    });
+  }
 
   const optionsArray = [...Array(Math.min(variantInventory, maxInventory))].map((_, index) => ({
     label: `${index + 1}`,
