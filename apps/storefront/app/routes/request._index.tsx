@@ -52,11 +52,8 @@ export const eventRequestSchema = z.object({
   // Step 4: Party Size
   partySize: z.number().min(2, "Minimum 2 guests required").max(50, "Maximum 50 guests allowed"),
   
-  // Step 5: Location
-  locationType: z.enum(['customer_location', 'chef_location'], {
-    required_error: "Please select a location type"
-  }),
-  locationAddress: z.string().min(10, "Please provide a detailed address").max(500, "Address is too long"),
+  // Step 5: Location (now only customer location)
+  locationAddress: z.string().min(10, "Please provide a complete address").max(500, "Address is too long"),
   
   // Step 6: Contact Details
   firstName: z.string().min(1, "First name is required").max(50, "First name is too long"),
@@ -147,7 +144,7 @@ export const action = async (actionArgs: ActionFunctionArgs) => {
       partySize: data.partySize,
       eventType: data.eventType,
       templateProductId: data.menuId,
-      locationType: data.locationType,
+      locationType: 'customer_location', // Default to customer location since we removed the selection
       locationAddress: data.locationAddress,
       firstName: data.firstName,
       lastName: data.lastName,

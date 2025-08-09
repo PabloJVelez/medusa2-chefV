@@ -123,7 +123,7 @@ export const SpecialRequests: FC<SpecialRequestsProps> = ({ className }) => {
           )}
         />
         <p className="text-sm text-primary-600 mt-1">
-                        Be as specific as possible to help Chef Luis plan the perfect menu for your group
+          Be as specific as possible to help Chef Luis plan the perfect menu for your group
         </p>
         {errors.specialRequirements && (
           <p className="text-red-600 text-sm mt-1">
@@ -140,7 +140,7 @@ export const SpecialRequests: FC<SpecialRequestsProps> = ({ className }) => {
         <textarea
           value={notes || ''}
           onChange={(e) => handleNotesChange(e.target.value)}
-                      placeholder="Share any other details, special occasions, preferences, or questions for Chef Luis..."
+          placeholder="Share any other details, special occasions, preferences, or questions for Chef Luis..."
           rows={5}
           className={clsx(
             "w-full px-4 py-3 border-2 rounded-lg focus:ring-2 focus:ring-accent-500 focus:border-accent-500 resize-none",
@@ -157,64 +157,6 @@ export const SpecialRequests: FC<SpecialRequestsProps> = ({ className }) => {
             {errors.notes.message}
           </p>
         )}
-      </div>
-
-      {/* Helpful examples */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <h4 className="text-sm font-medium text-blue-900 mb-2">
-          💡 Helpful Information to Include
-        </h4>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <h5 className="text-sm font-medium text-blue-800 mb-1">Dietary Notes:</h5>
-            <ul className="text-sm text-blue-700 space-y-0.5">
-              <li>• Severity of allergies</li>
-              <li>• Preferred protein sources</li>
-              <li>• Foods you love/hate</li>
-              <li>• Cultural dietary preferences</li>
-            </ul>
-          </div>
-          <div>
-            <h5 className="text-sm font-medium text-blue-800 mb-1">Event Details:</h5>
-            <ul className="text-sm text-blue-700 space-y-0.5">
-              <li>• Special occasion being celebrated</li>
-              <li>• Preferred cuisine styles</li>
-              <li>• Kitchen equipment available</li>
-              <li>• Guest preferences or dislikes</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      {/* Chef's accommodation promise */}
-      <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-        <h4 className="text-sm font-medium text-green-900 mb-2">
-          👨‍🍳 Chef Luis's Promise
-        </h4>
-        <ul className="text-sm text-green-800 space-y-1">
-          <li>• Every dietary restriction and allergy will be carefully accommodated</li>
-          <li>• Menus can be customized to fit your specific needs and preferences</li>
-          <li>• Alternative ingredients and cooking methods available for any restrictions</li>
-                      <li>• No request is too small - Chef Luis wants everyone to enjoy the experience</li>
-        </ul>
-      </div>
-
-      {/* Sample requests */}
-      <div className="bg-gray-50 rounded-lg p-4">
-        <h4 className="text-sm font-medium text-gray-900 mb-2">
-          📝 Sample Special Requests
-        </h4>
-        <div className="text-sm text-gray-600 space-y-2">
-          <div>
-            <span className="font-medium">Anniversary Dinner:</span> "We're celebrating our 10th anniversary. Could you include some romantic touches and perhaps a special dessert?"
-          </div>
-          <div>
-            <span className="font-medium">Kids in Group:</span> "We'll have 3 children (ages 6-10). Could you prepare some kid-friendly options alongside the main menu?"
-          </div>
-          <div>
-            <span className="font-medium">Wine Pairing:</span> "We love wine! Could you suggest pairings or incorporate wine into the cooking?"
-          </div>
-        </div>
       </div>
 
       {/* Summary of special requests */}

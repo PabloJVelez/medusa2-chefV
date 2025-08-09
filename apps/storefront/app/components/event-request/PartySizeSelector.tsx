@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Button } from '@app/components/common/buttons/Button';
 import { useFormContext } from 'react-hook-form';
 import type { EventRequestFormData } from '@app/routes/request._index';
 import { PRICING_STRUCTURE, getEventTypeDisplayName } from '@libs/constants/pricing';
@@ -69,156 +68,120 @@ export const PartySizeSelector: FC<PartySizeSelectorProps> = ({ className }) => 
           How Many Guests Will Attend?
         </h3>
         <p className="text-primary-600">
-          Select the number of guests for your event. Minimum 2 guests, maximum 50 guests.
+          Select the number of guests for your culinary experience.
         </p>
       </div>
 
-      {/* Quick preset buttons */}
-      <div className="text-center">
-        <p className="text-sm text-primary-700 mb-4">Popular party sizes:</p>
-        <div className="flex flex-wrap justify-center gap-3">
-          {PARTY_SIZE_PRESETS.map((size) => (
-            <Button
-              key={size}
-              type="button"
-              variant={partySize === size ? "primary" : "default"}
-              onClick={() => handlePartySizeChange(size)}
-              className="text-sm px-4 py-2"
-            >
-              {size} guests
-            </Button>
-          ))}
-        </div>
-      </div>
+      {/* Party size selector */}
+      <div className="bg-white border border-gray-200 rounded-lg p-6">
+        <div className="space-y-6">
+          {/* Manual input with +/- buttons */}
+          <div>
+            <label className="block text-sm font-medium text-primary-900 mb-3">
+              Number of Guests
+            </label>
+            
+            <div className="flex items-center justify-center space-x-4">
+              <button
+                type="button"
+                onClick={decrementSize}
+                disabled={partySize <= MIN_PARTY_SIZE}
+                className={clsx(
+                  "w-12 h-12 rounded-full border-2 flex items-center justify-center text-lg font-semibold transition-colors",
+                  partySize > MIN_PARTY_SIZE
+                    ? "border-accent-500 text-accent-600 hover:bg-accent-50"
+                    : "border-gray-300 text-gray-400 cursor-not-allowed"
+                )}
+              >
+                -
+              </button>
+              
+              <div className="text-center">
+                <input
+                  type="number"
+                  min={MIN_PARTY_SIZE}
+                  max={MAX_PARTY_SIZE}
+                  value={inputValue}
+                  onChange={(e) => handleInputChange(e.target.value)}
+                  className="w-20 text-center text-2xl font-bold text-primary-900 border-none bg-transparent focus:outline-none"
+                />
+                <p className="text-sm text-primary-600">guests</p>
+              </div>
+              
+              <button
+                type="button"
+                onClick={incrementSize}
+                disabled={partySize >= MAX_PARTY_SIZE}
+                className={clsx(
+                  "w-12 h-12 rounded-full border-2 flex items-center justify-center text-lg font-semibold transition-colors",
+                  partySize < MAX_PARTY_SIZE
+                    ? "border-accent-500 text-accent-600 hover:bg-accent-50"
+                    : "border-gray-300 text-gray-400 cursor-not-allowed"
+                )}
+              >
+                +
+              </button>
+            </div>
+            
+            <p className="text-sm text-primary-600 mt-2 text-center">
+              Minimum {MIN_PARTY_SIZE} guests, maximum {MAX_PARTY_SIZE} guests
+            </p>
+          </div>
 
-      {/* Custom number input */}
-      <div className="max-w-md mx-auto">
-        <label className="block text-sm font-medium text-primary-900 mb-3 text-center">
-          Or enter a custom number:
-        </label>
-        
-        <div className="flex items-center justify-center gap-4">
-          <Button
-            type="button"
-            variant="default"
-            onClick={decrementSize}
-            disabled={partySize <= MIN_PARTY_SIZE}
-            className="w-10 h-10 p-0 flex items-center justify-center"
-          >
-            −
-          </Button>
-          
-          <div className="relative">
-            <input
-              type="number"
-              min={MIN_PARTY_SIZE}
-              max={MAX_PARTY_SIZE}
-              value={inputValue}
-              onChange={(e) => handleInputChange(e.target.value)}
-              onBlur={() => setInputValue(partySize.toString())}
-              className={clsx(
-                "w-20 text-center text-xl font-semibold py-3 border-2 rounded-lg focus:ring-2 focus:ring-accent-500 focus:border-accent-500",
-                errors.partySize
-                  ? "border-red-300 focus:border-red-500 focus:ring-red-500"
-                  : "border-gray-300"
-              )}
-            />
-            <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs text-primary-600">
-              guests
+          {/* Quick selection presets */}
+          <div>
+            <p className="text-sm font-medium text-primary-900 mb-3">Quick Selection:</p>
+            <div className="flex flex-wrap gap-2">
+              {PARTY_SIZE_PRESETS.map((size) => (
+                <button
+                  key={size}
+                  type="button"
+                  onClick={() => handlePartySizeChange(size)}
+                  className={clsx(
+                    "px-4 py-2 rounded-lg text-sm font-medium transition-colors border-2",
+                    partySize === size
+                      ? "bg-accent-500 text-white border-accent-500"
+                      : "bg-white text-primary-700 border-gray-200 hover:border-accent-300 hover:bg-accent-50"
+                  )}
+                >
+                  {size} guests
+                </button>
+              ))}
             </div>
           </div>
-          
-          <Button
-            type="button"
-            variant="default"
-            onClick={incrementSize}
-            disabled={partySize >= MAX_PARTY_SIZE}
-            className="w-10 h-10 p-0 flex items-center justify-center"
-          >
-            +
-          </Button>
         </div>
-
-        {/* Error message */}
-        {errors.partySize && (
-          <p className="text-red-600 text-sm mt-2 text-center">
-            {errors.partySize.message}
-          </p>
-        )}
       </div>
 
-      {/* Price calculation */}
+      {/* Pricing display */}
       {eventType && price && (
-        <div className="bg-accent-50 border border-accent-200 rounded-lg p-6">
-          <div className="text-center space-y-3">
-            <h4 className="text-lg font-semibold text-accent-700">
+        <div className="bg-accent-50 border border-accent-200 rounded-lg p-4">
+          <div className="text-center">
+            <h4 className="text-sm font-semibold text-accent-700 mb-2">
               Pricing Estimate
             </h4>
-            
-            <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <span className="text-accent-600">Experience Type:</span>
-                <span className="font-medium text-accent-800">{getEventTypeName()}</span>
-              </div>
-              
-              <div className="flex justify-between items-center">
-                <span className="text-accent-600">Price per Person:</span>
-                <span className="font-medium text-accent-800">${price.toFixed(2)}</span>
-              </div>
-              
-              <div className="flex justify-between items-center">
-                <span className="text-accent-600">Number of Guests:</span>
-                <span className="font-medium text-accent-800">{partySize}</span>
-              </div>
-              
-              <div className="border-t border-accent-200 pt-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-lg font-semibold text-accent-700">Total Estimate:</span>
-                  <span className="text-2xl font-bold text-accent-800">${totalPrice.toFixed(2)}</span>
-                </div>
-              </div>
+            <div className="space-y-1">
+              <p className="text-sm text-accent-600">
+                {getEventTypeName()}
+              </p>
+              <p className="text-lg font-bold text-accent-800">
+                ${price.toFixed(2)} per person
+              </p>
+              <p className="text-sm text-accent-600">
+                Total: ${totalPrice.toFixed(2)} for {partySize} guests
+              </p>
             </div>
           </div>
         </div>
       )}
 
-      {/* Group size recommendations */}
-      <div className="bg-gray-50 rounded-lg p-4">
-        <h4 className="text-sm font-medium text-gray-900 mb-2">
-          Group Size Recommendations
-        </h4>
-        <div className="text-sm text-gray-600 space-y-1">
-          <div className="flex justify-between">
-            <span>• Intimate Experience:</span>
-            <span>2-4 guests</span>
-          </div>
-          <div className="flex justify-between">
-            <span>• Small Gathering:</span>
-            <span>6-8 guests</span>
-          </div>
-          <div className="flex justify-between">
-            <span>• Medium Party:</span>
-            <span>10-15 guests</span>
-          </div>
-          <div className="flex justify-between">
-            <span>• Large Event:</span>
-            <span>20+ guests</span>
-          </div>
+      {/* Error message */}
+      {errors.partySize && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <p className="text-red-600 text-sm">
+            {errors.partySize.message}
+          </p>
         </div>
-      </div>
-
-      {/* Important notes */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <h4 className="text-sm font-medium text-blue-900 mb-2">
-          💡 Important Notes
-        </h4>
-        <ul className="text-sm text-blue-800 space-y-1">
-          <li>• Final pricing confirmed after chef approval</li>
-          <li>• Group size affects menu options and setup requirements</li>
-          <li>• Additional guests can often be accommodated with advance notice</li>
-                      <li>• Chef Luis will work with you to optimize the experience for your group size</li>
-        </ul>
-      </div>
+      )}
 
       {/* Hidden form field */}
       <input type="hidden" name="partySize" value={partySize} />

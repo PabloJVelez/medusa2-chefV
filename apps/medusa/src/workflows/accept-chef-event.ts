@@ -367,39 +367,7 @@ const createEventProductStep = createStep(
   }
 )
 
-const attachInventoryItemsToVariantsStep = createStep(
-  "attach-inventory-items-to-variants-step",
-  async (input: { product: any, inventoryItems: any[] }, { container }: { container: any }) => {
-    console.log("🔗 Attaching inventory items to variants...")
-    
-    const attachments = []
-    
-    for (let i = 0; i < input.product.variants.length; i++) {
-      const variant = input.product.variants[i]
-      const inventoryItem = input.inventoryItems[i]
-      
-      if (variant && inventoryItem) {
-        attachments.push({
-          inventoryItemId: inventoryItem.id,
-          tag: variant.id
-        })
-        
-        console.log(`   ✅ Attaching inventory item ${inventoryItem.id} to variant ${variant.id}`)
-      }
-    }
-    
-    if (attachments.length > 0) {
-      console.log(`📝 Note: Inventory items created but manual attachment to variants skipped due to API limitations`)
-      console.log(`📝 Inventory items: ${attachments.map(a => a.inventoryItemId).join(', ')}`)
-      console.log(`📝 Variants: ${attachments.map(a => a.tag).join(', ')}`)
-    }
-    
-    return new StepResponse({
-      product: input.product,
-      inventoryItems: input.inventoryItems
-    })
-  }
-)
+
 
 const linkChefEventToProductStep = createStep(
   "link-chef-event-to-product-step",
@@ -438,13 +406,9 @@ export const acceptChefEventWorkflow = createWorkflow(
       defaultSalesChannel: linkedLocations.defaultSalesChannel, // Pass default sales channel to product creation
       digitalLocation: linkedLocations.digitalLocation // Pass digital location to inventory creation
     })
-    const productWithInventory = attachInventoryItemsToVariantsStep({
-      product: productAndInventory.product,
-      inventoryItems: productAndInventory.inventoryItems
-    })
     const linkedChefEvent = linkChefEventToProductStep({ 
       originalChefEvent: chefEventData.originalChefEvent, 
-      product: productWithInventory.product // Use the product from the combined step
+      product: productAndInventory.product // Use the product directly from productAndInventory
     })
     
     // Only emit event if email should be sent

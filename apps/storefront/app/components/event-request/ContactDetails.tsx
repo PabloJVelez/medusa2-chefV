@@ -46,7 +46,7 @@ export const ContactDetails: FC<ContactDetailsProps> = ({ className }) => {
           Contact Information
         </h3>
         <p className="text-primary-600">
-                      Please provide your contact details so Chef Luis can reach you about your event request.
+          Please provide your contact details so Chef Luis can reach you about your event request.
         </p>
       </div>
 
@@ -117,7 +117,7 @@ export const ContactDetails: FC<ContactDetailsProps> = ({ className }) => {
           )}
         />
         <p className="text-sm text-primary-600 mt-1">
-                          Used for event confirmations and communication with Chef Luis
+          Used for event confirmations and communication with Chef Luis
         </p>
         {errors.email && (
           <p className="text-red-600 text-sm mt-1">
@@ -167,45 +167,6 @@ export const ContactDetails: FC<ContactDetailsProps> = ({ className }) => {
           </div>
         </div>
       )}
-
-      {/* Communication preferences */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <h4 className="text-sm font-medium text-blue-900 mb-2">
-                      📞 How Chef Luis Will Contact You
-        </h4>
-        <ul className="text-sm text-blue-800 space-y-1">
-          <li>• <span className="font-medium">Initial Response:</span> Email within 24 hours to confirm receipt of your request</li>
-          <li>• <span className="font-medium">Event Planning:</span> Phone call or email to discuss menu details and logistics</li>
-          <li>• <span className="font-medium">Day of Event:</span> Text/call for any last-minute coordination (if phone provided)</li>
-          <li>• <span className="font-medium">Follow-up:</span> Email after your event to ensure everything was perfect</li>
-        </ul>
-      </div>
-
-      {/* Privacy information */}
-      <div className="bg-gray-50 rounded-lg p-4">
-        <h4 className="text-sm font-medium text-gray-900 mb-2">
-          🔒 Privacy & Data Protection
-        </h4>
-        <ul className="text-sm text-gray-600 space-y-1">
-          <li>• Your contact information is only used for this event booking</li>
-          <li>• We never share your details with third parties</li>
-          <li>• You can request data deletion at any time</li>
-          <li>• All communications are secure and confidential</li>
-        </ul>
-      </div>
-
-      {/* Communication tips */}
-      <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-        <h4 className="text-sm font-medium text-green-900 mb-2">
-          💡 Communication Tips
-        </h4>
-        <ul className="text-sm text-green-800 space-y-1">
-                      <li>• Check your email (including spam folder) for Chef Luis's response</li>
-          <li>• Providing a phone number enables faster communication and coordination</li>
-          <li>• Response times are typically faster on weekdays</li>
-                      <li>• Feel free to ask questions - Chef Luis loves discussing food and events!</li>
-        </ul>
-      </div>
 
       {/* Hidden form fields */}
       <input type="hidden" name="firstName" value={firstName || ''} />

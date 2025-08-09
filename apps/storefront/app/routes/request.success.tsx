@@ -23,7 +23,8 @@ export const meta: MetaFunction = () => {
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const url = new URL(request.url);
-  const eventId = url.searchParams.get('eventId') || '';
+  const searchParams = new URLSearchParams(url.search);
+  const eventId = searchParams.get('eventId') || '';
   
   console.log('🎉 SUCCESS PAGE: Loader called with eventId:', eventId);
   
@@ -33,8 +34,8 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   }
   
   return {
-    eventId,
-    supportEmail: 'hello@chefelenar.com',
+    eventId: searchParams.get('eventId') || 'unknown',
+    supportEmail: 'chef@chefluisvelez.com',
     supportPhone: '(555) 123-4567',
     responseTime: '24 hours',
   };

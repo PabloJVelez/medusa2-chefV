@@ -43,7 +43,17 @@ export const MedusaStripeAddress: FC<MedusaStripeAddressProps> = ({
   setAddress,
 }) => {
   const { env } = useEnv();
-  const { cart } = useCheckout();
+  
+  // Add null check for checkout context
+  let checkoutData;
+  try {
+    checkoutData = useCheckout();
+  } catch (error) {
+    console.error('Checkout context error:', error);
+    return <div>Loading checkout...</div>;
+  }
+  
+  const { cart } = checkoutData;
   const { region } = useRegion();
 
   const handleChange = (

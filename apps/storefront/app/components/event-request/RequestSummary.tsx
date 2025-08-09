@@ -30,7 +30,6 @@ export const RequestSummary: FC<RequestSummaryProps> = ({
     partySize: watch('partySize'),
     requestedDate: watch('requestedDate'),
     requestedTime: watch('requestedTime'),
-    locationType: watch('locationType'),
     locationAddress: watch('locationAddress'),
     firstName: watch('firstName'),
     lastName: watch('lastName'),
@@ -68,17 +67,6 @@ export const RequestSummary: FC<RequestSummaryProps> = ({
     const ampm = hour >= 12 ? 'PM' : 'AM';
     const displayHour = hour % 12 || 12;
     return `${displayHour}:${minutes} ${ampm}`;
-  };
-
-  const getLocationTypeDisplay = () => {
-    switch (formData.locationType) {
-      case 'customer_location':
-        return 'Your Location';
-      case 'chef_location':
-        return "Chef Luis's Kitchen";
-      default:
-        return '';
-    }
   };
 
   return (
@@ -214,7 +202,7 @@ export const RequestSummary: FC<RequestSummaryProps> = ({
           <div className="space-y-3">
             <div>
               <p className="text-sm font-medium text-primary-700">Event Location</p>
-              <p className="text-primary-900">{getLocationTypeDisplay() || 'Not selected'}</p>
+              <p className="text-primary-900">Your Location</p>
             </div>
             {formData.locationAddress && (
               <div>

@@ -9,6 +9,15 @@ const actions = ({ dispatch }: CheckoutContextValue) => ({
 
 export const useCheckout = () => {
   const context = useContext(CheckoutContext);
+  
+  if (!context) {
+    throw new Error('useCheckout must be used within a CheckoutProvider');
+  }
+  
+  if (!context.state) {
+    throw new Error('CheckoutProvider state is null');
+  }
+  
   const nextStep = useNextStep(context.state);
   const { state } = context;
   const fetchers = useFetchers();

@@ -9,6 +9,8 @@ import { eventRequestSchema } from '@app/routes/request._index';
 import { useActionData } from 'react-router';
 import clsx from 'clsx';
 import type { FC } from 'react';
+import { Disclosure } from '@headlessui/react';
+import ChevronDownIcon from '@heroicons/react/24/outline/ChevronDownIcon';
 
 // Real form step components
 import { MenuSelector } from './MenuSelector';
@@ -35,14 +37,11 @@ interface ActionResponse {
 }
 
 const STEPS = [
-  { id: 1, title: 'Menu Selection', subtitle: 'Choose a menu template (optional)' },
-  { id: 2, title: 'Experience Type', subtitle: 'Select your culinary experience' },
-  { id: 3, title: 'Date & Time', subtitle: 'When would you like your event?' },
-  { id: 4, title: 'Party Size', subtitle: 'How many guests will attend?' },
-  { id: 5, title: 'Location', subtitle: 'Where will the event take place?' },
-  { id: 6, title: 'Contact Details', subtitle: 'How can we reach you?' },
-  { id: 7, title: 'Special Requests', subtitle: 'Any dietary restrictions or notes?' },
-  { id: 8, title: 'Review & Submit', subtitle: 'Confirm your event details' },
+  { id: 1, title: 'Experience & Menu', subtitle: 'Choose your culinary experience and (optional) a menu template' },
+  { id: 2, title: 'Schedule & Party Size', subtitle: 'Select your preferred date, time, and number of guests' },
+  { id: 3, title: 'Location & Contact', subtitle: 'Where will the event take place and how can we reach you?' },
+  { id: 4, title: 'Special Requests', subtitle: 'Any dietary restrictions or notes?' },
+  { id: 5, title: 'Review & Submit', subtitle: 'Confirm your event details' },
 ];
 
 export const EventRequestForm: FC<EventRequestFormProps> = ({ 
@@ -89,48 +88,114 @@ export const EventRequestForm: FC<EventRequestFormProps> = ({
     
     switch (currentStep) {
       case 1:
-        return true; // Menu selection is optional
-      case 2:
+        // Experience required, menu optional
         return !!values.eventType && !errors.eventType;
+      case 2:
+        // Date, time, and party size required
+        return !!values.requestedDate && !!values.requestedTime &&
+               values.partySize >= 2 && values.partySize <= 50 &&
+               !errors.requestedDate && !errors.requestedTime && !errors.partySize;
       case 3:
-        return !!values.requestedDate && !!values.requestedTime && 
-               !errors.requestedDate && !errors.requestedTime;
+        // Location and contact required
+        return !!values.locationAddress && values.locationAddress.length >= 10 &&
+               !!values.firstName && !!values.lastName && !!values.email &&
+               !errors.locationAddress && !errors.firstName && !errors.lastName && !errors.email &&
+               (!values.phone || !errors.phone);
       case 4:
-        return values.partySize >= 2 && values.partySize <= 50 && !errors.partySize;
+        // Special requests optional but must be valid if provided
+        return !errors.specialRequirements && !errors.notes;
       case 5:
-        return !!values.locationType && !!values.locationAddress && 
-               values.locationAddress.length >= 10 &&
-               !errors.locationType && !errors.locationAddress;
-      case 6:
-        return !!values.firstName && !!values.lastName && !!values.email &&
-               !errors.firstName && !errors.lastName && !errors.email &&
-               (!values.phone || !errors.phone); // Phone is optional but must be valid if provided
-      case 7:
-        return !errors.specialRequirements && !errors.notes; // Optional but must be valid if provided
-      case 8:
-        return Object.keys(errors).length === 0; // No validation errors on final step
+        // No validation errors on final step
+        return Object.keys(errors).length === 0;
       default:
         return false;
     }
   };
 
+  const renderSectionHeader = (label: string) => (
+    <div className="flex items-center gap-2">
+      <h4 className="text-base font-semibold text-primary-900">{label}</h4>
+    </div>
+  );
+
+  const renderDisclosure = (
+    args: {
+      defaultOpen?: boolean;
+      header: React.ReactNode;
+      children: React.ReactNode;
+    }
+  ) => (
+    <Disclosure defaultOpen={args.defaultOpen}>
+      {({ open }) => (
+        <div
+          className={clsx(
+            'rounded-lg border bg-white transition-colors shadow-sm',
+            open ? 'border-accent-300 ring-1 ring-accent-200' : 'border-gray-200 hover:border-gray-300'
+          )}
+        >
+          <Disclosure.Button className="w-full px-4 py-3 text-left">
+            <div className="flex items-center justify-between">
+              <div>{args.header}</div>
+              <ChevronDownIcon
+                className={clsx('h-5 w-5 text-gray-500 transition-transform', open && 'rotate-180')}
+              />
+            </div>
+          </Disclosure.Button>
+          <Disclosure.Panel className="px-4 pb-4">
+            {args.children}
+          </Disclosure.Panel>
+        </div>
+      )}
+    </Disclosure>
+  );
+
   const renderStepContent = () => {
     switch (currentStep) {
       case 1:
-        return <MenuSelector menus={menus} />;
+        return (
+          <div className="space-y-6">
+            {renderDisclosure({
+              defaultOpen: true,
+              header: renderSectionHeader('Select a Menu'),
+              children: <MenuSelector menus={menus} />,
+            })}
+
+            {renderDisclosure({
+              defaultOpen: false,
+              header: renderSectionHeader('Experience Type'),
+              children: <EventTypeSelector />,
+            })}
+          </div>
+        );
       case 2:
-        return <EventTypeSelector />;
+        return (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div>
+              <div className="mb-3">{renderSectionHeader('Date & Time')}</div>
+              <DateTimeForm />
+            </div>
+            <div>
+              <div className="mb-3">{renderSectionHeader('Party Size')}</div>
+              <PartySizeSelector />
+            </div>
+          </div>
+        );
       case 3:
-        return <DateTimeForm />;
+        return (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div>
+              <div className="mb-3">{renderSectionHeader('Event Location')}</div>
+              <LocationForm />
+            </div>
+            <div>
+              <div className="mb-3">{renderSectionHeader('Contact Details')}</div>
+              <ContactDetails />
+            </div>
+          </div>
+        );
       case 4:
-        return <PartySizeSelector />;
-      case 5:
-        return <LocationForm />;
-      case 6:
-        return <ContactDetails />;
-      case 7:
         return <SpecialRequests />;
-      case 8:
+      case 5:
         return (
           <RequestSummary 
             menus={menus} 
@@ -265,7 +330,6 @@ export const EventRequestForm: FC<EventRequestFormProps> = ({
           <input type="hidden" name="requestedDate" value={form.watch('requestedDate') || ''} />
           <input type="hidden" name="requestedTime" value={form.watch('requestedTime') || ''} />
           <input type="hidden" name="partySize" value={form.watch('partySize') || ''} />
-          <input type="hidden" name="locationType" value={form.watch('locationType') || ''} />
           <input type="hidden" name="locationAddress" value={form.watch('locationAddress') || ''} />
           <input type="hidden" name="firstName" value={form.watch('firstName') || ''} />
           <input type="hidden" name="lastName" value={form.watch('lastName') || ''} />
