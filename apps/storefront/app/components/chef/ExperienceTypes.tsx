@@ -186,17 +186,13 @@ export const ExperienceTypes: FC<ExperienceTypesProps> = ({
           </h3>
           <p className="text-primary-600 mb-6 text-sm">
             Let us help you choose the perfect culinary experience for your occasion. 
-            We'll work with you to customize any experience to your preferences.
+            Let's start with selecting a menu...
           </p>
           <ActionList
             actions={[
               {
                 label: 'Browse Our Menus',
                 url: '/menus',
-              },
-              {
-                label: 'Request Custom Event',
-                url: '/request',
               }
             ]}
             className="flex-col gap-3 sm:flex-row sm:justify-center"

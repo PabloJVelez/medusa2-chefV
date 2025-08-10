@@ -44,7 +44,7 @@ export const MenuCarousel: FC<MenuCarouselProps> = ({ menus, className }) => {
     <div className={clsx('menu-carousel relative', className)}>
       <div
         ref={scrollableDivRef}
-        className="w-full snap-both snap-mandatory overflow-x-auto whitespace-nowrap pb-2 sm:snap-proximity"
+        className="w-full snap-both snap-mandatory overflow-x-auto whitespace-nowrap pb-2 sm:snap-proximity text-center"
       >
         <MenuRow menus={menus} />
       </div>

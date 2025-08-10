@@ -17,7 +17,7 @@ export const MenuGrid: FC<MenuListProps> = ({
   heading,
   actions,
   menus,
-  className = 'grid grid-cols-1 gap-y-6 @md:grid-cols-2 gap-x-4 @2xl:!grid-cols-3 @4xl:!grid-cols-4 @4xl:gap-x-4',
+  className = 'grid grid-cols-1 gap-y-6 @md:grid-cols-2 gap-x-4 @2xl:!grid-cols-3 @4xl:!grid-cols-4 @4xl:gap-x-4 justify-items-center',
 }) => {
   const navigation = useNavigation();
   const isLoading = navigation.state !== 'idle';

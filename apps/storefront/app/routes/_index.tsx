@@ -99,8 +99,8 @@ export default function IndexRoute() {
                 With over 15 years of culinary excellence, Chef Luis Velez brings world-class expertise 
                 from Michelin-starred restaurants directly to your home.
               </p>
-              <p className="text-base leading-relaxed">
-                Trained in classical French techniques with a modern innovative approach, she creates 
+            <p className="text-base leading-relaxed">
+                Trained in classical French techniques with a modern innovative approach, he creates 
                 unforgettable dining experiences tailored to your special occasions.
               </p>
             </div>
@@ -120,12 +120,12 @@ export default function IndexRoute() {
         </div>
       </Container>
 
-      {/* Chef Background Section */}
+      {/* Chef Background Section
       <Container className="p-14 pt-0">
         <div
           className="h-[594px] rounded-3xl bg-cover bg-no-repeat bg-center flex items-center justify-center"
           style={{
-            backgroundImage: 'url(https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80)',
+            backgroundImage: 'url(/assets/images/chef_watermelon_home.jpg)',
           }}
         >
           <div className="bg-black bg-opacity-50 rounded-2xl p-8 max-w-2xl text-white text-center">
@@ -137,7 +137,7 @@ export default function IndexRoute() {
             </p>
           </div>
         </div>
-      </Container>
+      </Container> */}
 
       {/* Testimonials Section */}
       <Container className="p-14 pt-0">
@@ -162,7 +162,7 @@ export default function IndexRoute() {
           <div className="bg-white rounded-2xl shadow-lg p-8 text-center">
             <div className="text-4xl mb-4">⭐⭐⭐⭐⭐</div>
             <p className="text-gray-700 italic mb-4">
-              "The cooking class was amazing! Elena taught us so much and we had a blast. 
+              "The cooking class was amazing! Chef Velez taught us so much and we had a blast. 
               Can't wait to book another experience."
             </p>
             <div className="font-semibold text-gray-900">— Jennifer L.</div>
@@ -186,8 +186,8 @@ export default function IndexRoute() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
           <div className="order-2 lg:order-1">
             <Image
-              src="https://images.unsplash.com/photo-1559181567-c3190ca9959b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80"
-              alt="Chef Luis plating an elegant dish"
+              src="/assets/images/chef_experience.PNG"
+              alt="Guests enjoying a Chef Velez experience"
               className="rounded-3xl shadow-lg"
               width={600}
               height={400}
