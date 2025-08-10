@@ -37,11 +37,10 @@ interface ActionResponse {
 }
 
 const STEPS = [
-  { id: 1, title: 'Experience & Menu', subtitle: 'Choose your culinary experience and (optional) a menu template' },
-  { id: 2, title: 'Schedule & Party Size', subtitle: 'Select your preferred date, time, and number of guests' },
-  { id: 3, title: 'Location & Contact', subtitle: 'Where will the event take place and how can we reach you?' },
-  { id: 4, title: 'Special Requests', subtitle: 'Any dietary restrictions or notes?' },
-  { id: 5, title: 'Review & Submit', subtitle: 'Confirm your event details' },
+  { id: 1, title: 'Experience & Menu', subtitle: 'Choose your culinary experience, select a menu template, and tell us how many guests' },
+  { id: 2, title: 'Schedule, Contact & Location', subtitle: 'Select date/time, provide contact info, and enter the event address' },
+  { id: 3, title: 'Special Requests', subtitle: 'Any dietary restrictions or notes?' },
+  { id: 4, title: 'Review & Submit', subtitle: 'Confirm your event details' },
 ];
 
 export const EventRequestForm: FC<EventRequestFormProps> = ({ 
@@ -88,23 +87,37 @@ export const EventRequestForm: FC<EventRequestFormProps> = ({
     
     switch (currentStep) {
       case 1:
-        // Experience required, menu optional
-        return !!values.eventType && !errors.eventType;
+        // Experience required, party size required
+        return (
+          !!values.eventType &&
+          !errors.eventType &&
+          !!values.menuId &&
+          values.partySize >= 2 &&
+          values.partySize <= 50 &&
+          !errors.partySize
+        );
       case 2:
-        // Date, time, and party size required
-        return !!values.requestedDate && !!values.requestedTime &&
-               values.partySize >= 2 && values.partySize <= 50 &&
-               !errors.requestedDate && !errors.requestedTime && !errors.partySize;
+        // Date/time, contact, and location required
+        return (
+          !!values.requestedDate &&
+          !!values.requestedTime &&
+          !errors.requestedDate &&
+          !errors.requestedTime &&
+          !!values.firstName &&
+          !!values.lastName &&
+          !!values.email &&
+          !errors.firstName &&
+          !errors.lastName &&
+          !errors.email &&
+          (!values.phone || !errors.phone) &&
+          !!values.locationAddress &&
+          values.locationAddress.length >= 10 &&
+          !errors.locationAddress
+        );
       case 3:
-        // Location and contact required
-        return !!values.locationAddress && values.locationAddress.length >= 10 &&
-               !!values.firstName && !!values.lastName && !!values.email &&
-               !errors.locationAddress && !errors.firstName && !errors.lastName && !errors.email &&
-               (!values.phone || !errors.phone);
-      case 4:
         // Special requests optional but must be valid if provided
         return !errors.specialRequirements && !errors.notes;
-      case 5:
+      case 4:
         // No validation errors on final step
         return Object.keys(errors).length === 0;
       default:
@@ -112,9 +125,31 @@ export const EventRequestForm: FC<EventRequestFormProps> = ({
     }
   };
 
-  const renderSectionHeader = (label: string) => (
-    <div className="flex items-center gap-2">
+  const isAllComplete = () => {
+    const v = form.getValues();
+    const e = form.formState.errors;
+    const step1 = !!v.menuId && !!v.eventType && !e.eventType && v.partySize >= 2 && v.partySize <= 50 && !e.partySize;
+    const step2Date = !!v.requestedDate && !!v.requestedTime && !e.requestedDate && !e.requestedTime;
+    const step2Contact = !!v.firstName && !!v.lastName && !!v.email && !e.firstName && !e.lastName && !e.email && (!v.phone || !e.phone);
+    const step2Location = !!v.locationAddress && v.locationAddress.length >= 10 && !e.locationAddress;
+    return step1 && step2Date && step2Contact && step2Location; // step3 (special requests) is optional
+  };
+
+  const renderSectionHeader = (label: string, opts?: { complete?: boolean; optional?: boolean }) => (
+    <div className="flex items-center gap-3">
       <h4 className="text-base font-semibold text-primary-900">{label}</h4>
+      <span
+        className={clsx(
+          'inline-flex items-center rounded-full border px-2 py-0.5 text-xs',
+          opts?.optional
+            ? 'border-gray-300 text-gray-600'
+            : opts?.complete
+            ? 'border-green-300 text-green-700 bg-green-50'
+            : 'border-gray-300 text-gray-600 bg-gray-50'
+        )}
+      >
+        {opts?.optional ? 'Optional' : opts?.complete ? 'Complete' : 'Incomplete'}
+      </span>
     </div>
   );
 
@@ -154,52 +189,104 @@ export const EventRequestForm: FC<EventRequestFormProps> = ({
       case 1:
         return (
           <div className="space-y-6">
-            {renderDisclosure({
-              defaultOpen: true,
-              header: renderSectionHeader('Select a Menu'),
-              children: <MenuSelector menus={menus} />,
-            })}
+            {(() => {
+              const v = form.getValues();
+              const e = form.formState.errors;
+              const isEventTypeComplete = !!v.eventType && !e.eventType;
+              const isPartySizeComplete = v.partySize >= 2 && v.partySize <= 50 && !e.partySize;
+              const isMenuSelected = !!v.menuId;
 
-            {renderDisclosure({
-              defaultOpen: false,
-              header: renderSectionHeader('Experience Type'),
-              children: <EventTypeSelector />,
-            })}
+              return (
+                <>
+                  {renderDisclosure({
+                    defaultOpen: true,
+                    header: renderSectionHeader('Select a Menu', { complete: isMenuSelected }),
+                    children: <MenuSelector menus={menus} />,
+                  })}
+
+                  {renderDisclosure({
+                    defaultOpen: false,
+                    header: renderSectionHeader('Experience Type', { complete: isEventTypeComplete }),
+                    children: <EventTypeSelector />,
+                  })}
+
+                  {renderDisclosure({
+                    defaultOpen: false,
+                    header: renderSectionHeader('Number of Guests', { complete: isPartySizeComplete }),
+                    children: <PartySizeSelector />,
+                  })}
+                </>
+              );
+            })()}
           </div>
         );
       case 2:
         return (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div>
-              <div className="mb-3">{renderSectionHeader('Date & Time')}</div>
-              <DateTimeForm />
-            </div>
-            <div>
-              <div className="mb-3">{renderSectionHeader('Party Size')}</div>
-              <PartySizeSelector />
-            </div>
+          <div className="space-y-6">
+            {(() => {
+              const v = form.getValues();
+              const e = form.formState.errors;
+              const isDateComplete = !!v.requestedDate && !!v.requestedTime && !e.requestedDate && !e.requestedTime;
+              const isContactComplete = !!v.firstName && !!v.lastName && !!v.email && !e.firstName && !e.lastName && !e.email && (!v.phone || !e.phone);
+              const isLocationComplete = !!v.locationAddress && v.locationAddress.length >= 10 && !e.locationAddress;
+
+              return (
+                <>
+                  {renderDisclosure({
+                    defaultOpen: false,
+                    header: renderSectionHeader('Date & Time', { complete: isDateComplete }),
+                    children: <DateTimeForm />,
+                  })}
+
+                  {renderDisclosure({
+                    defaultOpen: false,
+                    header: renderSectionHeader('Contact Information', { complete: isContactComplete }),
+                    children: <ContactDetails />,
+                  })}
+
+                  {renderDisclosure({
+                    defaultOpen: false,
+                    header: renderSectionHeader('Event Address', { complete: isLocationComplete }),
+                    children: <LocationForm />,
+                  })}
+                </>
+              );
+            })()}
           </div>
         );
       case 3:
-        return (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div>
-              <div className="mb-3">{renderSectionHeader('Event Location')}</div>
-              <LocationForm />
-            </div>
-            <div>
-              <div className="mb-3">{renderSectionHeader('Contact Details')}</div>
-              <ContactDetails />
-            </div>
-          </div>
-        );
-      case 4:
         return <SpecialRequests />;
-      case 5:
+      case 4:
         return (
           <RequestSummary 
             menus={menus} 
-            onEditStep={(step: number) => setCurrentStep(step)}
+            onEditStep={(step: number, section?: string) => {
+              setCurrentStep(step);
+              // brief timeout to allow render then expand intended section
+              setTimeout(() => {
+                const sectionMap: Record<string, string[]> = {
+                  // Step 1
+                  menu: ['Select a Menu'],
+                  experience: ['Experience Type'],
+                  guests: ['Number of Guests'],
+                  // Step 2
+                  date: ['Date & Time'],
+                  contact: ['Contact Information'],
+                  location: ['Event Address'],
+                  // Step 3
+                  special: ['Special Requests'],
+                };
+
+                const labels = section && sectionMap[section];
+                if (!labels) return;
+                // Find disclosure button by header text and click to open
+                labels.forEach((text) => {
+                  const btn = Array.from(document.querySelectorAll('button'))
+                    .find((b) => b.textContent?.trim().startsWith(text));
+                  if (btn) (btn as HTMLButtonElement).click();
+                });
+              }, 0);
+            }}
             onSubmit={() => {
               console.log('🎯 FORM: Submit button clicked, triggering form submission');
               console.log('🎯 FORM: Form values before submit:', form.getValues());
@@ -214,32 +301,21 @@ export const EventRequestForm: FC<EventRequestFormProps> = ({
                 if (input && input.type === 'hidden') {
                   let processedValue = String(value || '');
                   
-                  // Special handling for requestedDate - convert to datetime format
                   if (key === 'requestedDate' && value) {
                     const requestedTime = formValues.requestedTime || '12:00';
-                    // Create a proper local datetime and convert to ISO string
                     const dateTime = new Date(`${value}T${requestedTime}:00`);
                     processedValue = dateTime.toISOString();
-                    console.log(`🎯 FORM: Converting date ${value} + time ${requestedTime} to datetime: ${processedValue}`);
                   }
                   
                   input.value = processedValue;
-                  console.log(`🎯 FORM: Updated hidden input ${key} = ${input.value}`);
                 }
               });
               
-              // Handle form submission
               const form_element = document.querySelector('form') as HTMLFormElement;
               if (form_element) {
-                console.log('🎯 FORM: Form element found, requesting submit');
-                
-                // Log all form data that will be submitted
                 const formData = new FormData(form_element);
-                console.log('🎯 FORM: FormData entries to be submitted:', Array.from(formData.entries()));
-                
+                console.log('📤 FORM: Actual FormData being submitted:', Array.from(formData.entries()));
                 form_element.requestSubmit();
-              } else {
-                console.error('🎯 FORM: No form element found!');
               }
             }}
             isSubmitting={form.formState.isSubmitting}
@@ -263,16 +339,17 @@ export const EventRequestForm: FC<EventRequestFormProps> = ({
                 index < STEPS.length - 1 && 'flex-1'
               )}
             >
-              <div
+              <button
                 className={clsx(
                   'w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium',
                   currentStep >= step.id
                     ? 'bg-accent-500 text-white'
                     : 'bg-gray-200 text-gray-600'
                 )}
+                onClick={() => setCurrentStep(step.id)}
               >
                 {step.id}
-              </div>
+              </button>
               {index < STEPS.length - 1 && (
                 <div
                   className={clsx(
@@ -364,6 +441,16 @@ export const EventRequestForm: FC<EventRequestFormProps> = ({
                   disabled={!canProceed()}
                 >
                   Next Step
+                </Button>
+              )}
+              {currentStep < STEPS.length - 1 && isAllComplete() && (
+                <Button
+                  type="button"
+                  variant="default"
+                  className="border border-gray-300 bg-white text-gray-800 hover:bg-gray-50"
+                  onClick={() => setCurrentStep(STEPS.length)}
+                >
+                  Review Now
                 </Button>
               )}
               {/* Note: Submit button is handled by RequestSummary component on final step */}

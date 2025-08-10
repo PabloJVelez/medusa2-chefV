@@ -43,15 +43,21 @@ export const DateTimeForm: FC<DateTimeFormProps> = ({ className }) => {
   const [minDate] = useState(getMinDate());
   const [maxDate] = useState(getMaxDate());
 
-  // Format date for display
+  // Helpers to parse a YYYY-MM-DD string as a LOCAL date (avoid UTC off-by-one)
+  const parseLocalDate = (dateString: string) => {
+    const [y, m, d] = dateString.split('-').map(Number);
+    return new Date(y, (m || 1) - 1, d || 1);
+  };
+
+  // Format date for display (local)
   const formatDateForDisplay = (dateString: string) => {
     if (!dateString) return '';
-    const date = new Date(dateString);
+    const date = parseLocalDate(dateString);
     return date.toLocaleDateString('en-US', {
       weekday: 'long',
       year: 'numeric',
       month: 'long',
-      day: 'numeric'
+      day: 'numeric',
     });
   };
 
@@ -65,10 +71,10 @@ export const DateTimeForm: FC<DateTimeFormProps> = ({ className }) => {
     return `${displayHour}:${minutes} ${ampm}`;
   };
 
-  // Check if selected date is weekend
+  // Check if selected date is weekend (local)
   const isWeekend = (dateString: string) => {
     if (!dateString) return false;
-    const date = new Date(dateString);
+    const date = parseLocalDate(dateString);
     const day = date.getDay();
     return day === 0 || day === 6; // Sunday or Saturday
   };
@@ -89,7 +95,7 @@ export const DateTimeForm: FC<DateTimeFormProps> = ({ className }) => {
           Select Your Preferred Date & Time
         </h3>
         <p className="text-primary-600">
-          Choose when you'd like Chef Luis to create your culinary experience. Events require minimum 7 days advance notice.
+          Choose when you'd like Chef Luis to arrive. He typically needs about 2 hours before guests sit down to eat. Events require minimum 7 days advance notice.
         </p>
       </div>
 
@@ -190,6 +196,9 @@ export const DateTimeForm: FC<DateTimeFormProps> = ({ className }) => {
             <div className="mt-2">
               <p className="text-sm font-medium text-accent-700">
                 Selected: {formatTimeForDisplay(selectedTime)}
+              </p>
+              <p className="text-xs text-primary-600 mt-1">
+                This is the chef arrival time. Plan for dining to start roughly 2 hours later.
               </p>
             </div>
           )}
