@@ -17,7 +17,7 @@ export const MenuGrid: FC<MenuListProps> = ({
   heading,
   actions,
   menus,
-  className = 'grid grid-cols-1 gap-y-6 @md:grid-cols-2 gap-x-4 @2xl:!grid-cols-3 @4xl:!grid-cols-4 @4xl:gap-x-4 justify-items-center',
+  className = 'grid grid-cols-1 gap-y-6 @md:grid-cols-2 gap-x-4 @2xl:!grid-cols-3 @4xl:!grid-cols-4 @4xl:gap-x-4 justify-items-stretch items-stretch',
 }) => {
   const navigation = useNavigation();
   const isLoading = navigation.state !== 'idle';
@@ -33,9 +33,26 @@ export const MenuGrid: FC<MenuListProps> = ({
       <MenuListHeader heading={heading} actions={actions} />
 
       <div className={className}>
-        {menus?.map((menu) => (
-          <NavLink prefetch="viewport" key={menu.id} to={`/menus/${menu.id}`} viewTransition>
-            {({ isTransitioning }) => <MenuListItem isTransitioning={isTransitioning} menu={menu} />}
+        {menus?.map((menu, index) => (
+          <NavLink
+            prefetch="viewport"
+            key={menu.id}
+            to={`/menus/${menu.id}`}
+            viewTransition
+            className={
+              // Feature the first menu with a larger span on medium+ screens
+              index === 0
+                ? '@md:col-span-2 @2xl:col-span-2'
+                : undefined
+            }
+          >
+            {({ isTransitioning }) => (
+              <MenuListItem
+                isTransitioning={isTransitioning}
+                menu={menu}
+                className="h-full"
+              />
+            )}
           </NavLink>
         ))}
       </div>

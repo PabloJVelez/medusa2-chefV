@@ -23,7 +23,7 @@ export const ChefHero: FC<ChefHeroProps> = ({
   tagline = "CULINARY EXPERIENCES & PRIVATE DINING",
   description = "Transform your special occasions into unforgettable culinary experiences. From intimate cooking classes to elegant plated dinners, I bring restaurant-quality cuisine directly to your home.",
   image = {
-    url: '/assets/images/chef-hero.png',
+    url: '/assets/images/chef_scallops_home.PNG',
     alt: 'Chef Luis Velez preparing an elegant dish'
   },
   actions = [
@@ -43,11 +43,12 @@ export const ChefHero: FC<ChefHeroProps> = ({
       <Container className={clsx('flex flex-col justify-center items-center relative w-full bg-accent-50', className)}>
         <div
           className={clsx(
-            'mkt-section__background-overlay flex-1 z-0 bg-cover bg-no-repeat bg-center opacity-80',
+            'mkt-section__background-overlay flex-1 z-0 bg-cover bg-no-repeat bg-center',
             backgroundClassName,
           )}
           style={{
-            backgroundImage: `url(${image?.url})`,
+            // Add a subtle tint to improve text readability over the image
+            backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.35), rgba(0,0,0,0.35)), url(${image?.url})`,
           }}
         />
         <div className="overflow-hidden z-10 w-full text-white">

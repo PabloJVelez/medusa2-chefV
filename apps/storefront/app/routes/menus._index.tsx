@@ -1,6 +1,6 @@
 import { Breadcrumbs } from '@app/components/common/breadcrumbs';
 import { Container } from '@app/components/common/container';
-import { MenuListWithPagination } from '@app/components/menu/MenuListWithPagination';
+import { MenuCarousel } from '@app/components/menu/MenuCarousel';
 import HomeIcon from '@heroicons/react/24/solid/HomeIcon';
 import { fetchMenus } from '@libs/util/server/data/menus.server';
 import { getMergedPageMeta } from '@libs/util/page';
@@ -12,16 +12,14 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     const url = new URL(request.url);
     const limit = parseInt(url.searchParams.get('limit') || '12');
     const offset = parseInt(url.searchParams.get('offset') || '0');
-    const q = url.searchParams.get('q') || undefined;
-
-    const { menus, count } = await fetchMenus({ limit, offset, q });
+    // Search is not needed for this page; only fetch paginated menus
+    const { menus, count } = await fetchMenus({ limit, offset });
 
     return { 
       menus, 
       count, 
       limit, 
       offset,
-      searchQuery: q,
       success: true 
     };
   } catch (error) {
@@ -31,7 +29,6 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       count: 0, 
       limit: 12, 
       offset: 0,
-      searchQuery: undefined,
       success: false 
     };
   }
@@ -39,15 +36,10 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
   const count = data?.count || 0;
-  const searchQuery = data?.searchQuery;
   
-  const title = searchQuery 
-            ? `Search Results for "${searchQuery}" - Menu Templates | Chef Luis Velez`
-        : `Menu Templates (${count}) | Chef Luis Velez`;
+  const title = `Menus (${count}) | Chef Luis Velez`;
     
-  const description = searchQuery
-    ? `Found ${count} menu templates matching "${searchQuery}". Browse our curated collection of chef-designed menus for your culinary experience.`
-          : `Browse ${count} professionally designed menu templates by Chef Luis Velez. From intimate dinners to group celebrations, find the perfect menu for your culinary experience.`;
+  const description = `Browse ${count} expertly crafted menus by Chef Luis Velez. From intimate dinners to group celebrations, find the perfect menu for your culinary experience.`;
 
   return [
     { title },
@@ -55,7 +47,7 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
     { property: 'og:title', content: title },
     { property: 'og:description', content: description },
     { property: 'og:type', content: 'website' },
-          { name: 'keywords', content: 'chef menus, culinary templates, private dining menus, cooking class menus, chef Luis Velez' },
+          { name: 'keywords', content: 'chef menus, private dining menus, tasting menus, cooking class menus, Chef Luis Velez' },
     ...(count === 0 ? [{ name: 'robots', content: 'noindex' }] : []),
   ];
 };
@@ -67,7 +59,7 @@ export default function MenusIndexRoute() {
 
   if (!data) return null;
 
-  const { menus, count, limit, offset, searchQuery } = data;
+  const { menus, count, limit, offset } = data;
 
   const breadcrumbs = [
     {
@@ -80,7 +72,7 @@ export default function MenusIndexRoute() {
       url: `/`,
     },
     {
-      label: 'Menu Templates',
+      label: 'Menus',
     },
   ];
 
@@ -93,48 +85,27 @@ export default function MenusIndexRoute() {
       {/* Page Header */}
       <div className="mb-12 text-center">
         <h1 className="text-4xl md:text-5xl font-italiana text-gray-900 mb-4">
-          Menu Templates
+          Menus
         </h1>
         <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
-          Explore our carefully crafted menu collections, each designed to create memorable 
-          culinary experiences. Every menu can be customized to your preferences and dietary requirements.
+          Explore our carefully crafted menus, each designed to create memorable culinary experiences.
+          Every menu can be customized to your preferences and dietary requirements.
         </p>
-        {searchQuery && (
-          <div className="mt-4 text-sm text-gray-600">
-            Showing {count} results for "<span className="font-medium">{searchQuery}</span>"
-          </div>
-        )}
       </div>
 
-      {/* Menu Search */}
-      <div className="mb-8">
-        <form method="get" className="max-w-md mx-auto">
-          <div className="relative">
-            <input
-              type="text"
-              name="q"
-              defaultValue={searchQuery || ''}
-              placeholder="Search menu templates..."
-              className="w-full px-4 py-3 pl-10 pr-4 text-gray-900 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-            <div className="absolute inset-y-0 left-0 flex items-center pl-3">
-              <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-            </div>
-          </div>
-          <button type="submit" className="sr-only">Search</button>
-        </form>
-      </div>
+      {/* Search removed by design as there are only a handful of menus */}
 
-      {/* Menu List */}
+      {/* Menus - carousel across breakpoints to showcase motion polish */}
       <div className="flex flex-col gap-4">
-        <MenuListWithPagination
-          menus={menus}
-          paginationConfig={{ count, offset, limit }}
-          context="menus"
-          heading={count > 0 ? `${count} Menu Template${count !== 1 ? 's' : ''}` : undefined}
-        />
+        {/* Heading */}
+        {count > 0 && (
+          <h2 className="text-2xl md:text-3xl font-italiana text-gray-900">
+            {count} Menu{count !== 1 ? 's' : ''}
+          </h2>
+        )}
+
+        {/* Horizontal snap carousel on all sizes */}
+        <MenuCarousel menus={menus} />
       </div>
 
       {/* Empty State */}
@@ -143,29 +114,17 @@ export default function MenusIndexRoute() {
           <div className="max-w-md mx-auto">
             <div className="text-6xl mb-4">🍽️</div>
             <h3 className="text-xl font-semibold text-gray-900 mb-2">
-              {searchQuery ? 'No menus found' : 'No menu templates available'}
+              No menus available
             </h3>
             <p className="text-gray-600 mb-6">
-              {searchQuery 
-                ? `No menu templates match "${searchQuery}". Try adjusting your search terms.`
-                : 'We\'re currently preparing our menu templates. Check back soon for exciting culinary options!'
-              }
+              We're currently preparing our menus. Check back soon for exciting culinary options!
             </p>
-            {searchQuery ? (
-              <a
-                href="/menus"
-                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
-                View All Menus
-              </a>
-            ) : (
-              <a
-                href="/request"
-                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
-                Request Custom Event
-              </a>
-            )}
+            <a
+              href="/request"
+              className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              Request Custom Event
+            </a>
           </div>
         </div>
       )}

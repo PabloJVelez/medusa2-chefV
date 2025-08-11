@@ -28,7 +28,8 @@ export const MenuListItem: FC<MenuListItemProps> = ({
   return (
     <div 
       className={clsx(
-        "group relative bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300",
+        // Make card a flex column so heights align and footer sticks to bottom
+        "group relative bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 h-full flex flex-col",
         {
           'scale-105': isTransitioning,
         },
@@ -38,9 +39,9 @@ export const MenuListItem: FC<MenuListItemProps> = ({
       {/* Menu Image */}
       <div className="aspect-[4/3] overflow-hidden bg-gray-100">
         <Image
-          src="https://images.unsplash.com/photo-1546793665-c74683f339c1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80"
+          src="/assets/images/chef_beef_menu.JPG"
           alt={menu.name}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          className="w-full h-full object-cover [transform:translateX(var(--parallax-x,0))] group-hover:scale-105 transition-transform duration-300"
           width={400}
           height={300}
           loading="lazy"
@@ -48,7 +49,7 @@ export const MenuListItem: FC<MenuListItemProps> = ({
       </div>
       
       {/* Menu Content */}
-      <div className="p-6 space-y-4">
+      <div className="p-6 space-y-4 flex-1 flex flex-col" style={{ transform: 'scale(var(--scale,1))' }}>
         <div>
           <h3 className="text-xl font-semibold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2">
             {menu.name}
@@ -59,12 +60,12 @@ export const MenuListItem: FC<MenuListItemProps> = ({
         </div>
         
         {/* Description */}
-        <p className="text-gray-700 text-sm line-clamp-3 leading-relaxed">
+        <p className="text-gray-700 text-sm line-clamp-3 leading-relaxed flex-1">
           {description}
         </p>
         
         {/* Footer */}
-        <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+        <div className="flex items-center justify-between pt-2 border-t border-gray-100 mt-auto">
           <div className="text-sm text-gray-600">
             <span className="font-medium">From $99.99</span> per person
           </div>
