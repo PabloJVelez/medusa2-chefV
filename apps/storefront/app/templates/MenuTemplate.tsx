@@ -169,7 +169,7 @@ export const MenuTemplate: FC<MenuTemplateProps> = ({ menu, className }) => {
       <div className="text-center space-y-6">
         <div className="max-w-4xl mx-auto">
           <Image
-            src="https://images.unsplash.com/photo-1546793665-c74683f339c1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80"
+            src={menu.thumbnail || menu.images?.[0]?.url || "https://images.unsplash.com/photo-1546793665-c74683f339c1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80"}
             alt={`${menu.name} hero image`}
             className="w-full h-80 object-cover rounded-2xl shadow-lg"
             width={800}

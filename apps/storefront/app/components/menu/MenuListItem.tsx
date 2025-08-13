@@ -39,7 +39,7 @@ export const MenuListItem: FC<MenuListItemProps> = ({
       {/* Menu Image */}
       <div className="aspect-[4/3] overflow-hidden bg-gray-100">
         <Image
-          src="/assets/images/chef_beef_menu.JPG"
+          src={menu.thumbnail || menu.images?.[0]?.url || "/assets/images/chef_beef_menu.JPG"}
           alt={menu.name}
           className="w-full h-full object-cover [transform:translateX(var(--parallax-x,0))] group-hover:scale-105 transition-transform duration-300"
           width={400}
