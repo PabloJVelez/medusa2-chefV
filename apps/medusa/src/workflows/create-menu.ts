@@ -19,6 +19,9 @@ type CreateMenuWorkflowInput = {
       }>
     }>
   }>
+  images?: string[]
+  thumbnail?: string | null
+  image_files?: { url: string; file_id?: string }[]
 }
 
 const createMenuStep = createStep(
@@ -65,12 +68,27 @@ const createMenuStep = createStep(
       }
     }
     
-    const fullMenu = {
-      ...menu,
-      courses,
-      created_at: menu.created_at,
-      updated_at: menu.updated_at
+    // Attach images if provided
+    if (input.images && input.images.length > 0) {
+      const fileMap: Record<string, string | undefined> = {}
+      if (input.image_files) {
+        for (const f of input.image_files) {
+          fileMap[f.url] = f.file_id
+        }
+      }
+      // Use the service to replace images and set thumbnail
+      await menuModuleService.replaceMenuImages(menu.id, input.images, {
+        thumbnail: input.thumbnail,
+        fileMap,
+      })
+    } else if (input.thumbnail === null) {
+      // Explicitly clear thumbnail if requested and no images
+      await menuModuleService.updateMenus({ id: menu.id, thumbnail: null as any })
     }
+
+    const fullMenu = await menuModuleService.retrieveMenu(menu.id, {
+      relations: ["courses", "courses.dishes", "courses.dishes.ingredients", "images"],
+    })
     
     return new StepResponse(fullMenu)
   }

@@ -4,6 +4,12 @@ import { MENU_MODULE } from "../../../modules/menu"
 import { createMenuWorkflow } from "../../../workflows/create-menu"
 
 // Validation schemas
+const imageUrlsSchema = z.array(z.string().url()).optional().default([])
+const imageFilesSchema = z.array(z.object({
+  url: z.string().url(),
+  file_id: z.string().optional(),
+})).optional()
+
 const createMenuSchema = z.object({
   name: z.string().min(1, "Menu name is required"),
   courses: z.array(z.object({
@@ -16,7 +22,10 @@ const createMenuSchema = z.object({
         optional: z.boolean().optional()
       }))
     }))
-  })).optional().default([])
+  })).optional().default([]),
+  images: imageUrlsSchema,
+  thumbnail: z.string().url().nullable().optional(),
+  image_files: imageFilesSchema,
 })
 
 const listMenusSchema = z.object({
@@ -50,7 +59,7 @@ export async function GET(
       {
         take: query.limit || 10,
         skip: query.offset || 0,
-        relations: ["courses"]
+        relations: ["courses", "images"]
       }
     )
     

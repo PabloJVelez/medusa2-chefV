@@ -1,16 +1,19 @@
 import { Client, Admin } from '@medusajs/js-sdk'
 import { AdminMenusResource } from './admin/admin-menus'
 import { AdminChefEventsResource } from './admin/admin-chef-events'
+import { AdminUploadsResource } from './admin/admin-uploads'
 import { ExtendedStoreSDK } from './store'
 
 export class ExtendedAdminSDK extends Admin {
   public menus: AdminMenusResource
   public chefEvents: AdminChefEventsResource
+  public uploads: AdminUploadsResource
 
   constructor(client: Client) {
     super(client)
     this.menus = new AdminMenusResource(client)
     this.chefEvents = new AdminChefEventsResource(client)
+    this.uploads = new AdminUploadsResource(client)
   }
 }
 

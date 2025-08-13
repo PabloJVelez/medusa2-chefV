@@ -10,6 +10,9 @@ import MenuModuleService from "src/modules/menu/service"
 type UpdateMenuWorkflowInput = {
   id: string
   name?: string
+  images?: string[]
+  thumbnail?: string | null
+  image_files?: { url: string; file_id?: string }[]
   courses?: Array<{
     id?: string
     name: string
@@ -81,9 +84,44 @@ const updateMenuStep = createStep(
         courses.push({ ...course, dishes })
       }
       
-      return new StepResponse({ ...menu, courses })
+      // After handling courses, optionally replace images
+      if (input.images !== undefined) {
+        const fileMap: Record<string, string | undefined> = {}
+        if (input.image_files) {
+          for (const f of input.image_files) {
+            fileMap[f.url] = f.file_id
+          }
+        }
+        await menuModuleService.replaceMenuImages(input.id, input.images, {
+          thumbnail: input.thumbnail,
+          fileMap,
+        })
+      } else if (input.thumbnail !== undefined) {
+        await menuModuleService.updateMenus({ id: input.id, thumbnail: input.thumbnail as any })
+      }
+
+      const reloaded = await menuModuleService.retrieveMenu(input.id, { relations: ["courses", "courses.dishes", "courses.dishes.ingredients", "images"] })
+      return new StepResponse(reloaded)
     }
     
+    // If only images/thumbnail are being updated
+    if (input.images !== undefined || input.thumbnail !== undefined) {
+      if (input.images !== undefined) {
+        const fileMap: Record<string, string | undefined> = {}
+        if (input.image_files) {
+          for (const f of input.image_files) fileMap[f.url] = f.file_id
+        }
+        await menuModuleService.replaceMenuImages(input.id, input.images ?? [], {
+          thumbnail: input.thumbnail,
+          fileMap,
+        })
+      } else if (input.thumbnail !== undefined) {
+        await menuModuleService.updateMenus({ id: input.id, thumbnail: input.thumbnail as any })
+      }
+      const reloaded = await menuModuleService.retrieveMenu(input.id, { relations: ["courses", "courses.dishes", "courses.dishes.ingredients", "images"] })
+      return new StepResponse(reloaded)
+    }
+
     return new StepResponse(menu)
   }
 )

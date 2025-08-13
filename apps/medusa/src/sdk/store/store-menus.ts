@@ -23,6 +23,8 @@ export interface StoreMenuDTO {
   id: string
   name: string
   courses: StoreCourseDTO[]
+  images: { id: string; url: string; rank: number }[]
+  thumbnail?: string | null
   created_at: string
   updated_at: string
 }

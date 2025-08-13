@@ -25,10 +25,20 @@ export interface AdminCourseDTO {
   updated_at: string
 }
 
+export interface AdminMenuImageDTO {
+  id: string
+  url: string
+  rank: number
+  created_at: string
+  updated_at: string
+}
+
 export interface AdminMenuDTO {
   id: string
   name: string
   courses: AdminCourseDTO[]
+  images: AdminMenuImageDTO[]
+  thumbnail?: string | null
   created_at: string
   updated_at: string
 }
@@ -46,6 +56,9 @@ export interface AdminCreateMenuDTO {
       }>
     }>
   }>
+  images?: string[]
+  thumbnail?: string | null
+  image_files?: { url: string; file_id?: string }[]
 }
 
 export interface AdminUpdateMenuDTO {
@@ -64,6 +77,9 @@ export interface AdminUpdateMenuDTO {
       }>
     }>
   }>
+  images?: string[]
+  thumbnail?: string | null
+  image_files?: { url: string; file_id?: string }[]
 }
 
 export interface AdminListMenusQuery {

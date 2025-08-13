@@ -10,7 +10,7 @@ export async function GET(
     const menuModuleService = req.scope.resolve(MENU_MODULE)
     
     const menu = await menuModuleService.retrieveMenu(id, {
-      relations: ["courses", "courses.dishes", "courses.dishes.ingredients"]
+      relations: ["courses", "courses.dishes", "courses.dishes.ingredients", "images"]
     })
 
     if (!menu) {

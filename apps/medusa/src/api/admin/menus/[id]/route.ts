@@ -5,6 +5,12 @@ import { updateMenuWorkflow } from "../../../../workflows/update-menu"
 import { deleteMenuWorkflow } from "../../../../workflows/delete-menu"
 
 // Validation schemas
+const imageUrlsSchema = z.array(z.string().url()).optional()
+const imageFilesSchema = z.array(z.object({
+  url: z.string().url(),
+  file_id: z.string().optional(),
+})).optional()
+
 const updateMenuSchema = z.object({
   name: z.string().min(1, "Menu name is required").optional(),
   courses: z.array(z.object({
@@ -20,7 +26,10 @@ const updateMenuSchema = z.object({
         optional: z.boolean().optional()
       }))
     }))
-  })).optional()
+  })).optional(),
+  images: imageUrlsSchema,
+  thumbnail: z.string().url().nullable().optional(),
+  image_files: imageFilesSchema,
 })
 
 export async function GET(
@@ -32,7 +41,7 @@ export async function GET(
     const menuModuleService = req.scope.resolve(MENU_MODULE)
 
     const menu = await menuModuleService.retrieveMenu(id, {
-      relations: ["courses", "courses.dishes", "courses.dishes.ingredients"]
+      relations: ["courses", "courses.dishes", "courses.dishes.ingredients", "images"]
     })
 
     if (!menu) {

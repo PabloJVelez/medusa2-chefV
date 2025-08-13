@@ -4,6 +4,7 @@ import { Button, Label, Text, Input } from "@medusajs/ui"
 import { useState } from "react"
 import { menuSchema } from "../schemas"
 import type { AdminCreateMenuDTO, AdminMenuDTO, AdminUpdateMenuDTO } from "../../../../sdk/admin/admin-menus"
+import { MenuMedia } from "./menu-media/MenuMedia"
 
 interface MenuFormProps {
   initialData?: AdminMenuDTO
@@ -12,11 +13,18 @@ interface MenuFormProps {
   isLoading?: boolean
 }
 
-type TabType = "general" | "courses"
+type TabType = "general" | "courses" | "media"
+
+//REFACTOR : Use form to handle state and validation not useState
 
 export const MenuForm = ({ initialData, onSubmit, onCancel, isLoading }: MenuFormProps) => {
   const [activeTab, setActiveTab] = useState<TabType>("general")
   const [expandedCourses, setExpandedCourses] = useState<Set<number>>(new Set())
+  const [mediaState, setMediaState] = useState<{ images: string[]; image_files: { url: string; file_id?: string }[]; thumbnail?: string | null }>({
+    images: initialData?.images?.map((i) => i.url) || [],
+    image_files: [],
+    thumbnail: initialData?.thumbnail ?? undefined,
+  })
 
   // Transform initialData to match the form structure
   const getDefaultValues = () => {
@@ -55,7 +63,13 @@ export const MenuForm = ({ initialData, onSubmit, onCancel, isLoading }: MenuFor
 
   const handleSubmit = async (data: AdminCreateMenuDTO) => {
     try {
-      await onSubmit(data)
+      const payload: AdminCreateMenuDTO = {
+        ...data,
+        images: mediaState.images,
+        thumbnail: mediaState.thumbnail,
+        image_files: mediaState.image_files,
+      }
+      await onSubmit(payload)
     } catch (error) {
       console.error("Form submission error:", error)
     }
@@ -100,6 +114,7 @@ export const MenuForm = ({ initialData, onSubmit, onCancel, isLoading }: MenuFor
         <div className="flex space-x-2">
           <TabButton tab="general" label="General Info" />
           <TabButton tab="courses" label="Courses" count={courseFields.length} />
+          <TabButton tab="media" label="Media" />
         </div>
 
         {/* Tab Content */}
@@ -121,6 +136,13 @@ export const MenuForm = ({ initialData, onSubmit, onCancel, isLoading }: MenuFor
             addCourse={addCourse}
             removeCourse={removeCourse}
             isEditing={!!initialData}
+          />
+        )}
+
+        {activeTab === "media" && (
+          <MenuMedia
+            value={mediaState}
+            onChange={setMediaState}
           />
         )}
 
