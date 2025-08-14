@@ -35,7 +35,7 @@ export const meta: MetaFunction<MenuPageLoaderData> = ({ data, location }) => {
   
   if (!menu) {
     return [
-      { title: 'Menu Not Found | Chef Luis Velez' },
+      { title: 'Menu Not Found | Chef Silvia' },
       { name: 'robots', content: 'noindex' },
     ];
   }
@@ -43,7 +43,7 @@ export const meta: MetaFunction<MenuPageLoaderData> = ({ data, location }) => {
   const courseCount = menu.courses?.length || 0;
   const dishCount = menu.courses?.reduce((acc, course) => acc + (course.dishes?.length || 0), 0) || 0;
   
-      const title = `${menu.name} - Menu Template | Chef Luis Velez`;
+  const title = `${menu.name} - Menu Template | Chef Silvia`;
   const description = `${menu.name} featuring ${courseCount} courses and ${dishCount} dishes. Perfect for cooking classes, plated dinners, or buffet-style events. Request this menu for your culinary experience.`;
 
   return [
@@ -53,7 +53,7 @@ export const meta: MetaFunction<MenuPageLoaderData> = ({ data, location }) => {
     { property: 'og:description', content: description },
     { property: 'og:type', content: 'article' },
     { property: 'og:url', content: `https://yourstore.com${location.pathname}` },
-            { name: 'keywords', content: `${menu.name}, chef menu, culinary experience, private dining, cooking class, chef Luis Velez` },
+            { name: 'keywords', content: `${menu.name}, chef menu, culinary experience, private dining, cooking class, Chef Silvia` },
     // Structured data for Recipe/Menu
     {
       tagName: 'script',
@@ -65,7 +65,7 @@ export const meta: MetaFunction<MenuPageLoaderData> = ({ data, location }) => {
         description: `Professional chef menu template with ${courseCount} courses`,
         author: {
           '@type': 'Person',
-                      name: 'Chef Luis Velez',
+          name: 'Chef Silvia',
         },
         recipeCategory: 'Chef Menu Template',
         recipeCuisine: 'Contemporary',

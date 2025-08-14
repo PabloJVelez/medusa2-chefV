@@ -10,7 +10,8 @@
     "medusa:init": "turbo run medusa:init --filter=medusa",
     "format": "turbo run format",
     "clean": "find . -name \"node_modules\" -type d -prune -exec rm -rf '{}'",
-    "typecheck": "turbo run typecheck"
+    "typecheck": "turbo run typecheck",
+    "brand:guard": "bash scripts/check-no-velez.sh"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.3",

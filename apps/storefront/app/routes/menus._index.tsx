@@ -37,17 +37,17 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
   const count = data?.count || 0;
   
-  const title = `Menus (${count}) | Chef Luis Velez`;
+  const title = `Menus (${count}) | Chef Silvia`;
     
-  const description = `Browse ${count} expertly crafted menus by Chef Luis Velez. From intimate dinners to group celebrations, find the perfect menu for your culinary experience.`;
+  const description = `Browse ${count} expertly crafted menus by Chef Silvia. From intimate dinners to group celebrations, find the perfect menu for your culinary experience.`;
 
   return [
     { title },
     { name: 'description', content: description },
     { property: 'og:title', content: title },
     { property: 'og:description', content: description },
-    { property: 'og:type', content: 'website' },
-          { name: 'keywords', content: 'chef menus, private dining menus, tasting menus, cooking class menus, Chef Luis Velez' },
+      { property: 'og:type', content: 'website' },
+          { name: 'keywords', content: 'chef menus, private dining menus, tasting menus, cooking class menus, Chef Silvia' },
     ...(count === 0 ? [{ name: 'robots', content: 'noindex' }] : []),
   ];
 };

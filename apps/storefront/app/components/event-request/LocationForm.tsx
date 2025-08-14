@@ -143,7 +143,7 @@ export const LocationForm: FC<LocationFormProps> = ({ className }) => {
         <ul className="text-sm text-blue-800 space-y-1">
           <li>• Please provide the complete address where the event will take place</li>
           <li>• Include apartment/unit number if applicable</li>
-          <li>• Chef Luis will arrive with all necessary equipment and ingredients</li>
+      <li>• Chef Silvia will arrive with all necessary equipment and ingredients</li>
           <li>• Travel within 30 miles is included in the service</li>
         </ul>
       </div>

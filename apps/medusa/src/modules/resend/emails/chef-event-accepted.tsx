@@ -13,6 +13,7 @@ import {
   Link, 
   Button,
 } from "@react-email/components"
+import { BRAND } from "../brand"
 
 type ChefEventAcceptedEmailProps = {
   customer: {
@@ -243,7 +244,7 @@ function ChefEventAcceptedEmailComponent({
                     If you have any questions, please don't hesitate to contact us at {chef.email}
                   </Text>
                   <Text className="text-center text-gray-400 text-xs">
-                    © {new Date().getFullYear()} Chef Elena Rodriguez. All rights reserved.
+                    © {new Date().getFullYear()} {BRAND.name}. All rights reserved.
                   </Text>
                 </Column>
               </Row>

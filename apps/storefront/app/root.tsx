@@ -19,7 +19,7 @@ import '@app/styles/global.css';
 import { useRootLoaderData } from './hooks/useRootLoaderData';
 
 export const getRootMeta: MetaFunction = ({ data }) => {
-  const title = 'Chef Velez';
+  const title = 'Chef Silvia';
   const description = 'Private chef experiences: cooking classes, plated dinners, and buffet-style events.';
   const ogTitle = title;
   const ogDescription = description;

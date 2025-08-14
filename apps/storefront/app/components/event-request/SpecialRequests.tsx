@@ -56,7 +56,7 @@ export const SpecialRequests: FC<SpecialRequestsProps> = ({ className }) => {
       {/* Header */}
       <div className="text-center">
         <h3 className="text-lg font-semibold text-primary-900 mb-2">Special Requests & Dietary Needs</h3>
-        <p className="text-primary-600">Help Chef Luis customize your experience by sharing any dietary restrictions or special requests.</p>
+      <p className="text-primary-600">Help Chef Silvia customize your experience by sharing any dietary restrictions or special requests.</p>
       </div>
 
       {/* Dietary restrictions */}
@@ -99,7 +99,7 @@ export const SpecialRequests: FC<SpecialRequestsProps> = ({ className }) => {
         <textarea
           value={notes || ''}
           onChange={(e) => handleNotesChange(e.target.value)}
-          placeholder="Share any details, special occasions, preferences, allergies, or questions for Chef Luis..."
+      placeholder="Share any details, special occasions, preferences, allergies, or questions for Chef Silvia..."
           rows={5}
           className={clsx(
             'w-full px-4 py-3 border-2 rounded-lg focus:ring-2 focus:ring-accent-500 focus:border-accent-500 resize-none',

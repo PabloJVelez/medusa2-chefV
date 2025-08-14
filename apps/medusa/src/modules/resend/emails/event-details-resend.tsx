@@ -12,6 +12,7 @@ import {
   Body, 
   Button,
 } from "@react-email/components"
+import { BRAND } from "../brand"
 
 type EventDetailsResendEmailProps = {
   customer: {
@@ -95,7 +96,7 @@ function EventDetailsResendEmailComponent({
             {customNotes && (
               <Section className="bg-blue-50 rounded-lg p-6 mb-6">
                 <Heading className="text-lg font-semibold text-gray-800 mb-4">
-                  Message from Chef Elena
+                  Message from {BRAND.name}
                 </Heading>
                 <Text className="text-gray-600 italic">
                   "{customNotes}"
@@ -205,9 +206,9 @@ function EventDetailsResendEmailComponent({
               <Heading className="text-lg font-semibold text-gray-800 mb-4">
                 Important Reminders
               </Heading>
-              <Text className="text-gray-600 mb-3">
-                • Chef Elena will contact you 24 hours before the event
-              </Text>
+                <Text className="text-gray-600 mb-3">
+                  • {BRAND.name} will contact you 24 hours before the event
+                </Text>
               <Text className="text-gray-600 mb-3">
                 • Please ensure your kitchen is clean and ready for the chef
               </Text>
@@ -233,10 +234,10 @@ function EventDetailsResendEmailComponent({
               <Row>
                 <Column>
                   <Text className="text-center text-gray-500 text-sm mb-4">
-                    Questions? Contact Chef Elena at {chef.email} or {chef.phone}
+                    Questions? Contact {BRAND.name} at {chef.email} or {chef.phone}
                   </Text>
                   <Text className="text-center text-gray-400 text-xs">
-                    © {new Date().getFullYear()} Chef Elena Rodriguez. All rights reserved.
+                    © {new Date().getFullYear()} {BRAND.name}. All rights reserved.
                   </Text>
                 </Column>
               </Row>

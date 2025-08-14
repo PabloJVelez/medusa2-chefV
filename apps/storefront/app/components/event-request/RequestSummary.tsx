@@ -78,7 +78,7 @@ export const RequestSummary: FC<RequestSummaryProps> = ({
           Review Your Event Request
         </h3>
         <p className="text-primary-600">
-          Please review all details before submitting your request to Chef Luis.
+Please review all details before submitting your request to Chef Silvia.
         </p>
       </div>
 
@@ -109,7 +109,7 @@ export const RequestSummary: FC<RequestSummaryProps> = ({
               )}
             </div>
           ) : (
-            <p className="text-primary-600">Custom menu - Chef Luis will design a unique experience for you</p>
+<p className="text-primary-600">Custom menu - Chef Silvia will design a unique experience for you</p>
           )}
         </div>
 
@@ -233,7 +233,7 @@ export const RequestSummary: FC<RequestSummaryProps> = ({
                 </div>
               </div>
             </div>
-            <p className="text-sm text-accent-600 mt-3">* Final pricing will be confirmed by Chef Luis and may include adjustments for location, special requirements, or menu customizations.</p>
+<p className="text-sm text-accent-600 mt-3">* Final pricing will be confirmed by Chef Silvia and may include adjustments for location, special requirements, or menu customizations.</p>
           </div>
         )}
       </div>
@@ -250,10 +250,10 @@ export const RequestSummary: FC<RequestSummaryProps> = ({
               Submitting Request...
             </span>
           ) : (
-            'Submit Event Request to Chef Luis'
+'Submit Event Request to Chef Silvia'
           )}
         </Button>
-        <p className="text-sm text-primary-600 mt-2">No payment required now - you'll receive a secure payment link after Chef Luis confirms your event</p>
+<p className="text-sm text-primary-600 mt-2">No payment required now - you'll receive a secure payment link after Chef Silvia confirms your event</p>
       </div>
     </div>
   );

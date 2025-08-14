@@ -28,12 +28,12 @@ export const loader = async (args: LoaderFunctionArgs) => {
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
   return [
-    { title: 'Chef Luis Velez - Premium Culinary Experiences' },
+    { title: 'Chef Silvia - Premium Culinary Experiences' },
     { 
       name: 'description', 
-      content: 'Transform your special occasions with Chef Luis\'s premium culinary experiences. From intimate cooking classes to elegant plated dinners, bringing restaurant-quality cuisine to your home.'
+      content: 'Transform your special occasions with Chef Silvia’s premium culinary experiences. From intimate cooking classes to elegant plated dinners, bringing restaurant-quality cuisine to your home.'
     },
-          { property: 'og:title', content: 'Chef Luis Velez - Premium Culinary Experiences' },
+          { property: 'og:title', content: 'Chef Silvia - Premium Culinary Experiences' },
     { 
       property: 'og:description', 
       content: 'Professional chef services for cooking classes, plated dinners, and buffet-style events. Personalized culinary experiences in your home.'
@@ -71,9 +71,9 @@ export default function IndexRoute() {
           <div className="order-2 lg:order-1">
             <div className="relative">
               <Image
-                src="/assets/images/chef_experience.PNG"
+                src="/assets/images/chef-silvia.png"
                 loading="lazy"
-                alt="Chef Luis Velez in his kitchen"
+                alt="Chef Silvia in her kitchen"
                 className="rounded-2xl shadow-lg w-full h-[500px] object-cover"
                 height={500}
                 width={600}
@@ -87,21 +87,19 @@ export default function IndexRoute() {
           <div className="order-1 lg:order-2 text-center lg:text-left space-y-6">
             <div className="space-y-4">
               <h2 className="text-5xl md:text-6xl lg:text-7xl font-italiana text-primary-900">
-                Meet Chef Luis
+                Meet Chef Silvia
               </h2>
               <p className="text-2xl md:text-3xl lg:text-4xl font-italiana text-accent-600">
-                Culinary Artistry
+                A Culinary Journey
               </p>
             </div>
             
             <div className="space-y-4 text-primary-700">
               <p className="text-lg leading-relaxed">
-                With over 15 years of culinary excellence, Chef Luis Velez brings world-class expertise 
-                from Michelin-starred restaurants directly to your home.
+                A visionary Executive Chef, whose culinary roots are deeply embedded in the vibrant essence of Los Angeles. Born of Cuban descent, she has artfully blended her rich heritage with the precision and elegance of classical French training.
               </p>
-            <p className="text-base leading-relaxed">
-                Trained in classical French techniques with a modern innovative approach, he creates 
-                unforgettable dining experiences tailored to your special occasions.
+              <p className="text-base leading-relaxed">
+                Boasting over 18 years of experience, she has been a dynamic force within the eclectic Los Angeles food scene, constantly pushing the boundaries of culinary innovation. Now, having returned to Miami, she focuses her talents on highlighting the splendor of local ingredients. Her approach to cuisine is transformative, creating dishes that are not merely consumed but experienced. Each menu she designs is a bespoke journey, tailored to enchant the senses and leave an indelible mark on all who have the pleasure of tasting her creations.
               </p>
             </div>
 
@@ -131,7 +129,7 @@ export default function IndexRoute() {
           <div className="bg-black bg-opacity-50 rounded-2xl p-8 max-w-2xl text-white text-center">
             <h3 className="text-3xl font-italiana mb-4">15+ Years of Culinary Excellence</h3>
             <p className="text-lg leading-relaxed">
-                              From Michelin-starred restaurants to intimate home kitchens, Chef Luis brings world-class 
+                              From Michelin-starred restaurants to intimate home kitchens, Chef Silvia brings world-class 
               culinary expertise directly to your table. Trained in classical French techniques with a 
               modern innovative approach.
             </p>
@@ -149,12 +147,12 @@ export default function IndexRoute() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="bg-white rounded-2xl shadow-lg p-8 text-center">
+            <div className="bg-white rounded-2xl shadow-lg p-8 text-center">
             <div className="text-4xl mb-4">⭐⭐⭐⭐⭐</div>
-            <p className="text-gray-700 italic mb-4">
-                              "Chef Luis created the most incredible anniversary dinner for us. Every course was a masterpiece, 
+              <p className="text-gray-700 italic mb-4">
+                              "Chef Silvia created the most incredible anniversary dinner for us. Every course was a masterpiece, 
               and the cooking class was so much fun!"
-            </p>
+              </p>
             <div className="font-semibold text-gray-900">— Sarah & Michael K.</div>
             <div className="text-sm text-gray-600">Plated Dinner Experience</div>
           </div>
@@ -162,7 +160,7 @@ export default function IndexRoute() {
           <div className="bg-white rounded-2xl shadow-lg p-8 text-center">
             <div className="text-4xl mb-4">⭐⭐⭐⭐⭐</div>
             <p className="text-gray-700 italic mb-4">
-              "The cooking class was amazing! Chef Velez taught us so much and we had a blast. 
+                              "The cooking class was amazing! Chef Silvia taught us so much and we had a blast. 
               Can't wait to book another experience."
             </p>
             <div className="font-semibold text-gray-900">— Jennifer L.</div>
@@ -185,13 +183,13 @@ export default function IndexRoute() {
       <Container className="p-14 md:pt-28 lg:pt-24 lg:px-24">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
           <div className="order-2 lg:order-1">
-            <Image
-              src="/assets/images/chef_book_experience.PNG"
-              alt="Guests enjoying a Chef Velez experience"
-              className="rounded-3xl shadow-lg"
-              width={600}
-              height={400}
-            />
+              <Image
+                src="/assets/images/chef_book_experience.PNG"
+                alt="Guests enjoying a Chef Silvia experience"
+                className="rounded-3xl shadow-lg"
+                width={600}
+                height={400}
+              />
           </div>
           
           <div className="order-1 lg:order-2 space-y-8 flex flex-col justify-center items-center lg:items-start text-center lg:text-left">

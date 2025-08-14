@@ -46,7 +46,7 @@ export const ContactDetails: FC<ContactDetailsProps> = ({ className }) => {
           Contact Information
         </h3>
         <p className="text-primary-600">
-          Please provide your contact details so Chef Luis can reach you about your event request.
+      Please provide your contact details so Chef Silvia can reach you about your event request.
         </p>
       </div>
 
@@ -117,7 +117,7 @@ export const ContactDetails: FC<ContactDetailsProps> = ({ className }) => {
           )}
         />
         <p className="text-sm text-primary-600 mt-1">
-          Used for event confirmations and communication with Chef Luis
+      Used for event confirmations and communication with Chef Silvia
         </p>
         {errors.email && (
           <p className="text-red-600 text-sm mt-1">

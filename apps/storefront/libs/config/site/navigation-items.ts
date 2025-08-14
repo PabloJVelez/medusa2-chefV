@@ -78,7 +78,7 @@ export const footerNavigationItems: NavigationCollection = [
   },
   {
     id: 6,
-    label: 'About Chef Velez',
+    label: 'About Chef Silvia',
     url: '/about',
     location: NavigationItemLocation.footer,
     sort_order: 6,

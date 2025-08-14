@@ -61,13 +61,10 @@ export default function IndexRoute() {
             <div className="text-center w-full space-y-9">
               <h4 className="text-lg md:text-2xl font-italiana tracking-wider">ABOUT THE CHEF</h4>
               <h1 className="text-4xl md:text-8xl font-italiana tracking-wider [text-shadow:_1px_1px_2px_rgb(0_0_0_/_40%)]">
-                Chef Velez
+                Chef Silvia
               </h1>
               <p className="mx-auto text-md md:text-2xl !leading-normal">
-                Chef Velez is a private chef specializing in premium at-home culinary experiences—cooking classes,
-                plated dinners, and buffet-style events. With years of professional experience, Chef Velez crafts
-                unforgettable menus using fresh, seasonal ingredients and provides a seamless, restaurant-quality
-                experience in your home.
+                A visionary Executive Chef, whose culinary roots are deeply embedded in the vibrant essence of Los Angeles. Born of Cuban descent, she has artfully blended her rich heritage with the precision and elegance of classical French training. Now, having returned to Miami, she focuses her talents on highlighting the splendor of local ingredients.
               </p>
             </div>
           }

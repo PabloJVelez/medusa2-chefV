@@ -192,15 +192,15 @@ export const action = async (actionArgs: ActionFunctionArgs) => {
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
   return [
-    { title: 'Request Your Culinary Experience - Chef Luis Velez' },
+    { title: 'Request Your Culinary Experience - Chef Silvia' },
     { 
       name: 'description', 
-      content: 'Book a personalized culinary experience with Chef Luis. Choose from cooking classes, plated dinners, or buffet-style events.'
+      content: 'Book a personalized culinary experience with Chef Silvia. Choose from cooking classes, plated dinners, or buffet-style events.'
     },
-          { property: 'og:title', content: 'Request Your Culinary Experience - Chef Luis Velez' },
+          { property: 'og:title', content: 'Request Your Culinary Experience - Chef Silvia' },
     { 
       property: 'og:description', 
-              content: 'Submit a request for your personalized culinary experience. Chef Luis will review and create a custom proposal for your event.'
+      content: 'Submit a request for your personalized culinary experience. Chef Silvia will review and create a custom proposal for your event.'
     },
     { property: 'og:type', content: 'website' },
     { name: 'keywords', content: 'request event, book chef, cooking class, private dining, culinary experience' },
@@ -224,7 +224,7 @@ export default function RequestPage() {
           Request Your Culinary Experience
         </h1>
         <p className="text-lg text-primary-600 max-w-2xl mx-auto">
-                      Tell us about your event and Chef Luis will create a personalized proposal for your culinary experience.
+                      Tell us about your event and Chef Silvia will create a personalized proposal for your culinary experience.
         </p>
       </div>
 

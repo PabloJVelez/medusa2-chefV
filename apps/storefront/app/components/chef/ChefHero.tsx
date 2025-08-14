@@ -19,12 +19,12 @@ export const ChefHero: FC<ChefHeroProps> = ({
   className, 
   backgroundClassName, 
   actionsClassName,
-  chefName = "Chef Luis Velez",
+  chefName = "Chef Silvia",
   tagline = "CULINARY EXPERIENCES & PRIVATE DINING",
   description = "Transform your special occasions into unforgettable culinary experiences. From intimate cooking classes to elegant plated dinners, I bring restaurant-quality cuisine directly to your home.",
   image = {
     url: '/assets/images/chef_scallops_home.PNG',
-    alt: 'Chef Luis Velez preparing an elegant dish'
+    alt: 'Chef Silvia preparing an elegant dish'
   },
   actions = [
     {

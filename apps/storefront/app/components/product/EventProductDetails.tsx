@@ -304,7 +304,7 @@ export const EventProductDetails = ({ product, chefEvent, menu }: EventProductDe
                       </svg>
                     </div>
                     <div className="flex-1">
-                      <h4 className="text-xl font-bold text-gray-900 mb-2">Chef Luis Velez</h4>
+                      <h4 className="text-xl font-bold text-gray-900 mb-2">Chef Silvia</h4>
                       <p className="text-gray-600 font-medium mb-1">15+ years of culinary experience</p>
                       <p className="text-sm text-gray-500">Specializing in Mediterranean cuisine</p>
                     </div>
