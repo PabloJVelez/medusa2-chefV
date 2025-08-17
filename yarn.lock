@@ -23767,6 +23767,7 @@ __metadata:
     "@types/node": "npm:^17.0.8"
     "@types/react": "npm:^18.3.2"
     awilix: "npm:^8.0.1"
+    date-fns: "npm:^4.1.0"
     jest: "npm:^29.7.0"
     pg: "npm:^8.13.0"
     prop-types: "npm:^15.8.1"

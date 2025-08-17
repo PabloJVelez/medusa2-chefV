@@ -1,6 +1,5 @@
 import { defineRouteConfig } from "@medusajs/admin-sdk"
 import { Container, Heading, FocusModal, toast } from "@medusajs/ui"
-import { ChefEventList } from "./components/chef-event-list"
 import { ChefEventCalendar } from "./components/chef-event-calendar"
 import { ChefEventForm } from "./components/chef-event-form"
 import { useAdminCreateChefEventMutation } from "../../hooks/chef-events"
@@ -9,8 +8,6 @@ import type { AdminCreateChefEventDTO } from "../../../sdk/admin/admin-chef-even
 
 const ChefEventsPage = () => {
   const [showCreateModal, setShowCreateModal] = useState(false)
-  // Default to calendar view
-  const [currentView, setCurrentView] = useState<'calendar' | 'list'>('calendar')
   const createChefEvent = useAdminCreateChefEventMutation()
 
   const handleCreateChefEvent = async (data: any) => {
@@ -31,28 +28,20 @@ const ChefEventsPage = () => {
   }
 
   return (
-    <Container className="divide-y p-0">
-      <div className="flex items-center justify-between px-6 py-4">
-        <Heading level="h1">Chef Events</Heading>
-      </div>
+    <>
+      <Container className="divide-y p-0">
+        <div className="flex items-center justify-between px-6 py-4">
+          <Heading level="h1">Chef Events</Heading>
+        </div>
 
-      {currentView === 'list' ? (
-        <ChefEventList
-          onCreateEvent={() => setShowCreateModal(true)}
-          onViewChange={setCurrentView}
-          currentView={currentView}
-        />
-      ) : (
         <ChefEventCalendar
           onCreateEvent={() => setShowCreateModal(true)}
-          onViewChange={setCurrentView}
-          currentView={currentView}
         />
-      )}
+      </Container>
 
       {showCreateModal && (
         <FocusModal open onOpenChange={setShowCreateModal}>
-          <FocusModal.Content>
+          <FocusModal.Content className="z-50">
             <FocusModal.Header>
               <FocusModal.Title>Create Chef Event</FocusModal.Title>
             </FocusModal.Header>
@@ -66,7 +55,7 @@ const ChefEventsPage = () => {
           </FocusModal.Content>
         </FocusModal>
       )}
-    </Container>
+    </>
   )
 }
 
