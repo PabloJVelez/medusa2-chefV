@@ -1,8 +1,8 @@
 import { useForm, useFieldArray } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Button, Label, Text, Input } from "@medusajs/ui"
-import { useState } from "react"
-import { menuSchema } from "../schemas"
+import { Button, Label, Text, Input, toast } from "@medusajs/ui"
+import { useEffect, useState } from "react"
+import { menuSchema, menuUpdateSchema } from "../schemas"
 import type { AdminCreateMenuDTO, AdminMenuDTO, AdminUpdateMenuDTO } from "../../../../sdk/admin/admin-menus"
 import { MenuMedia } from "./menu-media/MenuMedia"
 
@@ -52,9 +52,17 @@ export const MenuForm = ({ initialData, onSubmit, onCancel, isLoading }: MenuFor
   }
 
   const form = useForm<AdminCreateMenuDTO>({
-    resolver: zodResolver(menuSchema),
+    resolver: zodResolver(initialData ? menuUpdateSchema : menuSchema),
     defaultValues: getDefaultValues()
   })
+
+  // Ensure form values are in sync with the loaded initialData
+  useEffect(() => {
+    if (initialData) {
+      form.reset(getDefaultValues())
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialData])
 
   const { fields: courseFields, append: appendCourse, remove: removeCourse } = useFieldArray({
     control: form.control,
@@ -63,16 +71,44 @@ export const MenuForm = ({ initialData, onSubmit, onCancel, isLoading }: MenuFor
 
   const handleSubmit = async (data: AdminCreateMenuDTO) => {
     try {
-      const payload: AdminCreateMenuDTO = {
-        ...data,
+      const base = {
         images: mediaState.images,
         thumbnail: mediaState.thumbnail,
         image_files: mediaState.image_files,
       }
-      await onSubmit(payload)
+
+      // Create vs Edit payload shaping
+      const isEditing = !!initialData
+      let payload: Partial<AdminCreateMenuDTO> = {}
+      if (!isEditing) {
+        // Creating: send everything
+        payload = { ...data, ...base }
+      } else {
+        // Editing: send only what corresponds to the active tab to avoid
+        // triggering validation for untouched fields
+        if (activeTab === "general" && data.name) {
+          payload.name = data.name
+        }
+        if (activeTab === "courses") {
+          payload.courses = data.courses
+          if (data.name) payload.name = data.name
+        }
+        // Media tab (or anything else): only media fields
+        payload = { ...payload, ...base }
+      }
+      console.log("MenuForm: submitting payload", payload)
+      await onSubmit(payload as AdminCreateMenuDTO)
     } catch (error) {
       console.error("Form submission error:", error)
     }
+  }
+
+  const handleInvalid = (errors: unknown) => {
+    console.error("MenuForm: validation failed", errors)
+    toast.error("Please fix the form errors", {
+      description: "Make sure the menu has a name.",
+      duration: 4000,
+    })
   }
 
   const toggleCourseExpansion = (index: number) => {
@@ -109,7 +145,7 @@ export const MenuForm = ({ initialData, onSubmit, onCancel, isLoading }: MenuFor
 
   return (
     <div className="p-6">
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(handleSubmit, handleInvalid)} className="space-y-6">
         {/* Tab Navigation */}
         <div className="flex space-x-2">
           <TabButton tab="general" label="General Info" />

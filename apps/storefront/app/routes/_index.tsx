@@ -184,7 +184,7 @@ export default function IndexRoute() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
           <div className="order-2 lg:order-1">
               <Image
-                src="/assets/images/chef_book_experience.PNG"
+                src="/assets/images/chef_silvia_experience.png"
                 alt="Guests enjoying a Chef Silvia experience"
                 className="rounded-3xl shadow-lg"
                 width={600}

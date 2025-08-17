@@ -15,7 +15,7 @@ export interface FeaturedMenusProps {
 
 export const FeaturedMenus: FC<FeaturedMenusProps> = ({ 
   className,
-  title = "Featured Menu Collections",
+  title = "Featured Menus",
   description = "Discover our carefully crafted menu templates, each designed to create memorable culinary experiences for your special occasions.",
   menus,
   maxDisplay 

@@ -34,11 +34,16 @@ const updateMenuStep = createStep(
   async (input: UpdateMenuWorkflowInput, { container }: { container: any }) => {
     const menuModuleService: MenuModuleService = container.resolve(MENU_MODULE)
     
-    // Update the menu
-    const menu = await menuModuleService.updateMenus({
-      id: input.id,
-      name: input.name
-    })
+    // Update the menu name only when provided; otherwise just load it
+    let menu = null as any
+    if (typeof input.name !== "undefined") {
+      menu = await menuModuleService.updateMenus({
+        id: input.id,
+        name: input.name,
+      })
+    } else {
+      menu = await menuModuleService.retrieveMenu(input.id)
+    }
     
     // If courses are provided, handle the full replacement
     if (input.courses !== undefined) {
