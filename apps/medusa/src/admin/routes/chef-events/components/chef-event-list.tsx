@@ -10,13 +10,15 @@ import {
   IconButton,
   toast
 } from "@medusajs/ui"
-import { PencilSquare, Trash, EllipsisHorizontal } from "@medusajs/icons"
+import { PencilSquare, Trash, EllipsisHorizontal, Calendar } from "@medusajs/icons"
 import { useAdminListChefEvents, useAdminDeleteChefEventMutation } from "../../../hooks/chef-events"
 import { eventTypeOptions, locationTypeOptions, statusOptions } from "../schemas"
 import { Link } from "react-router-dom"
 
 interface ChefEventListProps {
   onCreateEvent: () => void
+  onViewChange: (view: 'calendar' | 'list') => void
+  currentView: 'calendar' | 'list'
 }
 
 const formatDate = (date: Date) => {
@@ -54,7 +56,7 @@ const getLocationTypeLabel = (locationType: string) => {
   return locationTypeOptions.find(option => option.value === locationType)?.label || locationType
 }
 
-export const ChefEventList = ({ onCreateEvent }: ChefEventListProps) => {
+export const ChefEventList = ({ onCreateEvent, onViewChange, currentView }: ChefEventListProps) => {
   const [filters, setFilters] = useState({
     q: '',
     status: '',
@@ -161,9 +163,27 @@ export const ChefEventList = ({ onCreateEvent }: ChefEventListProps) => {
           </Select>
         </div>
 
-        <Button onClick={onCreateEvent}>
-          Create Chef Event
-        </Button>
+        <div className="flex items-center space-x-2">
+          <Button
+            variant={currentView === 'calendar' ? 'primary' : 'transparent'}
+            size="small"
+            onClick={() => onViewChange('calendar')}
+          >
+            <Calendar className="w-4 h-4 mr-2" />
+            Calendar
+          </Button>
+                      <Button
+              variant={currentView === 'list' ? 'primary' : 'transparent'}
+              size="small"
+              onClick={() => onViewChange('list')}
+            >
+              <EllipsisHorizontal className="w-4 h-4 mr-2" />
+              List
+            </Button>
+          <Button onClick={onCreateEvent}>
+            Create Chef Event
+          </Button>
+        </div>
       </div>
 
       {/* Table */}

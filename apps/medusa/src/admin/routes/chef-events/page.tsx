@@ -1,6 +1,7 @@
 import { defineRouteConfig } from "@medusajs/admin-sdk"
 import { Container, Heading, FocusModal, toast } from "@medusajs/ui"
 import { ChefEventList } from "./components/chef-event-list"
+import { ChefEventCalendar } from "./components/chef-event-calendar"
 import { ChefEventForm } from "./components/chef-event-form"
 import { useAdminCreateChefEventMutation } from "../../hooks/chef-events"
 import { useState } from "react"
@@ -8,6 +9,8 @@ import type { AdminCreateChefEventDTO } from "../../../sdk/admin/admin-chef-even
 
 const ChefEventsPage = () => {
   const [showCreateModal, setShowCreateModal] = useState(false)
+  // Default to calendar view
+  const [currentView, setCurrentView] = useState<'calendar' | 'list'>('calendar')
   const createChefEvent = useAdminCreateChefEventMutation()
 
   const handleCreateChefEvent = async (data: any) => {
@@ -32,9 +35,21 @@ const ChefEventsPage = () => {
       <div className="flex items-center justify-between px-6 py-4">
         <Heading level="h1">Chef Events</Heading>
       </div>
-      
-      <ChefEventList onCreateEvent={() => setShowCreateModal(true)} />
-      
+
+      {currentView === 'list' ? (
+        <ChefEventList
+          onCreateEvent={() => setShowCreateModal(true)}
+          onViewChange={setCurrentView}
+          currentView={currentView}
+        />
+      ) : (
+        <ChefEventCalendar
+          onCreateEvent={() => setShowCreateModal(true)}
+          onViewChange={setCurrentView}
+          currentView={currentView}
+        />
+      )}
+
       {showCreateModal && (
         <FocusModal open onOpenChange={setShowCreateModal}>
           <FocusModal.Content>
@@ -42,7 +57,7 @@ const ChefEventsPage = () => {
               <FocusModal.Title>Create Chef Event</FocusModal.Title>
             </FocusModal.Header>
             <FocusModal.Body>
-              <ChefEventForm 
+              <ChefEventForm
                 onSubmit={handleCreateChefEvent}
                 isLoading={createChefEvent.isPending}
                 onCancel={() => setShowCreateModal(false)}
@@ -59,4 +74,4 @@ export const config = defineRouteConfig({
   label: "Chef Events",
 })
 
-export default ChefEventsPage 
+export default ChefEventsPage
