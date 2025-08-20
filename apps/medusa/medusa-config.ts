@@ -60,6 +60,14 @@ module.exports = defineConfig({
   ],
   modules: [
     {
+      resolve: './src/modules/menu',
+      options: {},
+    },
+    {
+      resolve: './src/modules/chef-event',
+      options: {},
+    },
+    {
       resolve: '@medusajs/medusa/payment',
       options: {
         providers: [
