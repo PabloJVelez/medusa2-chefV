@@ -2,10 +2,5 @@
   "buildCommand": "yarn build",
   "installCommand": "yarn install",
   "framework": "vite",
-  "outputDirectory": "build",
-  "functions": {
-    "build/server/index.js": {
-      "runtime": "nodejs20.x"
-    }
-  }
+  "outputDirectory": "build"
 } 
