@@ -1,7 +1,7 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { z } from "zod"
 import { createChefEventWorkflow } from "../../../workflows/create-chef-event"
-import { CHEF_EVENT_MODULE } from "../../../modules/chef-event"
+import { CHEF_EVENT_MODULE } from "../../../modules/chef-event" 
 
 const createChefEventSchema = z.object({
   status: z.enum(['pending', 'confirmed', 'cancelled', 'completed']).default('pending'),
