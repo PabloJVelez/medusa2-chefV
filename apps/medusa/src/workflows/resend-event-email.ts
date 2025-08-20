@@ -6,6 +6,7 @@ import {
 } from "@medusajs/workflows-sdk"
 import { emitEventStep } from "@medusajs/medusa/core-flows"
 import { CHEF_EVENT_MODULE } from "../modules/chef-event"
+import ChefEventModuleService from "../modules/chef-event/service"
 import { Modules } from "@medusajs/framework/utils"
 
 type ResendEventEmailWorkflowInput = {
@@ -18,7 +19,7 @@ type ResendEventEmailWorkflowInput = {
 const updateEmailHistoryStep = createStep(
   "update-email-history-step",
   async (input: ResendEventEmailWorkflowInput, { container }) => {
-    const chefEventModuleService = container.resolve(CHEF_EVENT_MODULE)
+    const chefEventModuleService: ChefEventModuleService = container.resolve(CHEF_EVENT_MODULE)
     
     // Get current chef event
     const chefEvent = await chefEventModuleService.retrieveChefEvent(input.chefEventId)

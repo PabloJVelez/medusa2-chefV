@@ -15,7 +15,7 @@ export async function GET(
 ): Promise<void> {
   try {
     const query = listStoreMenusSchema.parse(req.query)
-    const menuModuleService = req.scope.resolve(MENU_MODULE)
+    const menuModuleService = req.scope.resolve(MENU_MODULE) as any
     
     const [menus, count] = await menuModuleService.listAndCountMenus(
       {

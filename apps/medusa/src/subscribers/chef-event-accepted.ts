@@ -19,7 +19,7 @@ export default async function chefEventAcceptedHandler({
 }: SubscriberArgs<EventData>) {
   
   const notificationService = container.resolve(Modules.NOTIFICATION)
-  const chefEventService = container.resolve("chefEventModuleService")
+  const chefEventService = container.resolve("chefEventModuleService") as any
   const productService = container.resolve("product")
 
   try {

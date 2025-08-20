@@ -8,7 +8,7 @@ export async function GET(
   const { id } = req.params
 
   try {
-    const chefEventService = req.scope.resolve("chefEventModuleService")
+    const chefEventService = req.scope.resolve("chefEventModuleService") as any
     
     const chefEvent = await chefEventService.retrieveChefEvent(id)
     

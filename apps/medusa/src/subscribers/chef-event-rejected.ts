@@ -19,7 +19,7 @@ export default async function chefEventRejectedHandler({
 }: SubscriberArgs<EventData>) {
   
   const notificationService = container.resolve(Modules.NOTIFICATION)
-  const chefEventService = container.resolve("chefEventModuleService")
+  const chefEventService = container.resolve("chefEventModuleService") as any
 
   try {
     // Fetch the chef event data from the database

@@ -7,7 +7,7 @@ export async function GET(
 ): Promise<void> {
   try {
     const { id } = req.params
-    const menuModuleService = req.scope.resolve(MENU_MODULE)
+    const menuModuleService = req.scope.resolve(MENU_MODULE) as any
     
     const menu = await menuModuleService.retrieveMenu(id, {
       relations: ["courses", "courses.dishes", "courses.dishes.ingredients", "images"]

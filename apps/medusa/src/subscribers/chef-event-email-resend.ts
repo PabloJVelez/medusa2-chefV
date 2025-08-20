@@ -17,7 +17,7 @@ export default async function chefEventEmailResendHandler({
   console.log("🔄 CHEF EVENT EMAIL RESEND SUBSCRIBER: Processing resend request:", data)
 
   try {
-    const chefEventModuleService = container.resolve(CHEF_EVENT_MODULE)
+    const chefEventModuleService = container.resolve(CHEF_EVENT_MODULE) as any
     const notificationService = container.resolve(Modules.NOTIFICATION)
 
     // Get chef event details
