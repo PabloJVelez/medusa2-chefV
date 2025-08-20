@@ -37,8 +37,8 @@ const updateEmailHistoryStep = createStep(
     
     const updatedChefEvent = await chefEventModuleService.updateChefEvents({
       id: input.chefEventId,
-      email_history: updatedHistory as any,
-      last_email_sent_at: new Date()
+      emailHistory: updatedHistory as any,
+      lastEmailSentAt: new Date()
     })
     
     return new StepResponse(updatedChefEvent)

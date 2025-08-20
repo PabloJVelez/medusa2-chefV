@@ -70,8 +70,9 @@ module.exports = defineConfig({
       ssl: false,
     },
     redisUrl: REDIS_URL,
-
     redisPrefix: process.env.REDIS_PREFIX,
+    // ADD WORKER MODE CONFIGURATION
+    workerMode: process.env.MEDUSA_WORKER_MODE as "shared" | "worker" | "server",
     http: {
       storeCors: process.env.STORE_CORS || '',
       adminCors: process.env.ADMIN_CORS || '',
@@ -108,6 +109,8 @@ module.exports = defineConfig({
     notificationModule,
   ],
   admin: {
+    // ADD ADMIN DISABLE CONFIGURATION
+    disable: process.env.DISABLE_MEDUSA_ADMIN === "true",
     backendUrl: process.env.ADMIN_BACKEND_URL,
     vite: () => {
       return {
@@ -116,9 +119,6 @@ module.exports = defineConfig({
         },
       };
     },
-  },
-  storefront: {
-    url: process.env.STOREFRONT_URL || 'http://localhost:3000',
   },
 });
 
