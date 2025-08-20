@@ -25,7 +25,7 @@ const updateChefEventSchema = z.object({
 })
 
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
-  const chefEventModuleService = req.scope.resolve(CHEF_EVENT_MODULE)
+  const chefEventModuleService = req.scope.resolve(CHEF_EVENT_MODULE) as any
   const { id } = req.params
   
   const chefEvent = await chefEventModuleService.retrieveChefEvent(id)

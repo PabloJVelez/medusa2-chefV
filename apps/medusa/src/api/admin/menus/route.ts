@@ -44,7 +44,7 @@ export async function GET(
     console.log("1. Query:", query)
     console.log("2. MENU_MODULE:", MENU_MODULE)
     
-    const menuModuleService = req.scope.resolve(MENU_MODULE)
+    const menuModuleService = req.scope.resolve(MENU_MODULE) as any
     console.log("3. Service resolved:", !!menuModuleService)
     console.log("4. Service methods:", Object.getOwnPropertyNames(Object.getPrototypeOf(menuModuleService)))
     
