@@ -6,6 +6,17 @@ const REDIS_URL = process.env.REDIS_URL;
 const STRIPE_API_KEY = process.env.STRIPE_API_KEY;
 const IS_TEST = process.env.NODE_ENV === 'test';
 
+const customModules = [
+  {
+    resolve: './src/modules/menu',
+    options: {},
+  },
+  {
+    resolve: './src/modules/chef-event',
+    options: {},
+  },
+]
+
 const cacheModule = IS_TEST
   ? { resolve: '@medusajs/medusa/cache-inmemory' }
   : {
@@ -35,6 +46,23 @@ const workflowEngineModule = IS_TEST
       },
     };
 
+const notificationModule = {
+      resolve: "@medusajs/medusa/notification",
+      options: {
+        providers: [
+          {
+            resolve: "./src/modules/resend",
+            id: "resend",
+            options: {
+              channels: ["email"],
+              api_key: process.env.RESEND_API_KEY,
+              from: process.env.RESEND_FROM_EMAIL,
+            },
+          },
+        ],
+      },
+    };
+
 module.exports = defineConfig({
   projectConfig: {
     databaseUrl: process.env.DATABASE_URL,
@@ -42,8 +70,9 @@ module.exports = defineConfig({
       ssl: false,
     },
     redisUrl: REDIS_URL,
-
     redisPrefix: process.env.REDIS_PREFIX,
+    // ADD WORKER MODE CONFIGURATION
+    workerMode: process.env.MEDUSA_WORKER_MODE as "shared" | "worker" | "server",
     http: {
       storeCors: process.env.STORE_CORS || '',
       adminCors: process.env.ADMIN_CORS || '',
@@ -59,6 +88,7 @@ module.exports = defineConfig({
     },
   ],
   modules: [
+    ...customModules,
     {
       resolve: '@medusajs/medusa/payment',
       options: {
@@ -76,8 +106,11 @@ module.exports = defineConfig({
     cacheModule,
     eventBusModule,
     workflowEngineModule,
+    notificationModule,
   ],
   admin: {
+    // ADD ADMIN DISABLE CONFIGURATION
+    disable: process.env.DISABLE_MEDUSA_ADMIN === "true",
     backendUrl: process.env.ADMIN_BACKEND_URL,
     vite: () => {
       return {
@@ -88,3 +121,6 @@ module.exports = defineConfig({
     },
   },
 });
+
+
+

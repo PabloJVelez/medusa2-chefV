@@ -144,6 +144,15 @@
   .position-right-bottom {
     @apply left-full right-auto bottom-0 top-auto ml-2 origin-bottom-right;
   }
+
+  /* Hide scrollbars (while keeping scroll functionality) */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
 }
 
 .mkt-section {

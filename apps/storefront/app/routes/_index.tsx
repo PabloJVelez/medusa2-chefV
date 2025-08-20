@@ -1,255 +1,222 @@
-import { ActionList } from '@app/components/common/actions-list/ActionList';
 import { Container } from '@app/components/common/container';
 import { Image } from '@app/components/common/images/Image';
-import { GridCTA } from '@app/components/sections/GridCTA';
-import Hero from '@app/components/sections/Hero';
-import { ListItems } from '@app/components/sections/ListItems';
-import ProductList from '@app/components/sections/ProductList';
-import { SideBySide } from '@app/components/sections/SideBySide';
+import { ChefHero } from '@app/components/chef/ChefHero';
+import { FeaturedMenus } from '@app/components/chef/FeaturedMenus';
+import { ExperienceTypes } from '@app/components/chef/ExperienceTypes';
+import { ActionList } from '@app/components/common/actions-list/ActionList';
+import { fetchMenus } from '@libs/util/server/data/menus.server';
 import { getMergedPageMeta } from '@libs/util/page';
 import type { LoaderFunctionArgs, MetaFunction } from 'react-router';
+import { useLoaderData } from 'react-router';
 
 export const loader = async (args: LoaderFunctionArgs) => {
-  return {};
+  try {
+    // Fetch menus for the featured menus section
+    const menusData = await fetchMenus({ limit: 3 });
+    return { 
+      menus: menusData.menus || [],
+      success: true 
+    };
+  } catch (error) {
+    console.error('Failed to load menus for homepage:', error);
+    return { 
+      menus: [],
+      success: false 
+    };
+  }
 };
 
-export const meta: MetaFunction<typeof loader> = getMergedPageMeta;
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
+  return [
+    { title: 'Chef Luis Velez - Premium Culinary Experiences' },
+    { 
+      name: 'description', 
+      content: 'Transform your special occasions with Chef Luis\'s premium culinary experiences. From intimate cooking classes to elegant plated dinners, bringing restaurant-quality cuisine to your home.'
+    },
+          { property: 'og:title', content: 'Chef Luis Velez - Premium Culinary Experiences' },
+    { 
+      property: 'og:description', 
+      content: 'Professional chef services for cooking classes, plated dinners, and buffet-style events. Personalized culinary experiences in your home.'
+    },
+    { property: 'og:type', content: 'website' },
+    { name: 'keywords', content: 'private chef, cooking classes, plated dinner, culinary experiences, chef services, private dining' },
+  ];
+};
 
 export default function IndexRoute() {
+  const { menus } = useLoaderData<typeof loader>();
+
   return (
     <>
-      <link rel="preload" href="/assets/images/barrio-banner.png" as="image" />
-      <Hero
+      <link rel="preload" href="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80" as="image" />
+      
+      {/* Chef Hero Section */}
+      <ChefHero
         className="h-[800px] !max-w-full -mt-[calc(var(--mkt-header-height)+3rem)] md:-mt-[calc(var(--mkt-header-height-desktop)+2rem)] pt-[var(--mkt-header-height)] md:pt-[var(--mkt-header-height-desktop)]"
-        content={
-          <div className="text-center w-full space-y-9">
-            <h4 className="font-italiana text-2xl">COFFEE & COMMUNITY</h4>
-            <h1 className="text-8xl font-aboreto">BARRIO</h1>
-            <p className="max-w-prose mx-auto text-lg">
-              Discover our artisan-roasted coffee, crafted with care and delivered to your door. At Barrio, we’re more
-              than a coffee roastery—we’re&nbsp;a&nbsp;neighborhood.
+      />
+
+      {/* Experience Types Section */}
+      <ExperienceTypes />
+
+      {/* Featured Menus Section */}
+      <FeaturedMenus 
+        menus={menus}
+        maxDisplay={3}
+      />
+
+      {/* Chef Story Section */}
+      <Container className="py-16 lg:py-24">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          {/* Chef Image */}
+          <div className="order-2 lg:order-1">
+            <div className="relative">
+              <Image
+                src="/assets/images/chef_experience.PNG"
+                loading="lazy"
+                alt="Chef Luis Velez in his kitchen"
+                className="rounded-2xl shadow-lg w-full h-[500px] object-cover"
+                height={500}
+                width={600}
+              />
+              {/* Decorative element */}
+              <div className="absolute -bottom-6 -right-6 w-24 h-24 bg-accent-500 rounded-full opacity-20"></div>
+            </div>
+          </div>
+
+          {/* Chef Content */}
+          <div className="order-1 lg:order-2 text-center lg:text-left space-y-6">
+            <div className="space-y-4">
+              <h2 className="text-5xl md:text-6xl lg:text-7xl font-italiana text-primary-900">
+                Meet Chef Luis
+              </h2>
+              <p className="text-2xl md:text-3xl lg:text-4xl font-italiana text-accent-600">
+                Culinary Artistry
+              </p>
+            </div>
+            
+            <div className="space-y-4 text-primary-700">
+              <p className="text-lg leading-relaxed">
+                With over 15 years of culinary excellence, Chef Luis Velez brings world-class expertise 
+                from Michelin-starred restaurants directly to your home.
+              </p>
+            <p className="text-base leading-relaxed">
+                Trained in classical French techniques with a modern innovative approach, he creates 
+                unforgettable dining experiences tailored to your special occasions.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap gap-4 justify-center lg:justify-start">
+              <div className="bg-accent-100 px-4 py-2 rounded-full">
+                <span className="text-sm font-medium text-accent-700">15+ Years Experience</span>
+              </div>
+              <div className="bg-accent-100 px-4 py-2 rounded-full">
+                <span className="text-sm font-medium text-accent-700">Michelin Trained</span>
+              </div>
+              <div className="bg-accent-100 px-4 py-2 rounded-full">
+                <span className="text-sm font-medium text-accent-700">Local Sourcing</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Container>
+
+      {/* Chef Background Section
+      <Container className="p-14 pt-0">
+        <div
+          className="h-[594px] rounded-3xl bg-cover bg-no-repeat bg-center flex items-center justify-center"
+          style={{
+            backgroundImage: 'url(/assets/images/chef_watermelon_home.jpg)',
+          }}
+        >
+          <div className="bg-black bg-opacity-50 rounded-2xl p-8 max-w-2xl text-white text-center">
+            <h3 className="text-3xl font-italiana mb-4">15+ Years of Culinary Excellence</h3>
+            <p className="text-lg leading-relaxed">
+                              From Michelin-starred restaurants to intimate home kitchens, Chef Luis brings world-class 
+              culinary expertise directly to your table. Trained in classical French techniques with a 
+              modern innovative approach.
             </p>
           </div>
-        }
-        actions={[
-          {
-            label: 'Discover Our Blends',
-            url: '/categories/blends',
-          },
-        ]}
-        image={{
-          url: '/assets/images/barrio-banner.png',
-          alt: 'Barrio background',
-        }}
-      />
-
-      <Container className="p-14 md:pt-1 lg:pt-24 relative flex flex-col-reverse items-center lg:flex-row">
-        <div className="md:absolute w-80 md:left-4 md:-top-[240px] lg:left-20 lg:w-[420px]">
-          <Image
-            src="/assets/images/header-image-1.png"
-            loading="lazy"
-            alt="Barrio background"
-            height={520}
-            width={420}
-          />
         </div>
+      </Container> */}
 
-        <div className="md:w-full flex flex-col justify-center max-md:items-center">
-          <div className="w-full flex text-center md:text-left">
-            <h2 className="mx-auto md:ml-[32%] lg:ml-[37%] xl:ml-[30%] lg:mr-auto text-6xl sm:text-7xl lg:text-8xl xl:text-9xl font-ballet mt-12">
-              Building Community
-            </h2>
-          </div>
-          <p className="font-italiana text-6xl lg:text-7xl xl:text-8xl mt-6 lg:mt-8 xl:mt-10 max-sm:text-center">
-            one cup at a time
-          </p>
-        </div>
-      </Container>
-
+      {/* Testimonials Section */}
       <Container className="p-14 pt-0">
-        <Hero
-          className="h-[594px]"
-          backgroundClassName="rounded-3xl"
-          image={{
-            url: '/assets/images/banner-coffee-shop.png',
-            alt: 'Barrio background',
-          }}
-        />
-      </Container>
-
-      <ListItems
-        itemsClassName="mb-2"
-        title="About our products"
-        items={[
-          {
-            title: 'Responsibly Sourced',
-            description:
-              'We believe good coffee happens when great people come together to build longterm relationships.',
-            image: {
-              src: '/assets/images/benefit-1.png',
-              alt: 'Responsibly Sourced',
-              width: 60,
-              height: 60,
-            },
-          },
-          {
-            title: 'Meticulously Roasted',
-            description:
-              'Our custom roast profiles are designed to elevate the natural beauty of our coffees - from sparkling acidity to brown sugar sweetness.',
-            image: {
-              src: '/assets/images/benefit-2.png',
-              alt: 'Meticulously Roasted',
-              width: 60,
-              height: 60,
-            },
-          },
-          {
-            title: 'Giving Back',
-            description:
-              'Every time you buy a bag of our coffee, we donate a portion of our proceeds to our non-profit partners.',
-            image: {
-              src: '/assets/images/benefit-3.png',
-              alt: 'Giving Back',
-              width: 60,
-              height: 60,
-            },
-          },
-        ]}
-      />
-
-      <ProductList
-        className="!pb-[100px]"
-        heading="Our Blends"
-        actions={[
-          {
-            label: 'View all',
-            url: '/products',
-          },
-        ]}
-      />
-
-      <Hero
-        className="pb-10 min-h-[734px] !max-w-full"
-        content={
-          <div className="text-center w-full space-y-9 pt-9">
-            <h4 className="font-italiana text-2xl">SUBSCRIBE & SAVE</h4>
-            <h1 className="text-4xl lg:text-7xl font-italiana">
-              Sit back, let us take care&nbsp;of&nbsp;your&nbsp;coffee
-            </h1>
-
-            <ListItems
-              className="text-left w-full text-black justify-between p-0"
-              itemsClassName="rounded-3xl bg-highlight-900 p-10 text-sm"
-              useFillTitle
-              items={[
-                {
-                  title: 'Choose your coffee',
-                  description:
-                    'From single origin to our house blend, or even surprise offerings for the more adventurous, we have the coffee tofit your taste.',
-                },
-                {
-                  title: 'Choose a frequency',
-                  description:
-                    'Receive 12 oz of our whole bean coffee weekly, every 2 weeks, every 3 weeks, or monthly—whatever frequency meets your needs.',
-                },
-                {
-                  title: 'enjoy :)',
-                  description:
-                    'You’ve chosen your coffee and how often you want it delivered—all that’s left to do is sit back and relax while we do all the work.',
-                },
-              ]}
-            />
-          </div>
-        }
-        actions={[
-          {
-            label: 'Get your coffee',
-            url: '/products',
-          },
-        ]}
-        image={{
-          url: '/assets/images/barrio-banner.png',
-          alt: 'Barrio background',
-        }}
-      />
-
-      <Container className="flex flex-col-reverse gap-8 items-center md:items-start p-6 lg:pt-24 xl:pt-16 lg:px-24 relative lg:min-h-[354px] min-h-[276px]">
-        <div className="flex justify-center md:justify-end md:absolute md:-top-[30%] w-60 md:w-80 md:right-0 lg:right-20 lg:w-[420px]">
-          <Image src="/assets/images/header-image-2.png" alt="Barrio background" height={520} width={420} />
+        <div className="text-center mb-12">
+          <h3 className="text-4xl font-italiana text-gray-900 mb-4">
+            What Our Guests Say
+          </h3>
+          <div className="w-20 mx-auto border-t-2 border-blue-500"></div>
         </div>
 
-        <h2 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-italiana md:ml-0 md:mr-[288px] lg:mr-[392px]">
-          <span className="whitespace-nowrap">The Art of Roasting</span>
-          <br />
-          <span className="font-ballet text-[200%] whitespace-nowrap inline-block mt-6 mb-4 sm:mt-2 sm:-mb-4">
-            at Barrio
-          </span>
-          <br />
-          <span className="whitespace-nowrap">Crafting with Care</span>
-        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="bg-white rounded-2xl shadow-lg p-8 text-center">
+            <div className="text-4xl mb-4">⭐⭐⭐⭐⭐</div>
+            <p className="text-gray-700 italic mb-4">
+                              "Chef Luis created the most incredible anniversary dinner for us. Every course was a masterpiece, 
+              and the cooking class was so much fun!"
+            </p>
+            <div className="font-semibold text-gray-900">— Sarah & Michael K.</div>
+            <div className="text-sm text-gray-600">Plated Dinner Experience</div>
+          </div>
+
+          <div className="bg-white rounded-2xl shadow-lg p-8 text-center">
+            <div className="text-4xl mb-4">⭐⭐⭐⭐⭐</div>
+            <p className="text-gray-700 italic mb-4">
+              "The cooking class was amazing! Chef Velez taught us so much and we had a blast. 
+              Can't wait to book another experience."
+            </p>
+            <div className="font-semibold text-gray-900">— Jennifer L.</div>
+            <div className="text-sm text-gray-600">Cooking Class Experience</div>
+          </div>
+
+          <div className="bg-white rounded-2xl shadow-lg p-8 text-center">
+            <div className="text-4xl mb-4">⭐⭐⭐⭐⭐</div>
+            <p className="text-gray-700 italic mb-4">
+              "Perfect for our family gathering! The buffet style worked perfectly for our group 
+              and everything was absolutely delicious."
+            </p>
+            <div className="font-semibold text-gray-900">— The Rodriguez Family</div>
+            <div className="text-sm text-gray-600">Buffet Style Experience</div>
+          </div>
+        </div>
       </Container>
 
-      <SideBySide
-        className="p-14 md:pt-12 lg:px-24"
-        left={
-          <div className="w-full h-full flex items-center justify-center">
-            <div
-              className="bg-cover bg-no-repeat bg-center w-full rounded-3xl h-[410px]"
-              style={{
-                backgroundImage: 'url(/assets/images/coffee-shop-2.png)',
-              }}
+      {/* Final CTA Section */}
+      <Container className="p-14 md:pt-28 lg:pt-24 lg:px-24">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+          <div className="order-2 lg:order-1">
+            <Image
+              src="/assets/images/chef_book_experience.PNG"
+              alt="Guests enjoying a Chef Velez experience"
+              className="rounded-3xl shadow-lg"
+              width={600}
+              height={400}
             />
           </div>
-        }
-        right={
-          <p className="text-sm h-full flex items-center justify-center">
-            At Barrio, our roasting process is a carefully honed craft, combining traditional techniques with a modern,
-            sustainable approach. Each batch of coffee is roasted in small quantities to ensure precise control over
-            every stage of the process, allowing the unique characteristics of the beans to shine through.
-            <br />
-            <br />
-            We start by selecting high-quality, ethically sourced beans from farmers who share our commitment to
-            sustainability and community. The roasting process begins with a slow, even heat that coaxes out the natural
-            flavors, developing rich aromas and deep, complex profiles. Every bean undergoes a transformation, revealing
-            its distinct notes—whether it's the bright acidity of a light roast, the balanced sweetness of a medium
-            roast, or the bold, rich depth of a dark roast.
-            <br />
-            <br />
-            Our goal is to honor the origin of each coffee, preserving its natural flavors while adding our own touch of
-            expertise. The result? A perfectly roasted coffee that reflects the heart of our community—vibrant, diverse,
-            and full of life. At Barrio, every roast tells a story, and every cup connects you to the hands that
-            nurtured it.
-          </p>
-        }
-      />
-      <GridCTA
-        className="p-14 md:pt-28 lg:pt-24 lg:px-24"
-        images={[
-          {
-            src: '/assets/images/grid-cta-1.png',
-            alt: 'Barrio background',
-          },
-          {
-            src: '/assets/images/grid-cta-2.png',
-            alt: 'Barrio background',
-          },
-        ]}
-        content={
-          <div className="space-y-8 flex flex-col justify-center items-center">
-            <h4 className="text-xl font-italiana">FIND YOUR COMMUNITY</h4>
-            <h3 className="text-7xl  font-aboreto">BARRIO</h3>
-            <p className="text-xl">Ship, Share & Connect Over Coffee</p>
+          
+          <div className="order-1 lg:order-2 space-y-8 flex flex-col justify-center items-center lg:items-start text-center lg:text-left">
+            <h4 className="text-xl font-italiana tracking-wider">READY TO CREATE MEMORIES?</h4>
+            <h3 className="text-6xl lg:text-7xl font-aboreto">Book Your Experience</h3>
+            <p className="text-xl leading-relaxed">
+              Transform your next special occasion into an unforgettable culinary journey. 
+              From intimate dinners to group celebrations, every experience is crafted with care.
+            </p>
             <ActionList
               actions={[
                 {
-                  label: 'Subscribe for Events',
-                  url: '#',
+                  label: 'Browse Our Menus',
+                  url: '/menus',
+                },
+                {
+                  label: 'Request Your Event',
+                  url: '/request',
                 },
               ]}
+              className="flex-col gap-4 lg:flex-row"
             />
           </div>
-        }
-      />
+        </div>
+      </Container>
     </>
   );
 }

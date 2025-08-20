@@ -74,7 +74,8 @@ export const addToCart = withAuthHeaders(
     const cartId = await getCartId(request.headers);
 
     if (cartId) {
-      return await sdk.store.cart.createLineItem(
+      console.log('ADDING TO CART======>', cartId, variantId, quantity);
+      const resp = await sdk.store.cart.createLineItem(
         cartId,
         {
           variant_id: variantId,
@@ -83,6 +84,8 @@ export const addToCart = withAuthHeaders(
         {},
         authHeaders,
       );
+      console.log('Response', resp);
+      return resp;
     }
 
     const region = await getSelectedRegion(request.headers);

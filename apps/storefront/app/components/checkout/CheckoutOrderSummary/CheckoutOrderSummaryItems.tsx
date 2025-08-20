@@ -61,7 +61,7 @@ export const CheckoutOrderSummaryItem: FC<CheckoutOrderSummaryItemProps> = ({ it
 
           <p className="mt-1 text-lg">
             <span className="font-bold text-gray-900">
-              {formatPrice(item.unit_price, {
+              {formatPrice((item.unit_price || 0), {
                 currency: cart.region?.currency_code,
               })}
             </span>

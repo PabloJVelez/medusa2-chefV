@@ -270,6 +270,44 @@ export function getVariantFromSelectedOptions(
   });
 }
 
+/**
+ * Detects if a product is an event product based on SKU pattern
+ * Event products have SKU pattern: EVENT-{eventId}-{date}-{type}
+ */
+export const isEventProduct = (product: StoreProduct): boolean => {
+  // Check if any variant has an EVENT- SKU pattern
+  return product.variants?.some(variant => 
+    variant.sku?.startsWith('EVENT-')
+  ) ?? false;
+}
+
+/**
+ * Extracts event information from product SKU
+ * @param sku - The SKU in format EVENT-{eventId}-{date}-{type}
+ * @returns Parsed event information or null if not an event SKU
+ */
+export const parseEventSku = (sku: string): { eventId: string; date: string; type: string } | null => {
+  if (!sku.startsWith('EVENT-')) return null
+  
+  const parts = sku.split('-')
+  if (parts.length < 4) return null
+  
+  const eventId = parts[1]
+  const date = parts[2]
+  const type = parts.slice(3).join('-') // Handle event types with hyphens
+  
+  return { eventId, date, type }
+}
+
+/**
+ * Gets the event variant from a product (the variant with EVENT- SKU)
+ */
+export const getEventVariant = (product: StoreProduct): StoreProductVariant | undefined => {
+  return product.variants?.find(variant => 
+    variant.sku?.startsWith('EVENT-')
+  )
+}
+
 export const getProductMeta: MetaFunction = ({ data, matches }) => {
   const rootMatch = matches[0] as UIMatch<RootLoaderResponse>;
   const region = rootMatch.data?.region;

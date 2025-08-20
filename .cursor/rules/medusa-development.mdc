@@ -26,6 +26,7 @@ You are an expert in Medusa v2, TypeScript, Node.js, PostgreSQL, and modern e-co
 
 ### Framework Structure
 - **Modules**: Self-contained packages with domain-specific functionality
+- **Service Factory**: More detail into services
 - **Services**: Business logic layer with dependency injection
 - **API Routes**: RESTful endpoints in `/api/admin` and `/api/store`
 - **Workflows**: Multi-step business processes with error handling
@@ -54,6 +55,61 @@ class MyService extends MedusaService({
   }
 }
 ```
+
+### Service Factory
+
+The Service Factory (`MedusaService`) is a powerful utility that automatically generates a set of standard CRUD methods for your service. When you extend `MedusaService`, your service automatically gets the following methods for each model you register:
+
+```typescript
+// Service pattern with Service Factory
+import { MedusaService } from "@medusajs/framework/utils"
+import { Menu } from "./models/menu"
+
+class MenuModuleService extends MedusaService({
+  Menu
+}) {
+  // The service automatically gets these methods:
+  // - createMenus(data: CreateMenuInput): Promise<Menu>
+  // - retrieveMenu(id: string): Promise<Menu>
+  // - listMenus(filters?: FilterableMenuProps): Promise<Menu[]>
+  // - listAndCountMenus(filters?: FilterableMenuProps): Promise<[Menu[], number]>
+  // - updateMenus(data: UpdateMenuInput): Promise<Menu>
+  // - deleteMenus(id: string): Promise<void>
+  // - softDeleteMenus(id: string): Promise<void>
+  // - restoreMenus(id: string): Promise<Menu>
+}
+```
+
+The generated method names follow the pattern `{operationName}_{dataModelName}`, where:
+- `{operationName}` is the operation (create, retrieve, list, etc.)
+- `{dataModelName}` is the pascal-case version of the model key, pluralized for all operations except `retrieve`
+
+For example, if you register a model named `Post`, you get methods like:
+- `createPosts`
+- `retrievePost`
+- `listPosts`
+- `listAndCountPosts`
+- `updatePosts`
+- `deletePosts`
+- `softDeletePosts`
+- `restorePosts`
+
+You can still add custom methods to your service while having access to these generated methods:
+
+```typescript
+class MenuModuleService extends MedusaService({
+  Menu
+}) {
+  // Custom method
+  async getActiveMenus(): Promise<Menu[]> {
+    return await this.listMenus({
+      status: "active"
+    })
+  }
+}
+```
+
+The Service Factory provides a consistent interface for data operations while allowing you to extend functionality as needed.
 
 ### API Route Patterns
 ```typescript

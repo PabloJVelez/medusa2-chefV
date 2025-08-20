@@ -27,6 +27,7 @@ import type {
 } from '@medusajs/types';
 import { seedProducts } from './seed/products';
 import { generateReviewResponse, reviewContents, texasCustomers } from './seed/reviews';
+import { seedMenuProducts, seedMenuEntities } from './seed/menus';
 
 export default async function seedDemoData({ container }: ExecArgs) {
   const logger = container.resolve(ContainerRegistrationKeys.LOGGER);
@@ -36,6 +37,7 @@ export default async function seedDemoData({ container }: ExecArgs) {
   const storeModuleService: IStoreModuleService = container.resolve(Modules.STORE);
 
   const paymentModuleService: IPaymentModuleService = container.resolve(Modules.PAYMENT);
+  const menuModuleService = container.resolve("menuModuleService");
 
   const canadianCountries = ['ca'];
   const americanCountries = ['us'];
@@ -153,11 +155,16 @@ export default async function seedDemoData({ container }: ExecArgs) {
           name: 'Default',
           type: 'default',
         },
+        {
+          name: 'Digital Products',
+          type: 'digital',
+        },
       ],
     },
   });
 
   const shippingProfile = shippingProfileResult[0];
+  const digitalShippingProfile = shippingProfileResult[1];
 
   const northAmericanFulfillmentSet = await fulfillmentModuleService.createFulfillmentSets({
     name: 'North American delivery',
@@ -207,6 +214,10 @@ export default async function seedDemoData({ container }: ExecArgs) {
         {
           title: 'Dark Roasts',
           handle: 'dark-roasts',
+        },
+        {
+          title: 'Chef Experiences',
+          handle: 'chef-experiences',
         },
       ],
     },
@@ -298,6 +309,48 @@ export default async function seedDemoData({ container }: ExecArgs) {
           },
         ],
       },
+      {
+        name: 'Digital Delivery',
+        price_type: 'flat',
+        provider_id: 'manual_manual',
+        service_zone_id: northAmericanFulfillmentSet.service_zones[0].id,
+        shipping_profile_id: digitalShippingProfile.id,
+        type: {
+          label: 'Digital',
+          description: 'Instant delivery - No physical shipping required.',
+          code: 'digital',
+        },
+        prices: [
+          {
+            currency_code: 'usd',
+            amount: 0,
+          },
+          {
+            currency_code: 'cad',
+            amount: 0,
+          },
+          {
+            region_id: usRegion.id,
+            amount: 0,
+          },
+          {
+            region_id: caRegion.id,
+            amount: 0,
+          },
+        ],
+        rules: [
+          {
+            attribute: 'enabled_in_store',
+            value: 'true',
+            operator: 'eq',
+          },
+          {
+            attribute: 'is_return',
+            value: 'false',
+            operator: 'eq',
+          },
+        ],
+      },
     ],
   });
 
@@ -348,6 +401,10 @@ export default async function seedDemoData({ container }: ExecArgs) {
           name: 'Single Origin',
           is_active: true,
         },
+        {
+          name: 'Chef Experiences',
+          is_active: true,
+        },
       ],
     },
   });
@@ -373,6 +430,12 @@ export default async function seedDemoData({ container }: ExecArgs) {
         {
           value: 'Latin America',
         },
+        {
+          value: 'Chef Experience',
+        },
+        {
+          value: 'Limited Availability',
+        },
       ],
     },
   });
@@ -388,6 +451,51 @@ export default async function seedDemoData({ container }: ExecArgs) {
       }),
     },
   });
+
+  logger.info('Seeding menu data...');
+
+  // Create menu entities first
+  const createdMenus = await seedMenuEntities(menuModuleService);
+  logger.info(`Created ${createdMenus.length} menus with courses, dishes, and ingredients.`);
+
+  // Create products for chef experiences (menu tickets)
+  const { result: menuProductResult } = await createProductsWorkflow(container).run({
+    input: {
+      products: seedMenuProducts({
+        collections: collectionsResult,
+        tags: productTagsResult,
+        categories: categoryResult,
+        sales_channels: [{ id: defaultSalesChannel[0].id }],
+        shipping_profile_id: digitalShippingProfile.id, // Use digital shipping for experiences
+      }),
+    },
+  });
+
+  logger.info(`Created ${menuProductResult.length} chef experience products.`);
+
+  // Link menu experiences to their corresponding menus
+  for (let i = 0; i < createdMenus.length && i < menuProductResult.length; i++) {
+    const menu = createdMenus[i];
+    const product = menuProductResult[i];
+    
+    try {
+      await remoteLink.create([
+        {
+          [Modules.PRODUCT]: {
+            product_id: product.id,
+          },
+          menuModule: {
+            menu_id: menu.id,
+          },
+        },
+      ]);
+      logger.info(`Linked menu "${menu.name}" to product "${product.title}"`);
+          } catch (error) {
+        logger.warn(`Failed to link menu "${menu.name}" to product "${product.title}": ${error}`);
+      }
+  }
+
+  logger.info('Finished seeding menu data.');
 
   for (const product of productResult) {
     const firstVariant = product.variants[0];

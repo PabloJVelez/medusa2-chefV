@@ -12,7 +12,12 @@ export default defineConfig({
     },
   },
   ssr: {
-    noExternal: ['@medusajs/js-sdk', '@lambdacurry/medusa-plugins-sdk'],
+    noExternal: [
+      '@medusajs/js-sdk',
+      '@lambdacurry/medusa-plugins-sdk',
+      '@medusajs/ui',
+      '@medusajs/icons',
+    ],
   },
   plugins: [reactRouter(), tsconfigPaths({ root: './' }), vanillaExtractPlugin()],
   build: {},

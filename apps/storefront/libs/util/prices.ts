@@ -44,14 +44,34 @@ export function getCheapestProductVariant(product: StoreProduct) {
 }
 
 export function formatLineItemPrice(lineItem: StoreCartLineItem, regionCurrency: string) {
-  return formatPrice(lineItem.unit_price, {
+  console.log('💰 formatLineItemPrice Debug:', {
+    lineItemId: lineItem.id,
+    productTitle: lineItem.product_title,
+    unitPrice: lineItem.unit_price,
+    quantity: lineItem.quantity,
+    regionCurrency: regionCurrency,
+    totalBeforeFormat: lineItem.unit_price && lineItem.quantity ? lineItem.unit_price * lineItem.quantity : null
+  });
+
+  // Medusa stores prices in dollars
+  const priceInDollars = lineItem.unit_price || 0;
+  
+  return formatPrice(priceInDollars, {
     currency: regionCurrency,
     quantity: lineItem.quantity,
   });
 }
 
 export function formatCartSubtotal(cart: StoreCart) {
-  return formatPrice(cart.item_subtotal || 0, {
+  console.log('💰 formatCartSubtotal Debug:', {
+    itemSubtotal: cart.item_subtotal,
+    currencyCode: cart.region?.currency_code
+  });
+
+  // Medusa stores prices in dollars
+  const subtotalInDollars = cart.item_subtotal || 0;
+  
+  return formatPrice(subtotalInDollars, {
     currency: cart.region?.currency_code,
   });
 }

@@ -21,12 +21,23 @@ const CheckoutOrderSummaryTotalsItem: FC<CheckoutOrderSummaryTotalsItemProps> = 
   amount,
   className,
   region,
-}) => (
-  <div className={clsx('flex items-center justify-between text-sm', className)}>
-    <dt>{label}</dt>
-    <dd className="font-bold text-gray-900">{formatPrice(amount || 0, { currency: region?.currency_code })}</dd>
-  </div>
-);
+}) => {
+  console.log('💰 CheckoutOrderSummaryTotalsItem Debug:', {
+    label,
+    amount,
+    currency: region?.currency_code
+  });
+
+  // Medusa stores prices in dollars
+  const amountInDollars = amount || 0;
+  
+  return (
+    <div className={clsx('flex items-center justify-between text-sm', className)}>
+      <dt>{label}</dt>
+      <dd className="font-bold text-gray-900">{formatPrice(amountInDollars, { currency: region?.currency_code })}</dd>
+    </div>
+  );
+};
 
 export const CheckoutOrderSummaryTotals: FC<CheckoutOrderSummaryTotalsProps> = ({ shippingOptions, cart }) => {
   const shippingMethods = cart.shipping_methods || [];
@@ -36,6 +47,17 @@ export const CheckoutOrderSummaryTotals: FC<CheckoutOrderSummaryTotalsProps> = (
   const shippingAmount = cart.shipping_total ?? 0;
   const cartTotal = cart.total ?? 0;
   const total = hasShippingMethod ? cartTotal : cartTotal + estimatedShipping;
+
+  console.log('💰 CheckoutOrderSummaryTotals Debug:', {
+    itemSubtotal: cart.item_subtotal,
+    total: cart.total,
+    shippingTotal: cart.shipping_total,
+    taxTotal: cart.tax_total,
+    discountTotal: cart.discount_total,
+    estimatedShipping,
+    hasShippingMethod,
+    finalTotal: total
+  });
 
   return (
     <div className="border-t border-gray-200 px-4 py-6 sm:px-6">
