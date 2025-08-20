@@ -23,7 +23,9 @@
   },
   "resolutions": {
     "@medusajs/js-sdk": "2.7.0",
-    "@medusajs/types": "2.7.0"
+    "@medusajs/types": "2.7.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
   },
   "packageManager": "yarn@4.5.0",
   "workspaces": [
@@ -34,10 +36,9 @@
     "@hookform/resolvers": "^5.1.0",
     "@medusajs/icons": "^2.8.4",
     "@medusajs/ui": "^4.0.14",
-    "@remix-run/react": "^2.16.8",
     "@tanstack/react-query": "^5.80.6",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "react-hook-form": "^7.57.0",
     "remix-hook-form": "^7.0.1",
     "zod": "^3.25.56"
