@@ -20,5 +20,7 @@ export default defineConfig({
     ],
   },
   plugins: [reactRouter(), tsconfigPaths({ root: './' }), vanillaExtractPlugin()],
-  build: {},
+  build: {
+    outDir: 'build',
+  },
 });
