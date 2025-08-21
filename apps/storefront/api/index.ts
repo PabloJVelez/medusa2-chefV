@@ -1,18 +1,13 @@
-// Serverless entry for Vercel (Node runtime)
-
-// RRv7 exports the handler creator from *react-router*
-import { createRequestHandler, type ServerBuild } from "react-router";
-
-// Do NOT import the virtual module here. Vercel’s function bundler
-// doesn’t know about Vite’s virtual modules.
-// Import the *built* server bundle instead:
+// Vercel Node runtime entry for React Router v7
+import { createRequire } from "module";
 import * as build from "../build/server/index.js";
 
-// If your editor complains about types (mixing Remix types, etc),
-// cast to ServerBuild – Vercel doesn’t type-check on deploy anyway.
-const rrBuild = build as unknown as ServerBuild;
+// Ensure we use the Node runtime (not Edge)
+export const config = { runtime: "nodejs" };
 
-export const config = { runtime: "nodejs" }; // force Node runtime
+// @react-router/node is published as CommonJS; require() avoids ESM interop issues
+const require = createRequire(import.meta.url);
+const { createRequestHandler } = require("@react-router/node");
 
-// Web-standard fetch handler for Vercel Node 20/22
-export default createRequestHandler(rrBuild);
+// Returns a Node-style (req, res) handler, which Vercel expects
+export default createRequestHandler(build, process.env.NODE_ENV);

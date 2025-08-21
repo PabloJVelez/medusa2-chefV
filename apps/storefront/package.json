@@ -89,7 +89,7 @@
     "@mjackson/file-storage": "^0.6.1",
     "@mjackson/form-data-parser": "^0.7.0",
     "@radix-ui/react-slot": "^1.0.2",
-    "@react-router/node": "^7.5.3",
+    "@react-router/node": "^7.8.1",
     "@react-router/serve": "^7.5.3",
     "@remix-run/node": "^2.16.5",
     "@remix-run/react": "^2.16.5",
