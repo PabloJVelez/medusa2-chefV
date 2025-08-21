@@ -22,18 +22,19 @@ FROM install AS build
 COPY --from=prune /app/out/full/ .
 WORKDIR /app/apps/medusa
 
-# Helpful logs + robust CLI fallback
+# Helpful logs + robust CLI fallback + assert output exists
 RUN set -euxo pipefail \
   && node -v && yarn -v \
   && (node -e "require.resolve('@medusajs/cli/package.json')" \
       && echo 'Medusa CLI found in deps' \
       || echo 'Medusa CLI not found; will use npx fallback') \
   && (yarn build:standalone \
-      || (echo 'yarn build:standalone failed; trying npx @medusajs/cli build' \
+      || (echo 'yarn build:standalone failed; using npx @medusajs/cli build' \
           && npx --yes @medusajs/cli@latest build \
           && cd .medusa/server \
-          && yarn install --immutable))
-
+          && npm ci --omit=dev)) \
+  && test -f .medusa/server/package.json \
+  && ls -la .medusa && ls -la .medusa/server
 # ---- runtime ----
 FROM node:22-alpine AS runner
 RUN apk add --no-cache libc6-compat bash && corepack enable
