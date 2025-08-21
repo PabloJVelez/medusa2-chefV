@@ -34,7 +34,7 @@
     "test:integration:modules": "TEST_TYPE=integration:modules NODE_OPTIONS=--experimental-vm-modules jest --silent --runInBand --forceExit",
     "test:unit": "TEST_TYPE=unit NODE_OPTIONS=--experimental-vm-modules jest --silent --runInBand --forceExit",
     "medusa:init": "yarn run nukedb && medusa db:create --db medusa2 && yarn run migrate && yarn run sync && yarn run seed && yarn run add-user",
-    "medusa:init:prod": "npm run nukedb && medusa db:create --db medusa2 && npm run migrate:prod && npm run sync && yarn run seed:menus && yarn run add-user:prod",
+    "medusa:init:prod": "medusa db:create --db medusa2 && npm run migrate:prod && npm run sync && yarn run seed:menus && yarn run add-user:prod",
     "create:medusadb": "medusa db:create --db medusa2",
     "add-user": "medusa user --email admin@medusa-test.com --password supersecret && medusa user --email admin@lambdacurry.dev --password password",
     "typecheck": "tsc --noEmit"
