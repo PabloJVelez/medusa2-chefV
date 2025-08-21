@@ -113,7 +113,7 @@ module.exports = defineConfig({
   ],
   admin: {
     // ADD ADMIN DISABLE CONFIGURATION
-    disable: process.env.DISABLE_MEDUSA_ADMIN === "true",
+    disable: false,
     backendUrl: process.env.ADMIN_BACKEND_URL,
     vite: () => {
       return {
