@@ -8,6 +8,9 @@ FROM base AS builder
 
 COPY . .
 
+# Ensure package.json has the correct packageManager field
+RUN node -e "const pkg = require('./package.json'); if (!pkg.packageManager) { pkg.packageManager = 'yarn@4.5.0'; require('fs').writeFileSync('./package.json', JSON.stringify(pkg, null, 2)); }"
+
 RUN npx --yes turbo@2.1.2 prune --scope=medusa --docker
 
 FROM base AS installer
