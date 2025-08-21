@@ -2,10 +2,10 @@
 nixPkgs = ["yarn"]
 
 [phases.install]
-cmds = ["yarn install --frozen-lockfile"]
+cmds = ["yarn install"]
 
 [phases.build]
-cmds = ["yarn build:prod"]
+cmds = ["yarn build"]
 
 [start]
-cmd = "yarn migrate:prod && yarn start:prod" 
+cmd = "yarn start:prod" 
