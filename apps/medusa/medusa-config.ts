@@ -2,23 +2,9 @@ import { defineConfig, loadEnv } from '@medusajs/framework/utils';
 
 loadEnv(process.env.NODE_ENV || 'development', process.cwd());
 
-// Add debug logging
-console.log('🔧 Loading Medusa configuration...');
-console.log('🔧 Environment variables:', {
-  NODE_ENV: process.env.NODE_ENV,
-  DATABASE_URL: process.env.DATABASE_URL ? 'SET' : 'NOT SET',
-  REDIS_URL: process.env.REDIS_URL ? 'SET' : 'NOT SET',
-  JWT_SECRET: process.env.JWT_SECRET ? 'SET' : 'NOT SET',
-  COOKIE_SECRET: process.env.COOKIE_SECRET ? 'SET' : 'NOT SET',
-});
-
 const REDIS_URL = process.env.REDIS_URL;
 const STRIPE_API_KEY = process.env.STRIPE_API_KEY;
 const IS_TEST = process.env.NODE_ENV === 'test';
-
-console.log('🔧 Redis URL:', REDIS_URL ? 'SET' : 'NOT SET');
-console.log('🔧 Stripe API Key:', STRIPE_API_KEY ? 'SET' : 'NOT SET');
-console.log('🔧 Is Test:', IS_TEST);
 
 const customModules = [
   {
@@ -30,8 +16,6 @@ const customModules = [
     options: {},
   },
 ]
-
-console.log('🔧 Custom modules:', customModules.map(m => m.resolve));
 
 // Temporarily use in-memory modules to avoid Redis authentication issues
 const cacheModule = IS_TEST
@@ -63,10 +47,6 @@ const workflowEngineModule = IS_TEST
       },
     };
 
-console.log('🔧 Cache module:', cacheModule.resolve);
-console.log('🔧 Event bus module:', eventBusModule.resolve);
-console.log('🔧 Workflow engine module:', workflowEngineModule.resolve);
-
 const notificationModule = {
       resolve: "@medusajs/medusa/notification",
       options: {
@@ -83,8 +63,6 @@ const notificationModule = {
         ],
       },
     };
-
-console.log('🔧 Creating project configuration...');
 
 module.exports = defineConfig({
   projectConfig: {
@@ -146,8 +124,6 @@ module.exports = defineConfig({
     },
   },
 });
-
-console.log('🔧 Medusa configuration loaded successfully!');
 
 
 
