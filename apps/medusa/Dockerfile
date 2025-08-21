@@ -21,8 +21,18 @@ RUN yarn install --immutable
 FROM install AS build
 COPY --from=prune /app/out/full/ .
 WORKDIR /app/apps/medusa
-# uses your script: medusa build -> .medusa/server -> npm install
-RUN yarn build:standalone
+
+# Helpful logs + robust CLI fallback
+RUN set -euxo pipefail \
+  && node -v && yarn -v \
+  && (node -e "require.resolve('@medusajs/cli/package.json')" \
+      && echo 'Medusa CLI found in deps' \
+      || echo 'Medusa CLI not found; will use npx fallback') \
+  && (yarn build:standalone \
+      || (echo 'yarn build:standalone failed; trying npx @medusajs/cli build' \
+          && npx --yes @medusajs/cli@latest build \
+          && cd .medusa/server \
+          && yarn install --immutable))
 
 # ---- runtime ----
 FROM node:22-alpine AS runner
