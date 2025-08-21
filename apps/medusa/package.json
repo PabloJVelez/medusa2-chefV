@@ -17,7 +17,6 @@
     "build": "medusa build",
     "build:prod": "medusa build && mkdir -p build && cp -r .medusa/client/* build/",
     "build:standalone": "medusa build && cd .medusa/server && npm install",
-    "postinstall": "yarn install --frozen-lockfile",
     "seed": "medusa exec ./src/scripts/seed.ts",
     "seed:menus": "medusa exec ./src/scripts/seed/menus.ts",
     "start": "medusa start",
