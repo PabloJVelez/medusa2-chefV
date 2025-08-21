@@ -31,6 +31,8 @@ const customModules = [
   },
 ]
 
+console.log('🔧 Custom modules:', customModules.map(m => m.resolve));
+
 // Temporarily use in-memory modules to avoid Redis authentication issues
 const cacheModule = IS_TEST
   ? { resolve: '@medusajs/medusa/cache-inmemory' }
