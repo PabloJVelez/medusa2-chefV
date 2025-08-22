@@ -10,18 +10,17 @@ services:
     buildCommand: |
       yarn install --immutable
       yarn build
-      # prepare the generated server so start is instant
+      # prepare the generated server
       cd .medusa/server
-      # Option A: npm (recommended to avoid Yarn workspaces checks)
-      npm ci --omit=dev || npm install --omit=dev
-      # If you prefer Yarn instead of npm, use:
-      # touch yarn.lock && yarn install --immutable
+      if [ -f package-lock.json ]; then
+        npm ci --omit=dev --legacy-peer-deps
+      else
+        npm install --omit=dev --legacy-peer-deps
+      fi
     startCommand: |
       echo "Starting Medusa in $(pwd) (PORT=$PORT)"
       cd .medusa/server
       HOST=0.0.0.0 PORT=${PORT:-10000} npm run predeploy && npm start
-      # If you used Yarn in build, you can do:
-      # HOST=0.0.0.0 PORT=${PORT:-10000} yarn predeploy && yarn start
     healthCheckPath: /health
     envVars:
       - key: HOST
