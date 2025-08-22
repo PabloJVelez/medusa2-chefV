@@ -5,6 +5,11 @@
   "author": "Medusa (https://medusajs.com)",
   "license": "MIT",
   "private": true,
+  "packageManager": "yarn@4.5.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "keywords": [
     "sqlite",
     "postgres",
