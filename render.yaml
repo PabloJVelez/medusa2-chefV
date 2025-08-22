@@ -8,12 +8,14 @@ services:
     rootDir: apps/medusa
 
     buildCommand: |
-      # Install workspace dependencies and build once
+      # Install once at the workspace root and build the Medusa app
       yarn install --immutable
       yarn build
+      # ⛔️ Do NOT install inside .medusa/server
 
     startCommand: |
       echo "Starting Medusa in $(pwd) (PORT=$PORT)"
+      # Ensure all common envs point to Render's PORT and bind to all interfaces
       export NODE_ENV=production
       export MEDUSA_WORKER_MODE=server
       export HOST=0.0.0.0
@@ -21,8 +23,8 @@ services:
       export SERVER_PORT="$PORT"
       export HTTP_PORT="$PORT"
       export MEDUSA_SERVER_PORT="$PORT"
-      # Run migrations (idempotent) and then launch server
-      yarn predeploy && node .medusa/server/dist/main.js
+      # Run migrations (idempotent) and start, executing scripts located in .medusa/server
+      yarn --cwd .medusa/server predeploy && yarn --cwd .medusa/server start
 
     healthCheckPath: /health
 
@@ -30,7 +32,7 @@ services:
       - key: HOST
         value: 0.0.0.0
 
-      # CORS + URLs
+      # CORS + URLs (replace placeholders with your domains)
       - key: STORE_CORS
         value: https://<your-storefront-domain>
       - key: ADMIN_CORS
@@ -59,7 +61,7 @@ services:
           name: medusa-redis
           property: connectionString
 
-      # Integrations
+      # Integrations (fill in as needed)
       - key: STRIPE_API_KEY
         sync: false
       - key: RESEND_API_KEY
@@ -83,7 +85,10 @@ services:
       yarn install --immutable
       yarn build
 
-    startCommand: yarn start
+    startCommand: |
+      echo "Starting Storefront (PORT=$PORT)"
+      HOST=0.0.0.0 yarn start
+
     healthCheckPath: /
 
     envVars:
@@ -106,7 +111,7 @@ services:
   - type: redis
     name: medusa-redis
     plan: free
-    ipAllowList: []   # keep private (internal-only)
+    ipAllowList: []   # internal-only
 
 # --- Database ---
 databases:
