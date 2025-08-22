@@ -11,7 +11,8 @@ services:
       yarn install --immutable
       yarn build
     startCommand: |
-      cd apps/medusa/.medusa/server && yarn install && yarn predeploy && yarn start
+      echo "Starting Medusa in $(pwd) (PORT=$PORT)"
+      cd apps/medusa/.medusa/server && yarn install --immutable && yarn predeploy && HOST=0.0.0.0 yarn start
     healthCheckPath: /health
     envVars:
       - key: HOST
