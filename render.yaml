@@ -1,6 +1,4 @@
-# render.yaml
 services:
-  # --- Medusa API ---
   - type: web
     name: medusa-api
     runtime: node
@@ -10,57 +8,24 @@ services:
     buildCommand: |
       yarn install --immutable
       yarn build
+    # IMPORTANT: don't set a fixed PORT; Render injects PORT
     startCommand: |
-      cd apps/medusa/.medusa/server && yarn install && yarn predeploy && yarn start
+      echo "Starting Medusa on PORT=$PORT..."
+      cd apps/medusa/.medusa/server && yarn install && yarn predeploy && HOST=0.0.0.0 yarn start
     healthCheckPath: /health
     envVars:
-      - key: PORT
-        value: 10000
       - key: HOST
         value: 0.0.0.0
-
-      # CORS + URLs
-      - key: STORE_CORS
-        value: https://<your-storefront-domain>
-      - key: ADMIN_CORS
-        value: https://<your-medusa-domain>
-      - key: AUTH_CORS
-        value: https://<your-storefront-domain>,https://<your-medusa-domain>
-      - key: MEDUSA_BACKEND_URL
-        value: https://<your-medusa-domain>
-      - key: ADMIN_BACKEND_URL
-        value: https://<your-medusa-domain>
-
-      # Secrets
-      - key: JWT_SECRET
-        generateValue: true
-      - key: COOKIE_SECRET
-        generateValue: true
-
-      # Datastores
-      - key: DATABASE_URL
-        fromDatabase:
-          name: medusa-db
-          property: connectionString
+      ...
       - key: REDIS_URL
         fromService:
           type: redis
           name: medusa-redis
           property: connectionString
-
-      # Integrations
-      - key: STRIPE_API_KEY
-        sync: false
-      - key: RESEND_API_KEY
-        sync: false
-      - key: RESEND_FROM_EMAIL
-        sync: false
-
     buildFilter:
       paths:
         - apps/medusa/**
 
-  # --- Storefront (Remix) ---
   - type: web
     name: storefront
     runtime: node
@@ -70,30 +35,27 @@ services:
     buildCommand: |
       yarn install --immutable
       yarn build
-    startCommand: yarn start
+    # Let Render's PORT flow through to the server process
+    startCommand: |
+      echo "Starting Storefront on PORT=$PORT..."
+      HOST=0.0.0.0 yarn start
     healthCheckPath: /
     envVars:
+      # don't set a PORT here either
       - key: NODE_ENV
         value: production
       - key: MEDUSA_BACKEND_URL
         value: https://<your-medusa-domain>
-      - key: MEDUSA_PUBLISHABLE_KEY
-        sync: false
-      - key: STRIPE_PUBLIC_KEY
-        sync: false
-      - key: STRIPE_SECRET_KEY
-        sync: false
+      ...
     buildFilter:
       paths:
         - apps/storefront/**
 
-  # --- Redis for Medusa ---
   - type: redis
     name: medusa-redis
     plan: free
-    ipAllowList: []   # keep private (internal-only)
+    ipAllowList: []
 
-# Databases
 databases:
   - name: medusa-db
     plan: free
