@@ -1,4 +1,3 @@
-# render.yaml
 services:
   # --- Medusa API ---
   - type: web
@@ -7,28 +6,26 @@ services:
     plan: free
     branch: main
     rootDir: apps/medusa
+
     buildCommand: |
-      # 1) Install monorepo deps & build your Medusa app
+      # Install workspace dependencies and build once
       yarn install --immutable
       yarn build
-      # 2) Prepare the generated server as its own Yarn project
-      cd .medusa/server
+
+    startCommand: |
+      echo "Starting Medusa in $(pwd) (PORT=$PORT)"
+      export NODE_ENV=production
       export MEDUSA_WORKER_MODE=server
       export HOST=0.0.0.0
       export PORT="${PORT:-10000}"
       export SERVER_PORT="$PORT"
       export HTTP_PORT="$PORT"
       export MEDUSA_SERVER_PORT="$PORT"
-      touch yarn.lock
-      YARN_ENABLE_IMMUTABLE_INSTALLS=0 yarn install
+      # Run migrations (idempotent) and then launch server
+      yarn predeploy && node .medusa/server/dist/main.js
 
-     
-
-    startCommand: |
-      echo "Starting Medusa in $(pwd) (PORT=$PORT)"
-      cd .medusa/server
-      HOST=0.0.0.0 PORT=${PORT:-10000} yarn predeploy && yarn start
     healthCheckPath: /health
+
     envVars:
       - key: HOST
         value: 0.0.0.0
@@ -81,11 +78,14 @@ services:
     plan: free
     branch: main
     rootDir: apps/storefront
+
     buildCommand: |
       yarn install --immutable
       yarn build
+
     startCommand: yarn start
     healthCheckPath: /
+
     envVars:
       - key: NODE_ENV
         value: production
@@ -97,6 +97,7 @@ services:
         sync: false
       - key: STRIPE_SECRET_KEY
         sync: false
+
     buildFilter:
       paths:
         - apps/storefront/**
@@ -107,7 +108,7 @@ services:
     plan: free
     ipAllowList: []   # keep private (internal-only)
 
-# Databases
+# --- Database ---
 databases:
   - name: medusa-db
     plan: free
