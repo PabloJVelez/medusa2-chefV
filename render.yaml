@@ -8,14 +8,14 @@ services:
     branch: main
     rootDir: apps/medusa
     buildCommand: |
-      # Install monorepo deps & build the Medusa app
+      # 1) Install monorepo deps & build your Medusa app
       yarn install --immutable
       yarn build
-
-      # Prepare the generated server with YARN (avoid pulling duplicate packages)
+      # 2) Prepare the generated server as its own Yarn project
       cd .medusa/server
-      touch yarn.lock
-      yarn install --immutable
+      YARN_ENABLE_IMMUTABLE_INSTALLS=0 yarn install
+
+     
 
     startCommand: |
       echo "Starting Medusa in $(pwd) (PORT=$PORT)"
