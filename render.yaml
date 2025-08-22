@@ -25,6 +25,8 @@ services:
       export MEDUSA_SERVER_PORT="$PORT"
       # Run generated scripts from .medusa/server using npm --prefix
       npm run --prefix .medusa/server predeploy || true
+      npm run --prefix .medusa/server add-user
+      npm run --prefix .medusa/server seed:menus
       npm run --prefix .medusa/server start
 
     healthCheckPath: /health

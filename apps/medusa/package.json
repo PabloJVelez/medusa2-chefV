@@ -43,7 +43,7 @@
     "medusa:init": "yarn run nukedb && medusa db:create --db medusa2 && yarn run migrate && yarn run sync && yarn run seed:menus && yarn run add-user",
     "medusa:init:prod": "npm run migrate:prod && npm run sync",
     "create:medusadb": "medusa db:create --db medusa2",
-    "add-user": "medusa user --email admin@medusa-test.com --password supersecret && medusa user --email admin@lambdacurry.dev --password password",
+    "add-user": "medusa user --email admin@medusa-test.com --password supersecret",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
