@@ -111,18 +111,11 @@ module.exports = defineConfig({
     workflowEngineModule,
     notificationModule,
   ],
-  admin: {
-    // ADD ADMIN DISABLE CONFIGURATION
-    disable: false,
-    backendUrl: process.env.ADMIN_BACKEND_URL,
-    vite: () => {
-      return {
-        optimizeDeps: {
-          include: ['@lambdacurry/medusa-plugins-sdk'],
-        },
-      };
-    },
-  },
+  // admin: {
+  //   // ADD ADMIN DISABLE CONFIGURATION
+  //   disable: false,
+  //   backendUrl: process.env.ADMIN_BACKEND_URL,
+  // },
 });
 
 
