@@ -15,7 +15,7 @@ services:
 
     startCommand: |
       echo "Starting Medusa in $(pwd) (PORT=$PORT)"
-      # Ensure all common envs point to Render's PORT and bind to all interfaces
+      # Align env & force HTTP server mode
       export NODE_ENV=production
       export MEDUSA_WORKER_MODE=server
       export HOST=0.0.0.0
@@ -23,8 +23,9 @@ services:
       export SERVER_PORT="$PORT"
       export HTTP_PORT="$PORT"
       export MEDUSA_SERVER_PORT="$PORT"
-      # Run migrations (idempotent) and start, executing scripts located in .medusa/server
-      yarn --cwd .medusa/server predeploy && yarn --cwd .medusa/server start
+      # Run generated scripts from .medusa/server using npm --prefix
+      npm run --prefix .medusa/server predeploy || true
+      npm run --prefix .medusa/server start
 
     healthCheckPath: /health
 
@@ -32,7 +33,7 @@ services:
       - key: HOST
         value: 0.0.0.0
 
-      # CORS + URLs (replace placeholders with your domains)
+      # CORS + URLs (replace placeholders)
       - key: STORE_CORS
         value: https://<your-storefront-domain>
       - key: ADMIN_CORS
@@ -61,7 +62,7 @@ services:
           name: medusa-redis
           property: connectionString
 
-      # Integrations (fill in as needed)
+      # Integrations (fill as needed)
       - key: STRIPE_API_KEY
         sync: false
       - key: RESEND_API_KEY
