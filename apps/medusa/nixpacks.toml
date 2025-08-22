@@ -1,23 +1,20 @@
-# nixpacks.toml  (place at repo root)
-
+# Ensure Node & bash are available for all phases
 [phases.setup]
-# make sure bash is available for our commands
-nixPkgs = ["bash"]
-cmds = ["corepack enable"]
+nixPkgs = ["nodejs_22", "bash"]
 
+# Use the vendored Yarn 4 binary instead of corepack
 [phases.install]
-# Yarn 4 (PnP) + immutable install at monorepo root
 cmds = [
-  "yarn --version",
-  "yarn install --immutable"
+  # Resolve the vendored Yarn path once and install
+  "bash -lc 'set -euo pipefail; YARN=$(ls .yarn/releases/yarn-*.cjs | head -n1); node -v; node \"$YARN\" --version; node \"$YARN\" install --immutable'"
 ]
 
-[phases.build]
 # Build ONLY the Medusa app (standalone output to .medusa/server)
+[phases.build]
 cmds = [
-  "bash -lc 'cd apps/medusa && yarn build:standalone'"
+  "bash -lc 'set -euo pipefail; YARN=$(ls .yarn/releases/yarn-*.cjs | head -n1); node \"$YARN\" workspace medusa run build:standalone'"
 ]
 
+# Start: run DB migrations, then launch the compiled server
 [start]
-# Run DB migrations, then start the compiled server
-cmd = "bash -lc 'cd apps/medusa && yarn predeploy && yarn start:standalone'"
+cmd = "bash -lc 'set -euo pipefail; YARN=$(ls .yarn/releases/yarn-*.cjs | head -n1); node \"$YARN\" workspace medusa run predeploy && node \"$YARN\" workspace medusa run start:standalone'"
