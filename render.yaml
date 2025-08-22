@@ -13,6 +13,12 @@ services:
       yarn build
       # 2) Prepare the generated server as its own Yarn project
       cd .medusa/server
+      export MEDUSA_WORKER_MODE=server
+      export HOST=0.0.0.0
+      export PORT="${PORT:-10000}"
+      export SERVER_PORT="$PORT"
+      export HTTP_PORT="$PORT"
+      export MEDUSA_SERVER_PORT="$PORT"
       touch yarn.lock
       YARN_ENABLE_IMMUTABLE_INSTALLS=0 yarn install
 
