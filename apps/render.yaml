@@ -1,0 +1,96 @@
+# render.yaml
+services:
+  # --- Medusa API (server mode) ---
+  - type: web
+    name: medusa-api
+    runtime: node
+    plan: free          # start free; upgrade as needed
+    branch: main
+    rootDir: apps/medusa
+    buildCommand: |
+      yarn install --immutable
+      yarn build
+    startCommand: |
+      cd .medusa/server && yarn install && yarn predeploy && yarn start
+    healthCheckPath: /health
+    envVars:
+      # Service URLs & CORS
+      - key: PORT
+        value: 10000
+      - key: HOST
+        value: 0.0.0.0
+      - key: STORE_CORS
+        value: https://<your-storefront-domain>
+      - key: ADMIN_CORS
+        # Point to medusa-api’s own public URL once known (can be left empty first deploy)
+        value: https://<your-medusa-domain>
+      - key: AUTH_CORS
+        value: https://<your-storefront-domain>,https://<your-medusa-domain>
+      - key: MEDUSA_BACKEND_URL
+        value: https://<your-medusa-domain>
+
+      # Secrets
+      - key: JWT_SECRET
+        generateValue: true
+      - key: COOKIE_SECRET
+        generateValue: true
+
+      # Datastores (auto-wired from resources below)
+      - key: DATABASE_URL
+        fromDatabase:
+          name: medusa-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: keyvalue
+          name: medusa-kv
+          property: connectionString
+
+      # Stripe / email (fill in values in dashboard)
+      - key: STRIPE_API_KEY
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: RESEND_FROM_EMAIL
+        sync: false
+
+    buildFilter:
+      paths:
+        - apps/medusa/**
+
+  # --- Remix Storefront ---
+  - type: web
+    name: storefront
+    runtime: node
+    plan: free
+    branch: main
+    rootDir: apps/storefront
+    buildCommand: |
+      yarn install --immutable
+      yarn build
+    startCommand: yarn start
+    healthCheckPath: /
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MEDUSA_BACKEND_URL
+        value: https://<your-medusa-domain>
+      - key: MEDUSA_PUBLISHABLE_KEY
+        sync: false
+      - key: STRIPE_PUBLIC_KEY
+        sync: false
+      - key: STRIPE_SECRET_KEY
+        sync: false
+    buildFilter:
+      paths:
+        - apps/storefront/**
+
+# --- Datastores ---
+databases:
+  - name: medusa-db
+    plan: free           # free is fine to start; upgrade for persistence/scale
+
+services:
+  - type: keyvalue
+    name: medusa-kv
+    plan: free
