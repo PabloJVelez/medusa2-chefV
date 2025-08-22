@@ -1,0 +1,23 @@
+# nixpacks.toml  (place at repo root)
+
+[phases.setup]
+# make sure bash is available for our commands
+nixPkgs = ["bash"]
+cmds = ["corepack enable"]
+
+[phases.install]
+# Yarn 4 (PnP) + immutable install at monorepo root
+cmds = [
+  "yarn --version",
+  "yarn install --immutable"
+]
+
+[phases.build]
+# Build ONLY the Medusa app (standalone output to .medusa/server)
+cmds = [
+  "bash -lc 'cd apps/medusa && yarn build:standalone'"
+]
+
+[start]
+# Run DB migrations, then start the compiled server
+cmd = "bash -lc 'cd apps/medusa && yarn predeploy && yarn start:standalone'"
