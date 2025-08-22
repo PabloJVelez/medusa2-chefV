@@ -8,19 +8,19 @@ services:
     branch: main
     rootDir: apps/medusa
     buildCommand: |
+      # Install monorepo deps & build the Medusa app
       yarn install --immutable
       yarn build
-      # prepare the generated server
+
+      # Prepare the generated server with YARN (avoid pulling duplicate packages)
       cd .medusa/server
-      if [ -f package-lock.json ]; then
-        npm ci --omit=dev --legacy-peer-deps
-      else
-        npm install --omit=dev --legacy-peer-deps
-      fi
+      touch yarn.lock
+      yarn install --immutable
+
     startCommand: |
       echo "Starting Medusa in $(pwd) (PORT=$PORT)"
       cd .medusa/server
-      HOST=0.0.0.0 PORT=${PORT:-10000} npm run predeploy && npm start
+      HOST=0.0.0.0 PORT=${PORT:-10000} yarn predeploy && yarn start
     healthCheckPath: /health
     envVars:
       - key: HOST
