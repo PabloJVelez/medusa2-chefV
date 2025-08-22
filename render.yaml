@@ -1,10 +1,10 @@
 # render.yaml
 services:
-  # --- Medusa API (server mode) ---
+  # --- Medusa API ---
   - type: web
     name: medusa-api
     runtime: node
-    plan: free          # start free; upgrade as needed
+    plan: free
     branch: main
     rootDir: apps/medusa
     buildCommand: |
@@ -14,7 +14,6 @@ services:
       cd .medusa/server && yarn install && yarn predeploy && yarn start
     healthCheckPath: /health
     envVars:
-      # Service URLs & CORS
       - key: PORT
         value: 10000
       - key: HOST
@@ -22,20 +21,17 @@ services:
       - key: STORE_CORS
         value: https://<your-storefront-domain>
       - key: ADMIN_CORS
-        # Point to medusa-api’s own public URL once known (can be left empty first deploy)
         value: https://<your-medusa-domain>
       - key: AUTH_CORS
         value: https://<your-storefront-domain>,https://<your-medusa-domain>
       - key: MEDUSA_BACKEND_URL
         value: https://<your-medusa-domain>
-
-      # Secrets
+      - key: ADMIN_BACKEND_URL
+        value: https://<your-medusa-domain>
       - key: JWT_SECRET
         generateValue: true
       - key: COOKIE_SECRET
         generateValue: true
-
-      # Datastores (auto-wired from resources below)
       - key: DATABASE_URL
         fromDatabase:
           name: medusa-db
@@ -45,20 +41,17 @@ services:
           type: keyvalue
           name: medusa-kv
           property: connectionString
-
-      # Stripe / email (fill in values in dashboard)
       - key: STRIPE_API_KEY
         sync: false
       - key: RESEND_API_KEY
         sync: false
       - key: RESEND_FROM_EMAIL
         sync: false
-
     buildFilter:
       paths:
         - apps/medusa/**
 
-  # --- Remix Storefront ---
+  # --- Storefront (Remix) ---
   - type: web
     name: storefront
     runtime: node
@@ -85,12 +78,11 @@ services:
       paths:
         - apps/storefront/**
 
-# --- Datastores ---
+# Datastores
 databases:
   - name: medusa-db
-    plan: free           # free is fine to start; upgrade for persistence/scale
+    plan: free
 
-services:
-  - type: keyvalue
-    name: medusa-kv
+keyValues:
+  - name: medusa-kv
     plan: free
