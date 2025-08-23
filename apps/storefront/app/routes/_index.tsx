@@ -13,6 +13,7 @@ export const loader = async (args: LoaderFunctionArgs) => {
   try {
     // Fetch menus for the featured menus section
     const menusData = await fetchMenus({ limit: 3 });
+    console.log("MENUS DATA---->", menusData)
     return { 
       menus: menusData.menus || [],
       success: true 
