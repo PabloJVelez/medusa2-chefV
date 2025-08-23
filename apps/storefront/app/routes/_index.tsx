@@ -6,24 +6,78 @@ import { FeaturedMenus } from '@app/components/chef/FeaturedMenus';
 import { ExperienceTypes } from '@app/components/chef/ExperienceTypes';
 import { ActionList } from '@app/components/common/actions-list/ActionList';
 import { fetchMenus } from '@libs/util/server/data/menus.server';
-import { getMergedPageMeta } from '@libs/util/page';
 import type { LoaderFunctionArgs, MetaFunction } from 'react-router';
-import { useLoaderData, isRouteErrorResponse, useRouteError } from 'react-router';
+import { useLoaderData, useRouteError, isRouteErrorResponse } from 'react-router';
+import * as React from 'react';
 
-export const loader = async (args: LoaderFunctionArgs) => {
+/**
+ * Helper: safe JSON stringify (avoid circular refs)
+ */
+function safeStringify(value: unknown) {
+  try {
+    return JSON.stringify(value, null, 2);
+  } catch {
+    return '[Unserializable]';
+  }
+}
+
+/**
+ * Component-scoped ErrorBoundary for FeaturedMenus
+ * - Logs error + component stack + a snapshot of menus data
+ * - Shows a small fallback so the whole page does not 500
+ */
+class FeaturedMenusBoundary extends React.Component<{ menus: any[]; children: React.ReactNode }, { hasError: boolean }> {
+  constructor(props: any) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  override componentDidCatch(error: unknown, info: React.ErrorInfo) {
+    // Super loud logging on the server
+    console.error('[FeaturedMenusBoundary] Render error:', error);
+    console.error('[FeaturedMenusBoundary] Component stack:', info?.componentStack);
+    try {
+      console.error('[FeaturedMenusBoundary] Menus length:', this.props.menus?.length);
+      console.error('[FeaturedMenusBoundary] First menu snapshot:', safeStringify(this.props.menus?.[0]));
+    } catch {
+      // ignore
+    }
+  }
+
+  override render() {
+    if (this.state.hasError) {
+      return (
+        <div className="rounded-xl border border-red-300 bg-red-50 p-4 text-red-800">
+          <p className="font-semibold">We had trouble rendering the featured menus.</p>
+          <p className="text-sm opacity-80">The rest of the page is still available. Check server logs for details.</p>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+export const loader = async (_args: LoaderFunctionArgs) => {
   try {
     const menusData = await fetchMenus({ limit: 3 });
-    console.log("MENUS DATA---->", menusData);
+    // Extremely explicit logging so we can see the shape that comes back
+    console.log('MENUS DATA (loader) keys:', Object.keys(menusData || {}));
+    console.log('MENUS DATA (loader) count:', menusData?.count, 'limit:', menusData?.limit, 'offset:', menusData?.offset);
+    console.log('MENUS DATA (loader) first item:', safeStringify(menusData?.menus?.[0]));
+
     return {
-      menus: menusData.menus || [],
+      menus: Array.isArray(menusData?.menus) ? menusData.menus : [],
       success: true,
+      // flip this to true if you want to dump data in the UI
+      __debug: process.env.DEBUG_INDEX_ROUTE === 'true',
     };
   } catch (error) {
-    console.error('Failed to load menus for homepage:', error);
-    return {
-      menus: [],
-      success: false,
-    };
+    console.error('Failed to load menus for homepage (loader):', error);
+    return { menus: [], success: false, __debug: process.env.DEBUG_INDEX_ROUTE === 'true' };
   }
 };
 
@@ -50,8 +104,27 @@ export const meta: MetaFunction<typeof loader> = () => {
   ];
 };
 
+/**
+ * Normalize menus to avoid null access crashes inside FeaturedMenus
+ */
+function normalizeMenus(raw: any[] = []) {
+  return raw.map((m) => ({
+    id: m?.id ?? 'unknown',
+    name: m?.name ?? 'Untitled Menu',
+    thumbnail: m?.thumbnail ?? null, // keep shape; UI should handle null
+    images: Array.isArray(m?.images) ? m.images : [],
+    courses: Array.isArray(m?.courses) ? m.courses : [],
+    created_at: m?.created_at ?? null,
+    updated_at: m?.updated_at ?? null,
+  }));
+}
+
 export default function IndexRoute() {
-  const { menus } = useLoaderData<typeof loader>();
+  const data = useLoaderData<typeof loader>();
+  const menus = normalizeMenus(data?.menus);
+
+  // Extra inline breadcrumb logging from the server render
+  console.log('[IndexRoute render] menus length:', menus.length);
 
   return (
     <>
@@ -65,7 +138,17 @@ export default function IndexRoute() {
 
       <ExperienceTypes />
 
-      <FeaturedMenus menus={menus} maxDisplay={3} />
+      {/* Wrap ONLY the risky bit in a very-chatty boundary */}
+      <FeaturedMenusBoundary menus={menus}>
+        <FeaturedMenus menus={menus} maxDisplay={3} />
+      </FeaturedMenusBoundary>
+
+      {/* Optional in-UI debug payload (enable by setting DEBUG_INDEX_ROUTE=true) */}
+      {data?.__debug ? (
+        <pre className="mt-6 rounded-lg bg-gray-100 p-4 text-xs text-gray-800 overflow-auto">
+          {safeStringify({ menusCount: menus.length, firstMenu: menus[0] })}
+        </pre>
+      ) : null}
 
       <Container className="py-16 lg:py-24">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
@@ -186,15 +269,14 @@ export default function IndexRoute() {
 }
 
 /**
- * Route-scoped ErrorBoundary for / (index)
- * - Logs the raw error (message + stack) to server logs
- * - Shows a friendly UI; in dev it also renders the stack
+ * Route-scoped ErrorBoundary (kept here too, catches anything outside the child boundary)
  */
 export function ErrorBoundary() {
   const error = useRouteError();
 
-  // Always log the raw error (works in SSR and browser; Render will capture SSR logs)
-  console.error('[IndexRoute ErrorBoundary]', error);
+  // Our explicit log (not just RR's)
+  
+  console.error('[IndexRoute ErrorBoundary] raw error:', error);
 
   if (isRouteErrorResponse(error)) {
     return (
@@ -203,21 +285,15 @@ export function ErrorBoundary() {
         <p>
           {error.status} {error.statusText}
         </p>
-        {error.data ? (
-          <pre style={{ whiteSpace: 'pre-wrap' }}>{JSON.stringify(error.data, null, 2)}</pre>
-        ) : null}
+        {error.data ? <pre style={{ whiteSpace: 'pre-wrap' }}>{safeStringify(error.data)}</pre> : null}
       </div>
     );
   }
 
-  const dev = process.env.NODE_ENV !== 'production';
   const message =
-    error instanceof Error
-      ? error.message
-      : typeof error === 'string'
-      ? error
-      : 'Unexpected error';
+    error instanceof Error ? error.message : typeof error === 'string' ? error : 'Unexpected error';
   const stack = error instanceof Error ? error.stack : undefined;
+  const dev = process.env.NODE_ENV !== 'production';
 
   return (
     <div style={{ padding: 24 }}>
