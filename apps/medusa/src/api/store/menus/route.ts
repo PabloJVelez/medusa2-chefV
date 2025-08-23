@@ -14,6 +14,7 @@ export async function GET(
   res: MedusaResponse
 ): Promise<void> {
   try {
+    console.log("GETTING MENUS FOR STOREFRONt!!!")
     const query = listStoreMenusSchema.parse(req.query)
     const menuModuleService = req.scope.resolve(MENU_MODULE) as any
     
@@ -31,6 +32,7 @@ export async function GET(
         relations: ["courses", "courses.dishes", "courses.dishes.ingredients", "images"]
       }
     )
+    console.log("MENUS WE GOT BACK---->", menus)
 
     // Set cache headers for 30 minutes as specified in the plan
     res.setHeader('Cache-Control', 'public, max-age=60, s-maxage=300')
