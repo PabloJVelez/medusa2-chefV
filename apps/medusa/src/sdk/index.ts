@@ -40,7 +40,7 @@ export class ExtendedSDK {
 }
 
 // Use a hardcoded URL for now since we're in development
-export const sdk = new ExtendedSDK(process.env.ADMIN_BACKEND_URL!)
+export const sdk = new ExtendedSDK(process.env.MEDUSA_BACKEND_URL!)
 
 export { AdminChefEventsResource } from './admin/admin-chef-events'
 export { AdminMenusResource } from './admin/admin-menus'
