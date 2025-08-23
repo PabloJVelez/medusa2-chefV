@@ -69,6 +69,8 @@ export const fetchMenus = async ({
         ...(bypassCache ? { 'Cache-Control': 'no-cache' } : {}),
       },
     });
+    console.log("RESPONSE WE GOT BACK---->", response)
+    console.log("RESPONSE WE GOT BACK---->", response.json())
 
     if (!response.ok) {
       throw new Error(`Failed to fetch menus: ${response.statusText}`);
