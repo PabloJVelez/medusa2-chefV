@@ -40,7 +40,7 @@ export class ExtendedSDK {
 }
 
 // Use a hardcoded URL for now since we're in development
-export const sdk = new ExtendedSDK('http://localhost:9000')
+export const sdk = new ExtendedSDK(process.env.ADMIN_BACKEND_URL || 'http://localhost:9000')
 
 export { AdminChefEventsResource } from './admin/admin-chef-events'
 export { AdminMenusResource } from './admin/admin-menus'
