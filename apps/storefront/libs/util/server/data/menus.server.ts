@@ -60,6 +60,7 @@ export const fetchMenus = async ({
   if (bypassCache) params.append('_ts', Date.now().toString());
 
   const fetcher = async () => {
+    console.log("FETCHING MENUS WITH BASE URL", baseMedusaConfig.baseUrl)
     const response = await fetch(`${baseMedusaConfig.baseUrl}/store/menus?${params}`, {
       method: 'GET',
       headers: {
