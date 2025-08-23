@@ -1,4 +1,9 @@
-// apps/storefront/app/routes/_index.tsx
+// app/routes/_index.tsx
+import * as React from 'react';
+import type { LoaderFunctionArgs, MetaFunction } from 'react-router';
+import { data } from 'react-router';
+import { useLoaderData } from 'react-router';
+
 import { Container } from '@app/components/common/container';
 import { Image } from '@app/components/common/images/Image';
 import { ChefHero } from '@app/components/chef/ChefHero';
@@ -6,78 +11,50 @@ import { FeaturedMenus } from '@app/components/chef/FeaturedMenus';
 import { ExperienceTypes } from '@app/components/chef/ExperienceTypes';
 import { ActionList } from '@app/components/common/actions-list/ActionList';
 import { fetchMenus } from '@libs/util/server/data/menus.server';
-import type { LoaderFunctionArgs, MetaFunction } from 'react-router';
-import { useLoaderData, useRouteError, isRouteErrorResponse } from 'react-router';
-import * as React from 'react';
-
-/**
- * Helper: safe JSON stringify (avoid circular refs)
- */
-function safeStringify(value: unknown) {
-  try {
-    return JSON.stringify(value, null, 2);
-  } catch {
-    return '[Unserializable]';
-  }
-}
-
-/**
- * Component-scoped ErrorBoundary for FeaturedMenus
- * - Logs error + component stack + a snapshot of menus data
- * - Shows a small fallback so the whole page does not 500
- */
-class FeaturedMenusBoundary extends React.Component<{ menus: any[]; children: React.ReactNode }, { hasError: boolean }> {
-  constructor(props: any) {
-    super(props);
-    this.state = { hasError: false };
-  }
-
-  static getDerivedStateFromError() {
-    return { hasError: true };
-  }
-
-  override componentDidCatch(error: unknown, info: React.ErrorInfo) {
-    // Super loud logging on the server
-    console.error('[FeaturedMenusBoundary] Render error:', error);
-    console.error('[FeaturedMenusBoundary] Component stack:', info?.componentStack);
-    try {
-      console.error('[FeaturedMenusBoundary] Menus length:', this.props.menus?.length);
-      console.error('[FeaturedMenusBoundary] First menu snapshot:', safeStringify(this.props.menus?.[0]));
-    } catch {
-      // ignore
-    }
-  }
-
-  override render() {
-    if (this.state.hasError) {
-      return (
-        <div className="rounded-xl border border-red-300 bg-red-50 p-4 text-red-800">
-          <p className="font-semibold">We had trouble rendering the featured menus.</p>
-          <p className="text-sm opacity-80">The rest of the page is still available. Check server logs for details.</p>
-        </div>
-      );
-    }
-    return this.props.children;
-  }
-}
+import { getMergedPageMeta } from '@libs/util/page';
 
 export const loader = async (_args: LoaderFunctionArgs) => {
   try {
     const menusData = await fetchMenus({ limit: 3 });
-    // Extremely explicit logging so we can see the shape that comes back
-    console.log('MENUS DATA (loader) keys:', Object.keys(menusData || {}));
-    console.log('MENUS DATA (loader) count:', menusData?.count, 'limit:', menusData?.limit, 'offset:', menusData?.offset);
-    console.log('MENUS DATA (loader) first item:', safeStringify(menusData?.menus?.[0]));
 
-    return {
-      menus: Array.isArray(menusData?.menus) ? menusData.menus : [],
-      success: true,
-      // flip this to true if you want to dump data in the UI
-      __debug: process.env.DEBUG_INDEX_ROUTE === 'true',
-    };
-  } catch (error) {
-    console.error('Failed to load menus for homepage (loader):', error);
-    return { menus: [], success: false, __debug: process.env.DEBUG_INDEX_ROUTE === 'true' };
+    // Trim to a safe, serializable snapshot to avoid circular/BigInt/etc.
+    const menus = (menusData?.menus ?? []).map((m: any) => ({
+      id: String(m.id),
+      name: String(m.name),
+      thumbnail: m.thumbnail ?? null,
+      created_at: m.created_at ? new Date(m.created_at).toISOString() : null,
+      updated_at: m.updated_at ? new Date(m.updated_at).toISOString() : null,
+      // Keep only what FeaturedMenus actually needs; avoid giant nested trees
+      courses: Array.isArray(m.courses)
+        ? m.courses.slice(0, 1).map((c: any) => ({
+            id: String(c.id),
+            name: String(c.name),
+          }))
+        : [],
+      images: Array.isArray(m.images) ? m.images : [],
+    }));
+
+    // Lightweight server log (shows up in server console)
+    console.log('MENUS DATA (loader) – count:', menus.length);
+
+    return data(
+      { menus },
+      {
+        headers: {
+          // cheap way to confirm what the route delivered (visible in browser devtools)
+          'X-Index-Debug': `menus=${menus.length}`,
+        },
+      }
+    );
+  } catch (error: any) {
+    // Log full server-side error details
+    console.error('Index loader failed:', {
+      message: error?.message,
+      stack: error?.stack,
+      cause: error?.cause,
+    });
+    // Never throw raw here—return a safe payload
+    return data({ menus: [] as any[] }, { status: 200 });
   }
 };
 
@@ -104,27 +81,12 @@ export const meta: MetaFunction<typeof loader> = () => {
   ];
 };
 
-/**
- * Normalize menus to avoid null access crashes inside FeaturedMenus
- */
-function normalizeMenus(raw: any[] = []) {
-  return raw.map((m) => ({
-    id: m?.id ?? 'unknown',
-    name: m?.name ?? 'Untitled Menu',
-    thumbnail: m?.thumbnail ?? null, // keep shape; UI should handle null
-    images: Array.isArray(m?.images) ? m.images : [],
-    courses: Array.isArray(m?.courses) ? m.courses : [],
-    created_at: m?.created_at ?? null,
-    updated_at: m?.updated_at ?? null,
-  }));
+function FeaturedMenusSection({ menus }: { menus: any[] }) {
+  return <FeaturedMenus menus={menus} maxDisplay={3} />;
 }
 
 export default function IndexRoute() {
-  const data = useLoaderData<typeof loader>();
-  const menus = normalizeMenus(data?.menus);
-
-  // Extra inline breadcrumb logging from the server render
-  console.log('[IndexRoute render] menus length:', menus.length);
+  const { menus } = useLoaderData<typeof loader>();
 
   return (
     <>
@@ -138,17 +100,7 @@ export default function IndexRoute() {
 
       <ExperienceTypes />
 
-      {/* Wrap ONLY the risky bit in a very-chatty boundary */}
-      <FeaturedMenusBoundary menus={menus}>
-        <FeaturedMenus menus={menus} maxDisplay={3} />
-      </FeaturedMenusBoundary>
-
-      {/* Optional in-UI debug payload (enable by setting DEBUG_INDEX_ROUTE=true) */}
-      {data?.__debug ? (
-        <pre className="mt-6 rounded-lg bg-gray-100 p-4 text-xs text-gray-800 overflow-auto">
-          {safeStringify({ menusCount: menus.length, firstMenu: menus[0] })}
-        </pre>
-      ) : null}
+      <FeaturedMenusSection menus={menus} />
 
       <Container className="py-16 lg:py-24">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
@@ -161,12 +113,14 @@ export default function IndexRoute() {
               height={500}
               width={600}
             />
-            <div className="absolute -bottom-6 -right-6 w-24 h-24 bg-accent-500 rounded-full opacity-20" />
+            <div className="absolute -bottom-6 -right-6 w-24 h-24 bg-accent-500 rounded-full opacity-20"></div>
           </div>
 
           <div className="order-1 lg:order-2 text-center lg:text-left space-y-6">
             <div className="space-y-4">
-              <h2 className="text-5xl md:text-6xl lg:text-7xl font-italiana text-primary-900">Meet Chef Luis</h2>
+              <h2 className="text-5xl md:text-6xl lg:text-7xl font-italiana text-primary-900">
+                Meet Chef Luis
+              </h2>
               <p className="text-2xl md:text-3xl lg:text-4xl font-italiana text-accent-600">Culinary Artistry</p>
             </div>
 
@@ -199,7 +153,7 @@ export default function IndexRoute() {
       <Container className="p-14 pt-0">
         <div className="text-center mb-12">
           <h3 className="text-4xl font-italiana text-gray-900 mb-4">What Our Guests Say</h3>
-          <div className="w-20 mx-auto border-t-2 border-blue-500" />
+          <div className="w-20 mx-auto border-t-2 border-blue-500"></div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -268,43 +222,26 @@ export default function IndexRoute() {
   );
 }
 
-/**
- * Route-scoped ErrorBoundary (kept here too, catches anything outside the child boundary)
- */
-export function ErrorBoundary() {
-  const error = useRouteError();
-
-  // Our explicit log (not just RR's)
-  
-  console.error('[IndexRoute ErrorBoundary] raw error:', error);
-
-  if (isRouteErrorResponse(error)) {
-    return (
-      <div style={{ padding: 24 }}>
-        <h1>Oops</h1>
-        <p>
-          {error.status} {error.statusText}
-        </p>
-        {error.data ? <pre style={{ whiteSpace: 'pre-wrap' }}>{safeStringify(error.data)}</pre> : null}
-      </div>
-    );
-  }
-
-  const message =
-    error instanceof Error ? error.message : typeof error === 'string' ? error : 'Unexpected error';
-  const stack = error instanceof Error ? error.stack : undefined;
-  const dev = process.env.NODE_ENV !== 'production';
+// Route-scoped ErrorBoundary so the real stack hits your server logs.
+export function ErrorBoundary({ error }: { error: unknown }) {
+  const e = error as any;
+  console.error('IndexRoute ErrorBoundary:', {
+    name: e?.name,
+    message: e?.message,
+    stack: e?.stack,
+    cause: e?.cause,
+  });
 
   return (
-    <div style={{ padding: 24 }}>
-      <h1>Unexpected Error</h1>
-      <p>Something went wrong while rendering this page.</p>
-      {dev && (
-        <pre style={{ whiteSpace: 'pre-wrap' }}>
-          {message}
-          {stack ? `\n\n${stack}` : ''}
-        </pre>
-      )}
-    </div>
+    <Container className="py-16">
+      <div className="rounded-xl border p-6 bg-red-50">
+        <h2 className="text-xl font-semibold mb-2">Something went wrong.</h2>
+        <p className="text-sm text-red-700">
+          {process.env.NODE_ENV === 'development'
+            ? e?.message ?? 'Unknown error'
+            : 'Please try again in a bit.'}
+        </p>
+      </div>
+    </Container>
   );
 }
