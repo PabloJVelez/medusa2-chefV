@@ -20,6 +20,7 @@
   ],
   "scripts": {
     "nukedb": "docker compose down -v && docker compose up -d",
+    "prepare": "medusa db:create --db medusa2 && medusa db:migrate && medusa db:sync-links",
     "build": "medusa build",
     "build:prod": "medusa build && mkdir -p build && cp -r .medusa/client/* build/",
     "build:standalone": "medusa build && cd .medusa/server && npm install",
