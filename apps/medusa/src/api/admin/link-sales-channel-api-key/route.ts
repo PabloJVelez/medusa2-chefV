@@ -55,3 +55,5 @@ export async function POST(
     })
   }
 } 
+
+export const AUTHENTICATE = false
