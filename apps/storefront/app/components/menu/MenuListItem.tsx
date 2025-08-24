@@ -2,6 +2,7 @@ import { Image } from '@app/components/common/images/Image';
 import type { StoreMenuDTO } from '@libs/util/server/data/menus.server';
 import clsx from 'clsx';
 import type { FC } from 'react';
+import { Link } from 'react-router';
 
 export interface MenuListItemProps {
   menu: StoreMenuDTO;
@@ -17,19 +18,20 @@ export const MenuListItem: FC<MenuListItemProps> = ({
   const courseCount = menu.courses?.length || 0;
   const estimatedTime = "3-4 hours"; // Default estimate since not in data model yet
   
-  // Generate a description from the first few dishes
+  // Generate a description from the first few dishes with defensive programming
   const description = menu.courses
-    .slice(0, 2)
+    ?.slice(0, 2)
     .map(course => 
-      course.dishes.slice(0, 2).map(dish => dish.name).join(', ')
+      course.dishes?.slice(0, 2).map(dish => dish.name).join(', ') || course.name
     )
     .join(' • ') || 'A carefully crafted menu experience';
 
   return (
-    <div 
+    <Link 
+      to={`/menus/${menu.id}`}
       className={clsx(
         // Make card a flex column so heights align and footer sticks to bottom
-        "group relative bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 h-full flex flex-col",
+        "group relative bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 h-full flex flex-col block",
         {
           'scale-105': isTransitioning,
         },
@@ -80,6 +82,6 @@ export const MenuListItem: FC<MenuListItemProps> = ({
 
       {/* Hover overlay */}
       <div className="absolute inset-0 bg-blue-600 bg-opacity-0 group-hover:bg-opacity-5 transition-all duration-300 rounded-2xl" />
-    </div>
+    </Link>
   );
 }; 

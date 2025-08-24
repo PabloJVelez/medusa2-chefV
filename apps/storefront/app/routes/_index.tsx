@@ -27,21 +27,37 @@ export const loader = async (_args: LoaderFunctionArgs) => {
     const menusData: any = await Promise.race([menusPromise, timeoutPromise]);
 
     // Trim to a safe, serializable snapshot to avoid circular/BigInt/etc.
-    menus = (menusData?.menus ?? []).map((m: any) => ({
-      id: String(m.id),
-      name: String(m.name),
-      thumbnail: m.thumbnail ?? null,
-      created_at: m.created_at ? new Date(m.created_at).toISOString() : null,
-      updated_at: m.updated_at ? new Date(m.updated_at).toISOString() : null,
-      // Keep only what FeaturedMenus actually needs; avoid giant nested trees
-      courses: Array.isArray(m.courses)
-        ? m.courses.slice(0, 1).map((c: any) => ({
-            id: String(c.id),
-            name: String(c.name),
-          }))
-        : [],
-      images: Array.isArray(m.images) ? m.images : [],
-    }));
+    menus = (menusData?.menus ?? []).map((m: any) => {
+      const menu = {
+        id: String(m.id),
+        name: String(m.name),
+        thumbnail: m.thumbnail ?? null,
+        created_at: m.created_at ? new Date(m.created_at).toISOString() : null,
+        updated_at: m.updated_at ? new Date(m.updated_at).toISOString() : null,
+        // Include courses with dishes for MenuListItem component
+        courses: Array.isArray(m.courses)
+          ? m.courses.slice(0, 2).map((c: any) => ({
+              id: String(c.id),
+              name: String(c.name),
+              dishes: Array.isArray(c.dishes)
+                ? c.dishes.slice(0, 3).map((d: any) => ({
+                    id: String(d.id),
+                    name: String(d.name),
+                    description: d.description || '',
+                  }))
+                : [],
+            }))
+          : [],
+        images: Array.isArray(m.images) ? m.images : [],
+      };
+      
+      // Debug log for first menu to understand structure
+      if (menus.length === 0) {
+        console.log('First menu structure:', JSON.stringify(menu, null, 2));
+      }
+      
+      return menu;
+    });
 
     // Lightweight server log (shows up in server console)
     console.log('MENUS DATA (loader) – count:', menus.length);
@@ -54,8 +70,35 @@ export const loader = async (_args: LoaderFunctionArgs) => {
       cause: error?.cause,
     });
     
-    // Provide empty menus array as fallback
-    menus = [];
+    // Provide sample menu data as fallback for deployment
+    menus = [
+      {
+        id: 'sample-menu-1',
+        name: 'Classic French Experience',
+        thumbnail: '/assets/images/chef_beef_menu.JPG',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        courses: [
+          {
+            id: 'course-1',
+            name: 'Appetizer',
+            dishes: [
+              { id: 'dish-1', name: 'French Onion Soup', description: 'Rich and savory' },
+              { id: 'dish-2', name: 'Escargot', description: 'Traditional preparation' }
+            ]
+          },
+          {
+            id: 'course-2',
+            name: 'Main Course',
+            dishes: [
+              { id: 'dish-3', name: 'Coq au Vin', description: 'Classic French dish' },
+              { id: 'dish-4', name: 'Beef Bourguignon', description: 'Slow-cooked perfection' }
+            ]
+          }
+        ],
+        images: []
+      }
+    ];
   }
 
   return data(

@@ -8,10 +8,18 @@ interface FeaturedMenusProps {
 }
 
 export const FeaturedMenus: FC<FeaturedMenusProps> = ({ menus, maxDisplay = 3 }) => {
-  const displayMenus = menus.slice(0, maxDisplay);
+  // Validate and filter menus to ensure they have required properties
+  const validMenus = menus?.filter(menu => 
+    menu && 
+    menu.id && 
+    menu.name && 
+    Array.isArray(menu.courses)
+  ) || [];
+  
+  const displayMenus = validMenus.slice(0, maxDisplay);
 
-  // If no menus are available, show a fallback message
-  if (!menus || menus.length === 0) {
+  // If no valid menus are available, show a fallback message
+  if (validMenus.length === 0) {
     return (
       <Container className="py-16 lg:py-24">
         <div className="text-center">
@@ -48,7 +56,7 @@ export const FeaturedMenus: FC<FeaturedMenusProps> = ({ menus, maxDisplay = 3 })
         ))}
       </div>
 
-      {menus.length > maxDisplay && (
+      {validMenus.length > maxDisplay && (
         <div className="text-center mt-12">
           <a
             href="/menus"
