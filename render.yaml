@@ -38,15 +38,15 @@ services:
 
       # CORS + URLs (replace placeholders)
       - key: STORE_CORS
-        value: https://<your-storefront-domain>
+        value: https://storefront-q5un.onrender.com
       - key: ADMIN_CORS
-        value: https://<your-medusa-domain>
+        value: https://medusa-api-q5un.onrender.com
       - key: AUTH_CORS
-        value: https://<your-storefront-domain>,https://<your-medusa-domain>
+        value: https://storefront-q5un.onrender.com,https://medusa-api-q5un.onrender.com
       - key: MEDUSA_BACKEND_URL
-        value: https://<your-medusa-domain>
+        value: https://medusa-api-q5un.onrender.com
       - key: ADMIN_BACKEND_URL
-        value: https://<your-medusa-domain>
+        value: https://medusa-api-q5un.onrender.com
 
       # Secrets
       - key: JWT_SECRET
@@ -99,7 +99,9 @@ services:
       - key: NODE_ENV
         value: production
       - key: MEDUSA_BACKEND_URL
-        value: https://<your-medusa-domain>
+        value: https://medusa-api-q5un.onrender.com
+      - key: PUBLIC_MEDUSA_API_URL
+        value: https://medusa-api-q5un.onrender.com
       - key: MEDUSA_PUBLISHABLE_KEY
         sync: false
       - key: STRIPE_PUBLIC_KEY

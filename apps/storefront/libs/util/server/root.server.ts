@@ -17,32 +17,42 @@ const fetchHasProducts = async (request: Request) => {
 };
 
 export const getRootLoader = async ({ request }: LoaderFunctionArgs) => {
-  //const region = await getSelectedRegion(request.headers);
-
-  // const [cart, customer, hasPublishedProducts] = await Promise.all([
-  //   retrieveCart(request),
-  //   getCustomer(request),
-  //   fetchHasProducts(request),
-  // ]);
-
   const headers = new Headers();
 
-  // const currentRegionCookieId = await getSelectedRegionId(headers);
+  // Provide minimal region data to prevent useRegion hook errors
+  // This is a fallback region for deployment - in production you'd want real region data
+  const fallbackRegion = {
+    id: 'us-region',
+    name: 'United States',
+    currency_code: 'usd',
+    countries: [
+      {
+        id: 'us',
+        iso_2: 'us',
+        iso_3: 'usa',
+        num_code: '840',
+        name: 'United States',
+        display_name: 'United States',
+      }
+    ]
+  };
 
-  // if (currentRegionCookieId !== region?.id) {
-  //   await setSelectedRegionId(headers, region?.id!);
-  // }
-
-  // if (cart?.items?.length) {
-  //   const enrichedItems = await enrichLineItems(cart?.items, cart?.region_id!);
-  //   cart.items = enrichedItems as HttpTypes.StoreCartLineItem[];
-  // }
+  // Provide minimal cart data to prevent cart-related errors
+  const fallbackCart = {
+    id: null,
+    items: [],
+    region_id: fallbackRegion.id,
+    currency_code: fallbackRegion.currency_code,
+    subtotal: 0,
+    tax_total: 0,
+    total: 0,
+  };
 
   const fontLinks: string[] = [];
 
   return remixData(
     {
-      //hasPublishedProducts,
+      hasPublishedProducts: true, // Assume we have products for now
       fontLinks,
       env: {
         NODE_ENV: config.NODE_ENV,
@@ -54,8 +64,9 @@ export const getRootLoader = async ({ request }: LoaderFunctionArgs) => {
         SENTRY_ENVIRONMENT: config.SENTRY_ENVIRONMENT,
         EVENT_LOGGING: config.EVENT_LOGGING,
       },
-      //customer,
-      //region,
+      customer: null, // No customer data for now
+      region: fallbackRegion,
+      regions: [fallbackRegion], // Provide regions array for useRegions hook
       siteDetails: {
         store: {
           name: 'Chef Velez',
@@ -64,7 +75,7 @@ export const getRootLoader = async ({ request }: LoaderFunctionArgs) => {
         headerNavigationItems,
         footerNavigationItems,
       } as SiteDetailsRootData,
-      //cart: cart,
+      cart: fallbackCart,
     },
     { headers },
   );

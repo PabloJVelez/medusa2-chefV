@@ -1,75 +1,61 @@
-import { Container } from '@app/components/common/container/Container';
-import { ActionList } from '@app/components/common/actions-list/ActionList';
-import { MenuCarousel } from '@app/components/menu/MenuCarousel';
-import type { StoreMenuDTO } from '@app/../types/menus';
-import clsx from 'clsx';
-import type { FC } from 'react';
+import { Container } from '@app/components/common/container';
+import { MenuListItem } from '@app/components/menu/MenuListItem';
+import { FC } from 'react';
 
-export interface FeaturedMenusProps {
-  className?: string;
-  title?: string;
-  description?: string;
-  menus: StoreMenuDTO[];
+interface FeaturedMenusProps {
+  menus: any[];
   maxDisplay?: number;
 }
 
-export const FeaturedMenus: FC<FeaturedMenusProps> = ({ 
-  className,
-  title = "Featured Menu Collections",
-  description = "Discover our carefully crafted menu templates, each designed to create memorable culinary experiences for your special occasions.",
-  menus,
-  maxDisplay 
-}) => {
+export const FeaturedMenus: FC<FeaturedMenusProps> = ({ menus, maxDisplay = 3 }) => {
+  const displayMenus = menus.slice(0, maxDisplay);
+
+  // If no menus are available, show a fallback message
+  if (!menus || menus.length === 0) {
+    return (
+      <Container className="py-16 lg:py-24">
+        <div className="text-center">
+          <h2 className="text-3xl md:text-4xl font-italiana text-gray-900 mb-4">
+            Featured Menus
+          </h2>
+          <p className="text-lg text-gray-600 mb-8">
+            Our curated menus are being prepared. Please check back soon for our latest culinary offerings.
+          </p>
+          <div className="bg-gray-50 rounded-lg p-8">
+            <p className="text-gray-500">
+              Menu data is temporarily unavailable. We're working to bring you the best dining experiences.
+            </p>
+          </div>
+        </div>
+      </Container>
+    );
+  }
+
   return (
-    <Container className={clsx('py-16 lg:py-20', className)}>
+    <Container className="py-16 lg:py-24">
       <div className="text-center mb-12">
-        <h2 className="text-4xl md:text-5xl font-italiana text-primary-900 mb-4">
-          {title}
+        <h2 className="text-3xl md:text-4xl font-italiana text-gray-900 mb-4">
+          Featured Menus
         </h2>
-        <p className="text-lg text-primary-600 max-w-3xl mx-auto leading-relaxed">
-          {description}
+        <p className="text-lg text-gray-600">
+          Discover our carefully crafted menus, each designed to create unforgettable dining experiences.
         </p>
       </div>
 
-      {menus.length > 0 ? (
-        <>
-          <MenuCarousel menus={menus} className="mb-12" />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {displayMenus.map((menu) => (
+          <MenuListItem key={menu.id} menu={menu} />
+        ))}
+      </div>
 
-          <div className="text-center">
-            <ActionList
-              actions={[
-                {
-                  label: 'View All Menus',
-                  url: '/menus',
-                },
-                {
-                  label: 'Request Custom Event',
-                  url: '/request',
-                },
-              ]}
-              className="flex-col gap-4 sm:flex-row sm:justify-center"
-            />
-          </div>
-        </>
-      ) : (
-        <div className="text-center py-12">
-          <div className="max-w-md mx-auto">
-            <h3 className="text-xl font-semibold text-primary-900 mb-2">
-              Menus Coming Soon
-            </h3>
-            <p className="text-primary-600 mb-6">
-              We're crafting exceptional menu templates for your culinary experiences. 
-              In the meantime, you can request a custom event.
-            </p>
-            <ActionList
-              actions={[
-                {
-                  label: 'Request Custom Event',
-                  url: '/request',
-                },
-              ]}
-            />
-          </div>
+      {menus.length > maxDisplay && (
+        <div className="text-center mt-12">
+          <a
+            href="/menus"
+            className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-accent-600 hover:bg-accent-700 transition-colors"
+          >
+            View All Menus
+          </a>
         </div>
       )}
     </Container>

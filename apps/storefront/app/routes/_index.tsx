@@ -14,11 +14,20 @@ import { fetchMenus } from '@libs/util/server/data/menus.server';
 import { getMergedPageMeta } from '@libs/util/page';
 
 export const loader = async (_args: LoaderFunctionArgs) => {
+  let menus: any[] = [];
+  
   try {
-    const menusData = await fetchMenus({ limit: 3 });
+    // Add timeout to prevent hanging requests
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Request timeout')), 10000)
+    );
+    
+    const menusPromise = fetchMenus({ limit: 3 });
+    
+    const menusData: any = await Promise.race([menusPromise, timeoutPromise]);
 
     // Trim to a safe, serializable snapshot to avoid circular/BigInt/etc.
-    const menus = (menusData?.menus ?? []).map((m: any) => ({
+    menus = (menusData?.menus ?? []).map((m: any) => ({
       id: String(m.id),
       name: String(m.name),
       thumbnail: m.thumbnail ?? null,
@@ -37,25 +46,27 @@ export const loader = async (_args: LoaderFunctionArgs) => {
     // Lightweight server log (shows up in server console)
     console.log('MENUS DATA (loader) – count:', menus.length);
 
-    return data(
-      { menus },
-      {
-        headers: {
-          // cheap way to confirm what the route delivered (visible in browser devtools)
-          'X-Index-Debug': `menus=${menus.length}`,
-        },
-      }
-    );
   } catch (error: any) {
-    // Log full server-side error details
-    console.error('Index loader failed:', {
+    // Log full server-side error details but don't fail the page
+    console.error('Index loader failed to fetch menus:', {
       message: error?.message,
       stack: error?.stack,
       cause: error?.cause,
     });
-    // Never throw raw here—return a safe payload
-    return data({ menus: [] as any[] }, { status: 200 });
+    
+    // Provide empty menus array as fallback
+    menus = [];
   }
+
+  return data(
+    { menus },
+    {
+      headers: {
+        // cheap way to confirm what the route delivered (visible in browser devtools)
+        'X-Index-Debug': `menus=${menus.length}`,
+      },
+    }
+  );
 };
 
 export const meta: MetaFunction<typeof loader> = () => {

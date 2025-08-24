@@ -61,22 +61,37 @@ export const fetchMenus = async ({
 
   const fetcher = async () => {
     console.log("FETCHING MENUS WITH BASE URL", baseMedusaConfig.baseUrl)
-    const response = await fetch(`${baseMedusaConfig.baseUrl}/store/menus?${params}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-publishable-api-key': baseMedusaConfig.publishableKey || '',
-        ...(bypassCache ? { 'Cache-Control': 'no-cache' } : {}),
-      },
-    });
+    
+    // Add timeout to prevent hanging requests
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+    
+    try {
+      const response = await fetch(`${baseMedusaConfig.baseUrl}/store/menus?${params}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-publishable-api-key': baseMedusaConfig.publishableKey || '',
+          ...(bypassCache ? { 'Cache-Control': 'no-cache' } : {}),
+        },
+        signal: controller.signal,
+      });
 
-    if (!response.ok) {
-      throw new Error(`Failed to fetch menus: ${response.statusText}`);
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch menus: ${response.statusText}`);
+      }
+
+      return response.json();
+    } catch (error) {
+      clearTimeout(timeoutId);
+      if (error instanceof Error && error.name === 'AbortError') {
+        throw new Error('Request timeout - backend may be unavailable');
+      }
+      throw error;
     }
-
-    return response.json();
   }
-
 
   const cacheKey = `menus-${JSON.stringify({ limit, offset, q })}`;
   return cachified({
