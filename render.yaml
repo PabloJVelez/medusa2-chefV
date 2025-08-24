@@ -24,7 +24,7 @@ services:
       export HTTP_PORT="$PORT"
       export MEDUSA_SERVER_PORT="$PORT"
       # Run generated scripts from .medusa/server using npm --prefix
-      npm run --prefix .medusa/server nuke-db
+      npm run --prefix .medusa/server nukedb
       npm run --prefix .medusa/server prepare
       npm run --prefix .medusa/server add-user
       npm run --prefix .medusa/server seed
