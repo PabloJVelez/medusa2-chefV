@@ -19,30 +19,30 @@ const fetchHasProducts = async (request: Request) => {
 export const getRootLoader = async ({ request }: LoaderFunctionArgs) => {
   //const region = await getSelectedRegion(request.headers);
 
-  const [cart, customer, hasPublishedProducts] = await Promise.all([
-    retrieveCart(request),
-    getCustomer(request),
-    fetchHasProducts(request),
-  ]);
+  // const [cart, customer, hasPublishedProducts] = await Promise.all([
+  //   retrieveCart(request),
+  //   getCustomer(request),
+  //   fetchHasProducts(request),
+  // ]);
 
   const headers = new Headers();
 
-  const currentRegionCookieId = await getSelectedRegionId(headers);
+  // const currentRegionCookieId = await getSelectedRegionId(headers);
 
   // if (currentRegionCookieId !== region?.id) {
   //   await setSelectedRegionId(headers, region?.id!);
   // }
 
-  if (cart?.items?.length) {
-    const enrichedItems = await enrichLineItems(cart?.items, cart?.region_id!);
-    cart.items = enrichedItems as HttpTypes.StoreCartLineItem[];
-  }
+  // if (cart?.items?.length) {
+  //   const enrichedItems = await enrichLineItems(cart?.items, cart?.region_id!);
+  //   cart.items = enrichedItems as HttpTypes.StoreCartLineItem[];
+  // }
 
   const fontLinks: string[] = [];
 
   return remixData(
     {
-      hasPublishedProducts,
+      //hasPublishedProducts,
       fontLinks,
       env: {
         NODE_ENV: config.NODE_ENV,
@@ -54,7 +54,7 @@ export const getRootLoader = async ({ request }: LoaderFunctionArgs) => {
         SENTRY_ENVIRONMENT: config.SENTRY_ENVIRONMENT,
         EVENT_LOGGING: config.EVENT_LOGGING,
       },
-      customer,
+      //customer,
       //region,
       siteDetails: {
         store: {
@@ -64,7 +64,7 @@ export const getRootLoader = async ({ request }: LoaderFunctionArgs) => {
         headerNavigationItems,
         footerNavigationItems,
       } as SiteDetailsRootData,
-      cart: cart,
+      //cart: cart,
     },
     { headers },
   );
