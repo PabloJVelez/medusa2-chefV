@@ -69,6 +69,7 @@ function App() {
       <html lang="en" className="min-h-screen">
         <head ref={headRef}>
           <meta charSet="UTF-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes" />
           <Meta />
 
           <link rel="preconnect" href="https://fonts.googleapis.com" />

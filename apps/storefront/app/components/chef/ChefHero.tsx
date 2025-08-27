@@ -51,11 +51,11 @@ export const ChefHero: FC<ChefHeroProps> = ({
             backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.35), rgba(0,0,0,0.35)), url(${image?.url})`,
           }}
         />
-        <div className="overflow-hidden z-10 w-full text-white">
-          <div className="inline-grid gap-6 w-full text-center">
-            <h4 className="font-italiana text-xl md:text-2xl tracking-wider text-white">{tagline}</h4>
-            <h1 className="text-5xl md:text-7xl lg:text-8xl font-italiana text-white drop-shadow-lg">{chefName}</h1>
-            <p className="max-w-2xl mx-auto text-base md:text-lg leading-relaxed text-white drop-shadow-md">
+        <div className="overflow-hidden z-10 w-full text-white px-4 sm:px-6 md:px-8">
+          <div className="inline-grid gap-4 sm:gap-6 w-full text-center">
+            <h4 className="font-italiana text-lg sm:text-xl md:text-2xl tracking-wider text-white">{tagline}</h4>
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-italiana text-white drop-shadow-lg leading-tight">{chefName}</h1>
+            <p className="max-w-2xl mx-auto text-sm sm:text-base md:text-lg leading-relaxed text-white drop-shadow-md px-4 sm:px-0">
               {description}
             </p>
           </div>
@@ -63,7 +63,7 @@ export const ChefHero: FC<ChefHeroProps> = ({
           {!!actions?.length && (
             <ActionList 
               actions={actions} 
-              className={clsx('mt-8 lg:mt-10 flex-col gap-4 md:flex-row md:justify-center', actionsClassName)} 
+              className={clsx('mt-6 sm:mt-8 lg:mt-10 flex-col gap-3 sm:gap-4 md:flex-row md:justify-center w-full sm:w-auto', actionsClassName)} 
             />
           )}
         </div>

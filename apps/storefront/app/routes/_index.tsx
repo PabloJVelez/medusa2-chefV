@@ -150,115 +150,119 @@ export default function IndexRoute() {
         as="image"
       />
 
-      <ChefHero className="h-[800px] !max-w-full -mt-[calc(var(--mkt-header-height)+3rem)] md:-mt-[calc(var(--mkt-header-height-desktop)+2rem)] pt-[var(--mkt-header-height)] md:pt-[var(--mkt-header-height-desktop)]" />
+      {/* Mobile-optimized hero section with responsive height */}
+      <ChefHero className="h-[600px] sm:h-[700px] md:h-[800px] !max-w-full -mt-[calc(var(--mkt-header-height)+2rem)] sm:-mt-[calc(var(--mkt-header-height)+2.5rem)] md:-mt-[calc(var(--mkt-header-height-desktop)+2rem)] pt-[var(--mkt-header-height)] md:pt-[var(--mkt-header-height-desktop)]" />
 
       <ExperienceTypes />
 
       <FeaturedMenusSection menus={menus} />
 
-      <Container className="py-16 lg:py-24">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          <div className="relative order-2 lg:order-1">
+      {/* Chef Luis section with improved mobile layout */}
+      <Container className="py-12 sm:py-16 lg:py-24">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 items-center">
+          <div className="relative order-1 lg:order-1">
             <Image
               src="/assets/images/chef_experience.PNG"
               loading="lazy"
               alt="Chef Luis Velez in his kitchen"
-              className="rounded-2xl shadow-lg w-full h-[500px] object-cover"
+              className="rounded-2xl shadow-lg w-full h-[300px] sm:h-[400px] md:h-[500px] object-cover"
               height={500}
               width={600}
             />
-            <div className="absolute -bottom-6 -right-6 w-24 h-24 bg-accent-500 rounded-full opacity-20"></div>
+            <div className="absolute -bottom-4 -right-4 sm:-bottom-6 sm:-right-6 w-16 h-16 sm:w-24 sm:h-24 bg-accent-500 rounded-full opacity-20"></div>
           </div>
 
-          <div className="order-1 lg:order-2 text-center lg:text-left space-y-6">
-            <div className="space-y-4">
-              <h2 className="text-5xl md:text-6xl lg:text-7xl font-italiana text-primary-900">
+          <div className="order-2 lg:order-2 text-center lg:text-left space-y-4 sm:space-y-6">
+            <div className="space-y-3 sm:space-y-4">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-italiana text-primary-900 leading-tight">
                 Meet Chef Luis
               </h2>
-              <p className="text-2xl md:text-3xl lg:text-4xl font-italiana text-accent-600">Culinary Artistry</p>
+              <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-italiana text-accent-600">Culinary Artistry</p>
             </div>
 
-            <div className="space-y-4 text-primary-700">
-              <p className="text-lg leading-relaxed">
+            <div className="space-y-3 sm:space-y-4 text-primary-700">
+              <p className="text-base sm:text-lg leading-relaxed">
                 With over 15 years of culinary excellence, Chef Luis Velez brings world-class expertise from
                 Michelin-starred restaurants directly to your home.
               </p>
-              <p className="text-base leading-relaxed">
+              <p className="text-sm sm:text-base leading-relaxed">
                 Trained in classical French techniques with a modern innovative approach, he creates unforgettable
                 dining experiences tailored to your special occasions.
               </p>
             </div>
 
-            <div className="flex flex-wrap gap-4 justify-center lg:justify-start">
-              <div className="bg-accent-100 px-4 py-2 rounded-full">
-                <span className="text-sm font-medium text-accent-700">15+ Years Experience</span>
+            <div className="flex flex-wrap gap-2 sm:gap-4 justify-center lg:justify-start">
+              <div className="bg-accent-100 px-3 py-2 sm:px-4 sm:py-2 rounded-full">
+                <span className="text-xs sm:text-sm font-medium text-accent-700">15+ Years Experience</span>
               </div>
-              <div className="bg-accent-100 px-4 py-2 rounded-full">
-                <span className="text-sm font-medium text-accent-700">Michelin Trained</span>
+              <div className="bg-accent-100 px-3 py-2 sm:px-4 sm:py-2 rounded-full">
+                <span className="text-xs sm:text-sm font-medium text-accent-700">Michelin Trained</span>
               </div>
-              <div className="bg-accent-100 px-4 py-2 rounded-full">
-                <span className="text-sm font-medium text-accent-700">Local Sourcing</span>
+              <div className="bg-accent-100 px-3 py-2 sm:px-4 sm:py-2 rounded-full">
+                <span className="text-xs sm:text-sm font-medium text-accent-700">Local Sourcing</span>
               </div>
             </div>
           </div>
         </div>
       </Container>
 
-      <Container className="p-14 pt-0">
-        <div className="text-center mb-12">
-          <h3 className="text-4xl font-italiana text-gray-900 mb-4">What Our Guests Say</h3>
-          <div className="w-20 mx-auto border-t-2 border-blue-500"></div>
+      {/* Testimonials section with mobile-optimized layout */}
+      <Container className="px-4 sm:px-6 md:px-8 py-12 sm:py-16">
+        <div className="text-center mb-8 sm:mb-12">
+          <h3 className="text-2xl sm:text-3xl md:text-4xl font-italiana text-gray-900 mb-3 sm:mb-4">What Our Guests Say</h3>
+          <div className="w-16 sm:w-20 mx-auto border-t-2 border-blue-500"></div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="bg-white rounded-2xl shadow-lg p-8 text-center">
-            <div className="text-4xl mb-4">⭐⭐⭐⭐⭐</div>
-            <p className="text-gray-700 italic mb-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+          <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 text-center">
+            <div className="text-3xl sm:text-4xl mb-3 sm:mb-4">⭐⭐⭐⭐⭐</div>
+            <p className="text-sm sm:text-base text-gray-700 italic mb-3 sm:mb-4 leading-relaxed">
               "Chef Luis created the most incredible anniversary dinner for us. Every course was a masterpiece, and the
               cooking class was so much fun!"
             </p>
-            <div className="font-semibold text-gray-900">— Sarah &amp; Michael K.</div>
-            <div className="text-sm text-gray-600">Plated Dinner Experience</div>
+            <div className="font-semibold text-gray-900 text-sm sm:text-base">— Sarah &amp; Michael K.</div>
+            <div className="text-xs sm:text-sm text-gray-600">Plated Dinner Experience</div>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-lg p-8 text-center">
-            <div className="text-4xl mb-4">⭐⭐⭐⭐⭐</div>
-            <p className="text-gray-700 italic mb-4">
+          <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 text-center">
+            <div className="text-3xl sm:text-4xl mb-3 sm:mb-4">⭐⭐⭐⭐⭐</div>
+            <p className="text-sm sm:text-base text-gray-700 italic mb-3 sm:mb-4 leading-relaxed">
               "The cooking class was amazing! Chef Velez taught us so much and we had a blast. Can't wait to book
               another experience."
             </p>
-            <div className="font-semibold text-gray-900">— Jennifer L.</div>
-            <div className="text-sm text-gray-600">Cooking Class Experience</div>
+            <div className="font-semibold text-gray-900 text-sm sm:text-base">— Jennifer L.</div>
+            <div className="text-xs sm:text-sm text-gray-600">Cooking Class Experience</div>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-lg p-8 text-center">
-            <div className="text-4xl mb-4">⭐⭐⭐⭐⭐</div>
-            <p className="text-gray-700 italic mb-4">
+          <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 text-center md:col-span-2 lg:col-span-1">
+            <div className="text-3xl sm:text-4xl mb-3 sm:mb-4">⭐⭐⭐⭐⭐</div>
+            <p className="text-sm sm:text-base text-gray-700 italic mb-3 sm:mb-4 leading-relaxed">
               "Perfect for our family gathering! The buffet style worked perfectly for our group and everything was
               absolutely delicious."
             </p>
-            <div className="font-semibold text-gray-900">— The Rodriguez Family</div>
-            <div className="text-sm text-gray-600">Buffet Style Experience</div>
+            <div className="font-semibold text-gray-900 text-sm sm:text-base">— The Rodriguez Family</div>
+            <div className="text-xs sm:text-sm text-gray-600">Buffet Style Experience</div>
           </div>
         </div>
       </Container>
 
-      <Container className="p-14 md:pt-28 lg:pt-24 lg:px-24">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-          <div className="order-2 lg:order-1">
+      {/* Book Your Experience section with mobile optimization */}
+      <Container className="px-4 sm:px-6 md:px-8 py-12 sm:py-16 lg:py-20 xl:py-24">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 items-center">
+          <div className="order-1 lg:order-1">
             <Image
               src="/assets/images/chef_book_experience.PNG"
               alt="Guests enjoying a Chef Velez experience"
-              className="rounded-3xl shadow-lg"
+              className="rounded-2xl sm:rounded-3xl shadow-lg w-full h-[250px] sm:h-[300px] md:h-[400px] object-cover"
               width={600}
               height={400}
             />
           </div>
 
-          <div className="order-1 lg:order-2 space-y-8 flex flex-col justify-center items-center lg:items-start text-center lg:text-left">
-            <h4 className="text-xl font-italiana tracking-wider">READY TO CREATE MEMORIES?</h4>
-            <h3 className="text-6xl lg:text-7xl font-aboreto">Book Your Experience</h3>
-            <p className="text-xl leading-relaxed">
+          <div className="order-2 lg:order-2 space-y-6 sm:space-y-8 flex flex-col justify-center items-center lg:items-start text-center lg:text-left">
+            <h4 className="text-lg sm:text-xl font-italiana tracking-wider">READY TO CREATE MEMORIES?</h4>
+            <h3 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-aboreto leading-tight">Book Your Experience</h3>
+            <p className="text-base sm:text-lg md:text-xl leading-relaxed max-w-lg">
               Transform your next special occasion into an unforgettable culinary journey. From intimate dinners to
               group celebrations, every experience is crafted with care.
             </p>
@@ -267,7 +271,7 @@ export default function IndexRoute() {
                 { label: 'Browse Our Menus', url: '/menus' },
                 { label: 'Request Your Event', url: '/request' },
               ]}
-              className="flex-col gap-4 lg:flex-row"
+              className="flex-col gap-3 sm:gap-4 w-full sm:w-auto lg:flex-row"
             />
           </div>
         </div>
@@ -287,9 +291,9 @@ export function ErrorBoundary({ error }: { error: unknown }) {
   });
 
   return (
-    <Container className="py-16">
-      <div className="rounded-xl border p-6 bg-red-50">
-        <h2 className="text-xl font-semibold mb-2">Something went wrong.</h2>
+    <Container className="py-12 sm:py-16">
+      <div className="rounded-xl border p-4 sm:p-6 bg-red-50">
+        <h2 className="text-lg sm:text-xl font-semibold mb-2">Something went wrong.</h2>
         <p className="text-sm text-red-700">
           {process.env.NODE_ENV === 'development'
             ? e?.message ?? 'Unknown error'
