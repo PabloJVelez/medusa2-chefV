@@ -1,6 +1,7 @@
 import { Container } from '@app/components/common/container';
 import { MenuListItem } from '@app/components/menu/MenuListItem';
-import { FC } from 'react';
+import { FC, useState, useEffect } from 'react';
+import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 
 interface FeaturedMenusProps {
   menus: any[];
@@ -17,6 +18,49 @@ export const FeaturedMenus: FC<FeaturedMenusProps> = ({ menus, maxDisplay = 3 })
   ) || [];
   
   const displayMenus = validMenus.slice(0, maxDisplay);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+
+  // Auto-rotate carousel every 6 seconds
+  useEffect(() => {
+    if (displayMenus.length <= 1) return;
+    
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % displayMenus.length);
+    }, 6000);
+    
+    return () => clearInterval(interval);
+  }, [displayMenus.length]);
+
+  const handleNext = () => {
+    if (isTransitioning || displayMenus.length <= 1) return;
+    
+    setIsTransitioning(true);
+    setTimeout(() => {
+      setCurrentIndex((prev) => (prev + 1) % displayMenus.length);
+      setIsTransitioning(false);
+    }, 150);
+  };
+
+  const handlePrev = () => {
+    if (isTransitioning || displayMenus.length <= 1) return;
+    
+    setIsTransitioning(true);
+    setTimeout(() => {
+      setCurrentIndex((prev) => (prev - 1 + displayMenus.length) % displayMenus.length);
+      setIsTransitioning(false);
+    }, 150);
+  };
+
+  const goToSlide = (index: number) => {
+    if (isTransitioning || index === currentIndex) return;
+    
+    setIsTransitioning(true);
+    setTimeout(() => {
+      setCurrentIndex(index);
+      setIsTransitioning(false);
+    }, 150);
+  };
 
   // If no valid menus are available, show a fallback message
   if (validMenus.length === 0) {
@@ -50,10 +94,70 @@ export const FeaturedMenus: FC<FeaturedMenusProps> = ({ menus, maxDisplay = 3 })
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {displayMenus.map((menu) => (
-          <MenuListItem key={menu.id} menu={menu} />
-        ))}
+      {/* Carousel Container */}
+      <div className="relative max-w-2xl mx-auto">
+        {/* Menu Carousel */}
+        <div className="relative overflow-hidden">
+          <div 
+            className="flex transition-transform duration-300 ease-in-out"
+            style={{ 
+              transform: `translateX(-${currentIndex * 100}%)`,
+              opacity: isTransitioning ? 0.7 : 1
+            }}
+          >
+            {displayMenus.map((menu, index) => (
+              <div key={menu.id} className="w-full flex-shrink-0 px-4">
+                <MenuListItem 
+                  menu={menu} 
+                  isTransitioning={isTransitioning}
+                  className="mx-auto"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Navigation Arrows */}
+        {displayMenus.length > 1 && (
+          <>
+            <button
+              onClick={handlePrev}
+              disabled={isTransitioning}
+              className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 w-12 h-12 bg-white rounded-full shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center text-gray-600 hover:text-gray-900 z-10"
+              aria-label="Previous menu"
+            >
+              <ChevronLeftIcon className="w-6 h-6" />
+            </button>
+            
+            <button
+              onClick={handleNext}
+              disabled={isTransitioning}
+              className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 w-12 h-12 bg-white rounded-full shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center text-gray-600 hover:text-gray-900 z-10"
+              aria-label="Next menu"
+            >
+              <ChevronRightIcon className="w-6 h-6" />
+            </button>
+          </>
+        )}
+
+        {/* Dots Indicator */}
+        {displayMenus.length > 1 && (
+          <div className="flex justify-center mt-8 space-x-2">
+            {displayMenus.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => goToSlide(index)}
+                disabled={isTransitioning}
+                className={`w-3 h-3 rounded-full transition-all duration-200 ${
+                  index === currentIndex
+                    ? 'bg-accent-600 scale-110'
+                    : 'bg-gray-300 hover:bg-gray-400'
+                }`}
+                aria-label={`Go to menu ${index + 1}`}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       {validMenus.length > maxDisplay && (
