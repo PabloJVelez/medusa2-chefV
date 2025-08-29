@@ -153,9 +153,10 @@ export default function IndexRoute() {
       {/* Mobile-optimized hero section with responsive height */}
       <ChefHero className="h-[600px] sm:h-[700px] md:h-[800px] !max-w-full -mt-[calc(var(--mkt-header-height)+2rem)] sm:-mt-[calc(var(--mkt-header-height)+2.5rem)] md:-mt-[calc(var(--mkt-header-height-desktop)+2rem)] pt-[var(--mkt-header-height)] md:pt-[var(--mkt-header-height-desktop)]" />
 
+      <FeaturedMenusSection menus={menus} />
       <ExperienceTypes />
 
-      <FeaturedMenusSection menus={menus} />
+      
 
       {/* Chef Luis section with improved mobile layout */}
       <Container className="py-12 sm:py-16 lg:py-24">
