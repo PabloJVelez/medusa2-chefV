@@ -3,6 +3,7 @@ import { ActionList } from '@app/components/common/actions-list/ActionList';
 import { Image } from '@app/components/common/images/Image';
 import clsx from 'clsx';
 import type { FC } from 'react';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@app/components/ui/accordion';
 
 export interface ExperienceTypesProps {
   className?: string;
@@ -75,7 +76,127 @@ interface ExperienceCardProps {
   featured?: boolean;
 }
 
-const ExperienceCard: FC<ExperienceCardProps> = ({ experience, className, featured = false }) => {
+// Tailwind-first mobile experience accordion
+const MobileExperienceAccordion: FC<{ experiences: ExperienceType[] }> = ({ experiences }) => {
+  return (
+    <Accordion type="single" collapsible className="w-full space-y-3">
+      {experiences.map((experience, index) => {
+        const featured = index === 1;
+        const gradientClasses = [
+          'bg-gradient-to-br from-blue-50 via-blue-50 to-indigo-100 border-blue-200',
+          'bg-gradient-to-br from-emerald-50 via-green-50 to-emerald-100 border-emerald-200', 
+          'bg-gradient-to-br from-amber-50 via-orange-50 to-amber-100 border-amber-200'
+        ];
+        
+        const iconClasses = [
+          'bg-blue-100 text-blue-600',
+          'bg-emerald-100 text-emerald-600',
+          'bg-amber-100 text-amber-600'
+        ];
+
+        return (
+          <AccordionItem 
+            key={experience.id} 
+            value={experience.id}
+            className={clsx(
+              "relative rounded-2xl transition-all duration-300 hover:shadow-lg group",
+              "data-[state=open]:shadow-xl data-[state=open]:scale-[1.02]",
+              gradientClasses[index % 3]
+            )}
+          >
+            {featured && (
+              <div className="absolute -top-1 right-4 z-10">
+                <span className="inline-flex items-center px-3 py-1 rounded-b-lg text-xs font-bold bg-accent-500 text-white shadow-lg animate-pulse">
+                  Most Popular
+                </span>
+              </div>
+            )}
+            
+            <AccordionTrigger className="hover:opacity-80 p-4 transition-opacity duration-200">
+              <div className="flex items-center space-x-4 flex-1">
+                <div className={clsx(
+                  "w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 transition-transform duration-200 group-hover:scale-110",
+                  iconClasses[index % 3]
+                )}>
+                  <Image
+                    src={experience.icon}
+                    alt={`${experience.name} icon`}
+                    width={24}
+                    height={24}
+                    className="w-6 h-6"
+                  />
+                </div>
+                
+                <div className="flex-1 min-w-0 text-left">
+                  <div className="flex items-baseline gap-3">
+                    <h3 className="text-lg font-bold text-gray-900 truncate group-hover:text-gray-700 transition-colors">
+                      {experience.name}
+                    </h3>
+                    <span className="text-xl font-bold text-accent-600 whitespace-nowrap tabular-nums">
+                      {experience.price}
+                    </span>
+                  </div>
+                  <p className="text-sm text-gray-600 font-medium">
+                    {experience.duration} • per person
+                  </p>
+                </div>
+              </div>
+            </AccordionTrigger>
+            
+            <AccordionContent className="px-4 pb-4">
+              <div className="space-y-4">
+                {/* Description */}
+                <p className="text-sm text-gray-700 leading-relaxed bg-white/40 rounded-lg p-3 border border-white/60">
+                  {experience.description}
+                </p>
+                
+                {/* Highlights Grid */}
+                <div className="bg-white/40 rounded-lg p-3 border border-white/60">
+                  <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center">
+                    <span className="w-2 h-2 bg-accent-500 rounded-full mr-2"></span>
+                    What's Included
+                  </h4>
+                  <div className="grid grid-cols-2 gap-2">
+                    {experience.highlights.map((highlight, idx) => (
+                      <div key={idx} className="flex items-start text-xs text-gray-700 leading-snug">
+                        <div className="w-1 h-1 bg-accent-500 rounded-full mt-1.5 mr-2 flex-shrink-0" />
+                        <span className="line-clamp-2">{highlight}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                
+                {/* Ideal For */}
+                <div className="bg-white/60 rounded-lg p-3 border border-white/80">
+                  <div className="text-xs text-gray-700 leading-relaxed">
+                    <span className="font-semibold text-gray-900">Perfect for:</span>{' '}
+                    <span className="text-gray-600">{experience.idealFor}</span>
+                  </div>
+                </div>
+                
+                {/* CTA Button */}
+                <div className="pt-2">
+                  <ActionList
+                    actions={[
+                      {
+                        label: 'Select This Experience',
+                        url: `/request?type=${experience.id}`,
+                      }
+                    ]}
+                    className=""
+                  />
+                </div>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        );
+      })}
+    </Accordion>
+  );
+};
+
+// Desktop card component (original design)
+const DesktopExperienceCard: FC<ExperienceCardProps> = ({ experience, className, featured = false }) => {
   return (
     <div className={clsx(
       "relative bg-white rounded-lg shadow-md p-4 sm:p-6 hover:shadow-lg transition-all duration-300 h-full flex flex-col",
@@ -159,19 +280,30 @@ export const ExperienceTypes: FC<ExperienceTypesProps> = ({
   description = "Each experience is carefully crafted to match the occasion. All prices are per person with no hidden fees or deposits required."
 }) => {
   return (
-    <Container className={clsx('py-8 sm:py-12 lg:py-16', className)}>
-      <div className="text-center mb-8 sm:mb-12">
-        <h2 className="text-2xl sm:text-3xl md:text-4xl font-italiana text-primary-900 mb-2 sm:mb-3">
+    <Container className={clsx('py-6 sm:py-12 lg:py-16', className)}>
+      {/* Header - responsive text sizing */}
+      <div className="text-center mb-4 sm:mb-8 lg:mb-12">
+        <h2 className="text-xl sm:text-3xl md:text-4xl font-italiana text-primary-900 mb-2 sm:mb-3">
           {title}
         </h2>
-        <p className="text-sm sm:text-base text-primary-600 max-w-2xl mx-auto leading-relaxed px-4 sm:px-0">
+        {/* Mobile: simplified description, Desktop: full description */}
+        <p className="text-sm text-primary-600 max-w-xl mx-auto sm:hidden">
+          Tap to explore • All prices per person
+        </p>
+        <p className="text-sm sm:text-base text-primary-600 max-w-2xl mx-auto leading-relaxed px-4 sm:px-0 hidden sm:block">
           {description}
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+      {/* Mobile: Shadcn Accordion (hidden on desktop) */}
+      <div className="max-w-lg mx-auto sm:hidden">
+        <MobileExperienceAccordion experiences={experienceTypes} />
+      </div>
+
+      {/* Desktop: Original Grid Layout (hidden on mobile) */}
+      <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
         {experienceTypes.map((experience, index) => (
-          <ExperienceCard 
+          <DesktopExperienceCard 
             key={experience.id} 
             experience={experience}
             featured={index === 1} // Make cooking class featured (middle option)
@@ -180,8 +312,26 @@ export const ExperienceTypes: FC<ExperienceTypesProps> = ({
         ))}
       </div>
 
-      <div className="text-center mt-8 sm:mt-12">
-        <div className="max-w-xl mx-auto px-4 sm:px-0">
+      {/* CTA Section - responsive */}
+      <div className="text-center mt-6 sm:mt-8 lg:mt-12">
+        {/* Mobile: Simplified CTA */}
+        <div className="sm:hidden">
+          <p className="text-sm text-gray-600 mb-4">
+            Need help choosing? Start by browsing our menus.
+          </p>
+          <ActionList
+            actions={[
+              {
+                label: 'Browse Our Menus',
+                url: '/menus',
+              }
+            ]}
+            className=""
+          />
+        </div>
+
+        {/* Desktop: Original detailed CTA */}
+        <div className="hidden sm:block max-w-xl mx-auto px-4 sm:px-0">
           <h3 className="text-base sm:text-lg font-semibold text-primary-900 mb-2 sm:mb-3">
             Not sure which experience is right for you?
           </h3>

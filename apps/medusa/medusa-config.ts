@@ -64,7 +64,7 @@ const notificationModule = {
       },
     };
 
-const fileModule = {
+const fileModule = IS_TEST ? {} :{
       resolve: "@medusajs/medusa/file",
       options: {
         providers: [
