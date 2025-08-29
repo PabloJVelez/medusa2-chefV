@@ -44,15 +44,15 @@ export const HeaderSideNav: FC<HeaderSideNavProps> = ({ open, setOpen, activeSec
                 leaveTo="translate-x-full"
               >
                 <Dialog.Panel className="pointer-events-auto w-screen max-w-md">
-                  <div className="flex h-full flex-col overflow-y-scroll bg-gradient-to-b from-[#3F432C] to-[#2A2E1C] shadow-xl">
+                  <div className="flex h-full flex-col overflow-y-scroll bg-white shadow-xl">
                     <div className="flex-1 overflow-y-auto px-4 py-6 sm:px-6">
                       <div className="flex items-center justify-between">
-                        <Dialog.Title className="text-xl font-italiana text-white">Navigation</Dialog.Title>
+                        <Dialog.Title className="text-lg font-bold text-gray-900">Navigation</Dialog.Title>
                         <div className="ml-3 flex h-7 items-center">
                           <IconButton
                             icon={XMarkIcon}
                             onClick={() => setOpen(false)}
-                            className="-m-2 text-white hover:bg-white/10 rounded-full p-2"
+                            className="-m-2"
                             aria-label="Close panel"
                           />
                         </div>
@@ -70,12 +70,12 @@ export const HeaderSideNav: FC<HeaderSideNavProps> = ({ open, setOpen, activeSec
                                   onClick={() => setOpen(false)}
                                   className={({ isActive }) =>
                                     clsx(
-                                      'group flex items-center rounded-xl px-4 py-3 text-base font-normal transition-all duration-200',
+                                      'group flex items-center rounded-md px-4 py-3 text-sm font-normal',
                                       isActive &&
                                         (!navItemProps.url.includes('#') ||
                                           activeSection === navItemProps.url.split('#')[1].split('?')[0])
-                                        ? 'bg-white/20 text-white font-medium backdrop-blur-sm'
-                                        : 'text-white/80 hover:bg-white/10 hover:text-white hover:backdrop-blur-sm',
+                                        ? 'bg-gray-100 text-gray-900'
+                                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
                                     )
                                   }
                                   prefetch="viewport"
