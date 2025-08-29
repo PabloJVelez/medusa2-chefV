@@ -73,23 +73,23 @@ export const Footer = () => {
             ))}
           </nav>
           <div className="flex flex-col gap-5 lg:col-span-2">
-            {/* <NewsletterSubscription className="mb-4" /> */}
+            <NewsletterSubscription className="mb-4" />
 
             <SocialIcons siteSettings={settings} />
 
-            {/* <div className="flex flex-col gap-4 mt-4">
+            <div className="flex flex-col gap-4 mt-4">
               <h5>Location</h5>
               <p className="text-sm">
                 1619 E Cesar Chavez St, Austin, TX 78702
                 <br />
                 Open 7AM - 4PM Daily
               </p>
-            </div> */}
+            </div>
           </div>
         </div>
         <div className="flex flex-col max-md:items-center gap-8 mt-8 md:flex-row md:justify-between">
           <div className="flex flex-col gap-8">
-            {/* <div className="flex items-center gap-2 ">
+            <div className="flex items-center gap-2 ">
               <Select
                 className="!text-base border-1 border-white text-white bg-transparent !shadow-none"
                 options={regionOptions}
@@ -98,16 +98,16 @@ export const Footer = () => {
                   onRegionChange(e.target.value);
                 }}
               />
-            </div> */}
+            </div>
 
-            {/* <a
+            <a
               href="https://www.lambdacurry.dev/"
               target="_blank"
               rel="noopener noreferrer"
               className="flex flex-col items-start gap-1 text-sm"
             >
               © {new Date().getFullYear()} Made with ❤️ by LambdaCurry
-            </a> */}
+            </a>
           </div>
           <div className="mt-1 flex flex-col justify-end text-xs sm:mt-0">
             {hasProducts && <StripeSecurityImage className="mt-2" />}
