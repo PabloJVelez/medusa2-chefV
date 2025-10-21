@@ -22,6 +22,10 @@ const customModules = [
     resolve: './src/modules/chef-event',
     options: {},
   },
+  {
+    resolve: './src/modules/landing-lead',
+    options: {},
+  },
 ]
 
 // Temporarily use in-memory modules to avoid Redis authentication issues
