@@ -4,12 +4,13 @@ import { newsletterSubscriberSchema } from '@app/routes/api.newsletter-subscript
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowRightIcon } from '@heroicons/react/24/solid';
 import clsx from 'clsx';
-import { type FC, useEffect } from 'react';
+import { type FC, useEffect, useState } from 'react';
 import { useFetcher, useSearchParams } from 'react-router';
 import { RemixFormProvider, useRemixForm } from 'remix-hook-form';
 
 export const LandingEmailCapture: FC = () => {
   const [searchParams] = useSearchParams();
+  const [showSuccess, setShowSuccess] = useState(false);
   const fetcher = useFetcher<{
     success: boolean;
     errors?: Record<string, { message: string }>;
@@ -33,6 +34,7 @@ export const LandingEmailCapture: FC = () => {
 
   useEffect(() => {
     if (fetcher.data?.success) {
+      setShowSuccess(true);
       form.reset();
     }
   }, [fetcher.data]);
@@ -60,7 +62,7 @@ export const LandingEmailCapture: FC = () => {
             </div>
 
             {/* Form or Success Message */}
-            {fetcher.data?.success ? (
+            {showSuccess ? (
               <div className="space-y-4 py-4">
                 <Alert 
                   type="success" 
@@ -72,6 +74,7 @@ export const LandingEmailCapture: FC = () => {
                 </Alert>
                 <button
                   onClick={() => {
+                    setShowSuccess(false);
                     form.reset();
                   }}
                   className="text-accent-600 hover:text-accent-700 font-semibold"

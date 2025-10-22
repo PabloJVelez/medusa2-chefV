@@ -26,6 +26,12 @@ export async function GET(
 
   try {
     const lead = await landingLeadModuleService.retrieveLandingLead(id)
+    
+    // Set cache headers to prevent stale data
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
+    res.setHeader('Pragma', 'no-cache')
+    res.setHeader('Expires', '0')
+    
     return res.json({ lead })
   } catch (error) {
     throw new MedusaError(

@@ -42,7 +42,9 @@ class LandingLeadModuleService extends MedusaService({
 
   // Find lead by email
   async findByEmail(email: string) {
-    const leads = await this.listLandingLeads({ email })
+    // Normalize email to lowercase for consistent searching
+    const normalizedEmail = email.toLowerCase().trim()
+    const leads = await this.listLandingLeads({ email: normalizedEmail })
     return leads.length > 0 ? leads[0] : null
   }
 
@@ -61,7 +63,7 @@ class LandingLeadModuleService extends MedusaService({
       const cutoffDate = new Date()
       cutoffDate.setDate(cutoffDate.getDate() - daysOld)
       return leads.filter(lead => 
-        new Date(lead.createdAt) <= cutoffDate
+        new Date(lead.created_at) <= cutoffDate
       )
     }
     

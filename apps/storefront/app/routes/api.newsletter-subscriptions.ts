@@ -3,6 +3,16 @@ import { ActionFunctionArgs, data } from 'react-router';
 import { getValidatedFormData } from 'remix-hook-form';
 import { z } from 'zod';
 
+const resolveBackendUrl = () =>
+  (process.env.INTERNAL_MEDUSA_API_URL ??
+    process.env.PUBLIC_MEDUSA_API_URL ??
+    process.env.MEDUSA_BACKEND_URL ??
+    process.env.VITE_MEDUSA_BACKEND_URL ??
+    'http://localhost:9000').replace(/\/+$/, '');
+
+const resolvePublishableKey = () =>
+  process.env.MEDUSA_PUBLISHABLE_KEY ?? '';
+
 export const newsletterSubscriberSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
   firstName: z.string().optional(),
@@ -30,11 +40,19 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     const referrer = request.headers.get('referer') || undefined;
 
     // Call Medusa backend API to create landing lead
-    const backendUrl = process.env.MEDUSA_BACKEND_URL || 'http://localhost:9000';
+    const backendUrl = resolveBackendUrl();
+    const publishableKey = resolvePublishableKey();
+    
+    if (!publishableKey) {
+      console.error('MEDUSA_PUBLISHABLE_KEY is not set');
+      return data({ errors: { root: { message: 'Configuration error' } } }, { status: 500 });
+    }
+    
     const response = await fetch(`${backendUrl}/store/landing-leads`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'x-publishable-api-key': publishableKey,
       },
       body: JSON.stringify({
         email,

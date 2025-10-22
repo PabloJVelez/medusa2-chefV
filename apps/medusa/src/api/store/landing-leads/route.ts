@@ -1,8 +1,7 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { z } from "zod"
 import { MedusaError } from "@medusajs/framework/utils"
-import LandingLeadModuleService from "../../../modules/landing-lead/service"
-import { LANDING_LEAD_MODULE } from "../../../modules/landing-lead"
+import { createLandingLeadWorkflow } from "../../../workflows/create-landing-lead"
 
 const createLandingLeadSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -31,58 +30,18 @@ export async function POST(
   req: MedusaRequest<CreateLandingLeadInput>,
   res: MedusaResponse
 ) {
-  const landingLeadModuleService: LandingLeadModuleService = req.scope.resolve(LANDING_LEAD_MODULE)
-  const eventBusService = req.scope.resolve("eventBusModuleService")
-
   try {
     // Validate request body
     const validatedData = createLandingLeadSchema.parse(req.body)
 
-    // Check if lead already exists
-    const existingLead = await landingLeadModuleService.findByEmail(
-      validatedData.email
-    )
-
-    if (existingLead) {
-      // Update existing lead with new information
-      const updatedLead = await landingLeadModuleService.updateLandingLeads({
-        id: existingLead.id,
-        ...validatedData,
-        followUpCount: existingLead.followUpCount,
-      })
-
-      // Emit event for existing lead update
-      await eventBusService.emit("landing_lead.updated", {
-        id: updatedLead.id,
-        email: updatedLead.email,
-        isReturning: true,
-      })
-
-      return res.status(200).json({
-        lead: updatedLead,
-        message: "Lead updated successfully",
-      })
-    }
-
-    // Create new lead
-    const lead = await landingLeadModuleService.createLandingLeads({
-      ...validatedData,
-      status: 'new',
-      followUpCount: 0,
+    // Run workflow to create/update lead and emit event
+    const { result } = await createLandingLeadWorkflow(req.scope).run({
+      input: validatedData
     })
 
-    // Emit event for new lead
-    await eventBusService.emit("landing_lead.created", {
-      id: lead.id,
-      email: lead.email,
-      source: lead.source,
-      utmSource: lead.utmSource,
-      utmCampaign: lead.utmCampaign,
-    })
-
-    return res.status(201).json({
-      lead,
-      message: "Lead created successfully",
+    return res.status(result.isNew ? 201 : 200).json({
+      lead: result.lead,
+      message: result.isNew ? "Lead created successfully" : "Lead updated successfully",
     })
   } catch (error) {
     if (error instanceof z.ZodError) {

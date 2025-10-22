@@ -1,4 +1,5 @@
 import type { SubscriberArgs, SubscriberConfig } from "@medusajs/framework"
+import { Modules } from "@medusajs/framework/utils"
 import LandingLeadModuleService from "../modules/landing-lead/service"
 import { LANDING_LEAD_MODULE } from "../modules/landing-lead"
 
@@ -8,13 +9,20 @@ type EventData = {
   source?: string
   utmSource?: string
   utmCampaign?: string
+  isNew?: boolean
 }
 
 export default async function landingLeadCreatedHandler({
   event: { data },
   container,
 }: SubscriberArgs<EventData>) {
-  const notificationModuleService = container.resolve("notificationModuleService")
+  // Only send emails for new leads
+  if (!data.isNew) {
+    console.log("📧 Skipping email for existing lead:", data.email)
+    return
+  }
+
+  const notificationService = container.resolve(Modules.NOTIFICATION)
   const landingLeadModuleService: LandingLeadModuleService = container.resolve(LANDING_LEAD_MODULE)
 
   console.log("📧 Landing lead created:", data.email)
@@ -24,7 +32,7 @@ export default async function landingLeadCreatedHandler({
     const lead = await landingLeadModuleService.retrieveLandingLead(data.id)
 
     // Send welcome email to the lead
-    await notificationModuleService.createNotifications({
+    await notificationService.createNotifications({
       to: lead.email,
       channel: "email",
       template: "landing-lead-welcome",
@@ -38,7 +46,7 @@ export default async function landingLeadCreatedHandler({
 
     // Send notification to admin
     const adminEmail = process.env.ADMIN_EMAIL || "admin@example.com"
-    await notificationModuleService.createNotifications({
+    await notificationService.createNotifications({
       to: adminEmail,
       channel: "email",
       template: "landing-lead-notification",
@@ -53,8 +61,8 @@ export default async function landingLeadCreatedHandler({
         utmCampaign: lead.utmCampaign,
         message: lead.message,
         interestedIn: lead.interestedIn,
-        createdAt: lead.createdAt,
-        adminDashboardUrl: `${process.env.ADMIN_BACKEND_URL}/admin/landing-leads/${lead.id}`,
+        createdAt: lead.created_at,
+        adminDashboardUrl: `${process.env.ADMIN_BACKEND_URL || 'http://localhost:9000'}/app/landing-leads/${lead.id}`,
       },
     })
 

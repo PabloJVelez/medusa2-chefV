@@ -3,6 +3,7 @@ import { Client, Admin } from '@medusajs/js-sdk'
 import { AdminMenusResource } from './admin/admin-menus'
 import { AdminChefEventsResource } from './admin/admin-chef-events'
 import { AdminUploadsResource } from './admin/admin-uploads'
+import { AdminLandingLeadsResource } from './admin/admin-landing-leads'
 import { ExtendedStoreSDK } from './store'
 
 // Vite will inline this at build time for browser bundles.
@@ -13,12 +14,14 @@ class ExtendedAdminSDK extends Admin {
   public menus: AdminMenusResource
   public chefEvents: AdminChefEventsResource
   public uploads: AdminUploadsResource
+  public landingLeads: AdminLandingLeadsResource
 
   constructor(client: Client) {
     super(client)
     this.menus = new AdminMenusResource(client)
     this.chefEvents = new AdminChefEventsResource(client)
     this.uploads = new AdminUploadsResource(client)
+    this.landingLeads = new AdminLandingLeadsResource(client)
   }
 }
 
@@ -49,5 +52,6 @@ export const sdk = new ExtendedSDK(baseUrl)
 
 export { AdminChefEventsResource } from './admin/admin-chef-events'
 export { AdminMenusResource } from './admin/admin-menus'
+export { AdminLandingLeadsResource } from './admin/admin-landing-leads'
 export { ExtendedStoreSDK } from './store'
 export type * from './store'

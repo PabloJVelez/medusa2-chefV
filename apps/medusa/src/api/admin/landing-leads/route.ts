@@ -17,24 +17,33 @@ export async function GET(
     source,
     limit = 50,
     offset = 0,
+    q,
   } = req.query as {
-    status?: string
-    source?: string
+    status?: string | string[]
+    source?: string | string[]
     limit?: number
     offset?: number
+    q?: string
   }
 
-  const filters: any = {}
-  if (status) filters.status = status
-  if (source) filters.source = source
+  const filter: any = {}
+  if (status) filter.status = Array.isArray(status) ? status : [status]
+  if (source) filter.source = Array.isArray(source) ? source : [source]
+  if (q) filter.q = q
 
-  const [leads, count] = await landingLeadModuleService.listAndCountLandingLeads(filters)
-
-  return res.json({
-    leads: leads.slice(Number(offset), Number(offset) + Number(limit)),
+    const [leads, count] = await landingLeadModuleService.listAndCountLandingLeads(
+      filter,
+      {
+        take: Number(limit),
+        skip: Number(offset),
+      }
+    )
+  
+  res.json({ 
+    leads, 
     count,
     limit: Number(limit),
-    offset: Number(offset),
+    offset: Number(offset)
   })
 }
 
