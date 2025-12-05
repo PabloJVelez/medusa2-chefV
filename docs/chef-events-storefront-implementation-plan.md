@@ -129,7 +129,7 @@ const listStoreMenusSchema = z.object({
 const createStoreChefEventSchema = z.object({
   requestedDate: z.string().datetime(),
   requestedTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/),
-  partySize: z.number().min(2).max(50),
+  partySize: z.number().min(2),
   eventType: z.enum(['cooking_class', 'plated_dinner', 'buffet_style']),
   templateProductId: z.string().optional(),
   locationType: z.enum(['customer_location', 'chef_location']),
@@ -439,7 +439,7 @@ const eventRequestSchema = z.object({
   eventType: z.enum(['cooking_class', 'plated_dinner', 'buffet_style']),
   requestedDate: z.string().date(),
   requestedTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/),
-  partySize: z.number().min(2).max(50),
+  partySize: z.number().min(2),
   locationType: z.enum(['customer_location', 'chef_location']),
   locationAddress: z.string().min(10),
   firstName: z.string().min(1),

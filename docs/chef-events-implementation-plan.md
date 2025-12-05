@@ -25,7 +25,7 @@ This implementation plan creates a comprehensive chef event management system th
 - **Field Management**: All fields editable through admin initially
 - **Validation Rules**: 
   - Events must be scheduled in the future
-  - Party size max 50
+  - Party size minimum 2 guests
   - Required field validation
 - **Status Management**: Simple updates with transition restrictions
 - **Product Integration**: Link events to specific menus
@@ -211,7 +211,7 @@ const createChefEventSchema = z.object({
   status: z.enum(['pending', 'confirmed', 'cancelled', 'completed']).default('pending'),
   requestedDate: z.string(),
   requestedTime: z.string(),
-  partySize: z.number().min(1).max(50),
+  partySize: z.number().min(1),
   eventType: z.enum(['cooking_class', 'plated_dinner', 'buffet_style']),
   templateProductId: z.string().optional(),
   locationType: z.enum(['customer_location', 'chef_location']),
@@ -275,7 +275,7 @@ const updateChefEventSchema = z.object({
   status: z.enum(['pending', 'confirmed', 'cancelled', 'completed']).optional(),
   requestedDate: z.string().optional(),
   requestedTime: z.string().optional(),
-  partySize: z.number().min(1).max(50).optional(),
+  partySize: z.number().min(1).optional(),
   eventType: z.enum(['cooking_class', 'plated_dinner', 'buffet_style']).optional(),
   templateProductId: z.string().optional(),
   locationType: z.enum(['customer_location', 'chef_location']).optional(),
@@ -349,7 +349,7 @@ export const chefEventSchema = z.object({
     /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/,
     "Time must be in HH:MM format"
   ),
-  partySize: z.number().min(1, "Party size must be at least 1").max(50, "Party size cannot exceed 50"),
+  partySize: z.number().min(1, "Party size must be at least 1"),
   eventType: z.enum(['cooking_class', 'plated_dinner', 'buffet_style']),
   templateProductId: z.string().optional(),
   locationType: z.enum(['customer_location', 'chef_location']),

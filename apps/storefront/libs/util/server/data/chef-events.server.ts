@@ -56,17 +56,12 @@ import { PRICING_STRUCTURE } from '@libs/constants/pricing';
 export { PRICING_STRUCTURE };
 
 // Calculate total price for an event
-export const calculateEventPrice = (
-  eventType: keyof typeof PRICING_STRUCTURE,
-  partySize: number
-): number => {
+export const calculateEventPrice = (eventType: keyof typeof PRICING_STRUCTURE, partySize: number): number => {
   return PRICING_STRUCTURE[eventType] * partySize;
 };
 
 // Create a chef event request
-export const createChefEventRequest = async (
-  data: StoreCreateChefEventDTO
-): Promise<StoreChefEventResponse> => {
+export const createChefEventRequest = async (data: StoreCreateChefEventDTO): Promise<StoreChefEventResponse> => {
   try {
     const requestUrl = `${baseMedusaConfig.baseUrl}/store/chef-events`;
 
@@ -104,9 +99,9 @@ export const createChefEventRequest = async (
 
     // Wrap other errors
     throw new Error(
-      error instanceof Error 
+      error instanceof Error
         ? `Failed to create chef event request: ${error.message}`
-        : 'Failed to create chef event request: Unknown error'
+        : 'Failed to create chef event request: Unknown error',
     );
   }
 };
@@ -135,7 +130,7 @@ export const validateEventRequest = (data: StoreCreateChefEventDTO): string[] =>
     const eventDate = new Date(data.requestedDate);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
+
     if (eventDate < today) {
       errors.push('Event date cannot be in the past');
     }
@@ -147,8 +142,6 @@ export const validateEventRequest = (data: StoreCreateChefEventDTO): string[] =>
 
   if (!data.partySize || data.partySize < 2) {
     errors.push('Minimum party size is 2');
-  } else if (data.partySize > 50) {
-    errors.push('Maximum party size is 50');
   }
 
   if (!data.eventType) {
@@ -164,4 +157,4 @@ export const validateEventRequest = (data: StoreCreateChefEventDTO): string[] =>
   }
 
   return errors;
-}; 
+};
