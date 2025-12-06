@@ -1,5 +1,6 @@
 import type { MedusaRequest, MedusaResponse } from '@medusajs/framework/http';
 import { verifyMagicLinkToken } from '../../../../modules/utils/magic-link';
+import ChefEventModuleService from '../../../../modules/chef-event/service';
 
 /**
  * Magic Link Authentication Route
@@ -26,7 +27,7 @@ export async function GET(req: MedusaRequest<{ token: string }>, res: MedusaResp
     }
 
     // Get the chef event to verify it exists
-    const chefEventModuleService = req.scope.resolve('chefEventModuleService');
+    const chefEventModuleService: ChefEventModuleService = req.scope.resolve('chefEventModuleService');
     const chefEvent = await chefEventModuleService.retrieveChefEvent(eventId);
 
     if (!chefEvent) {
