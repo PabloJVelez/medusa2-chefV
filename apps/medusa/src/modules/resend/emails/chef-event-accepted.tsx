@@ -1,73 +1,72 @@
-import { 
-  Text, 
-  Column, 
-  Container, 
-  Heading, 
-  Html, 
-  Row, 
-  Section, 
-  Tailwind, 
-  Head, 
-  Preview, 
-  Body, 
-  Link, 
+import {
+  Text,
+  Column,
+  Container,
+  Heading,
+  Html,
+  Row,
+  Section,
+  Tailwind,
+  Head,
+  Preview,
+  Body,
+  Link,
   Button,
-} from "@react-email/components"
+} from '@react-email/components';
 
 type ChefEventAcceptedEmailProps = {
   customer: {
-    first_name: string
-    last_name: string
-    email: string
-    phone: string
-  }
+    first_name: string;
+    last_name: string;
+    email: string;
+    phone: string;
+  };
   booking: {
-    date: string
-    time: string
-    menu: string
-    event_type: string
-    location_type: string
-    location_address: string
-    party_size: number
-    notes: string
-  }
+    date: string;
+    time: string;
+    menu: string;
+    event_type: string;
+    location_type: string;
+    location_address: string;
+    party_size: number;
+    notes: string;
+  };
   event: {
-    status: string
-    total_price: string
-    price_per_person: string
-    deposit_required: string
-    deposit_deadline: string
-    minimum_tickets: number
-    is_full_deposit: boolean
-  }
+    status: string;
+    total_price: string;
+    price_per_person: string;
+    deposit_required: string;
+    deposit_deadline: string;
+    minimum_tickets: number;
+    is_full_deposit: boolean;
+  };
   product: {
-    id: string
-    handle: string
-    title: string
-    purchase_url: string
-  }
+    id: string;
+    handle: string;
+    title: string;
+    purchase_url: string;
+  };
   chef: {
-    name: string
-    email: string
-    phone: string
-  }
-  requestReference: string
-  acceptanceDate: string
-  chefNotes: string
-  emailType: "customer_acceptance"
-}
+    name: string;
+    email: string;
+    phone: string;
+  };
+  requestReference: string;
+  acceptanceDate: string;
+  chefNotes: string;
+  emailType: 'customer_acceptance';
+};
 
-function ChefEventAcceptedEmailComponent({ 
-  customer, 
-  booking, 
-  event, 
-  product, 
-  chef, 
-  requestReference, 
+function ChefEventAcceptedEmailComponent({
+  customer,
+  booking,
+  event,
+  product,
+  chef,
+  requestReference,
   acceptanceDate,
-  chefNotes 
+  chefNotes,
 }: ChefEventAcceptedEmailProps) {
-  
   return (
     <Tailwind>
       <Html className="font-sans bg-gray-100">
@@ -75,16 +74,12 @@ function ChefEventAcceptedEmailComponent({
         <Preview>Great news! Your chef event has been accepted</Preview>
         <Body className="bg-white my-10 mx-auto w-full max-w-2xl">
           {/* Header */}
-          <Section className="bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-4">
+          <Section className="bg-gradient-to-r from-green-500 to-green-600 px-6 py-4">
             <Container>
               <Row>
                 <Column>
-                  <Heading className="text-2xl font-bold m-0">
-                    🎉 Booking Confirmed!
-                  </Heading>
-                  <Text className="text-green-100 m-0">
-                    Your chef event request has been confirmed
-                  </Text>
+                  <Heading className="text-2xl font-bold m-0 text-white">🎉 Booking Confirmed!</Heading>
+                  <Text className="text-green-100 m-0">Your chef event request has been confirmed</Text>
                 </Column>
               </Row>
             </Container>
@@ -92,22 +87,16 @@ function ChefEventAcceptedEmailComponent({
 
           {/* Main Content */}
           <Container className="p-6">
-            <Heading className="text-2xl font-bold text-gray-800 mb-4">
-              Great News!
-            </Heading>
-            <Text className="text-gray-600 mb-6">
-              Dear {customer.first_name},
-            </Text>
+            <Heading className="text-2xl font-bold text-gray-800 mb-4">Great News!</Heading>
+            <Text className="text-gray-600 mb-6">Dear {customer.first_name},</Text>
             <Text className="text-gray-600 mb-6">
               Your chef has confirmed your booking! Here are your event details:
             </Text>
 
             {/* Event Details */}
             <Section className="bg-gray-50 rounded-lg p-6 mb-6">
-              <Heading className="text-lg font-semibold text-gray-800 mb-4">
-                Event Details
-              </Heading>
-              
+              <Heading className="text-lg font-semibold text-gray-800 mb-4">Event Details</Heading>
+
               <Row className="mb-3">
                 <Column className="w-1/3">
                   <Text className="font-semibold text-gray-700">Date:</Text>
@@ -174,10 +163,8 @@ function ChefEventAcceptedEmailComponent({
 
             {/* Payment Details */}
             <Section className="bg-green-50 rounded-lg p-6 mb-6">
-              <Heading className="text-lg font-semibold text-gray-800 mb-4">
-                Payment Details
-              </Heading>
-              
+              <Heading className="text-lg font-semibold text-gray-800 mb-4">Payment Details</Heading>
+
               <Row className="mb-3">
                 <Column className="w-1/3">
                   <Text className="font-semibold text-gray-700">Total Price:</Text>
@@ -219,16 +206,15 @@ function ChefEventAcceptedEmailComponent({
               )}
 
               <Text className="text-gray-600 mt-4">
-                {event.is_full_deposit 
+                {event.is_full_deposit
                   ? `To secure your booking, please pay the full amount by ${event.deposit_deadline}.`
-                  : `To secure your booking, please purchase at least ${event.minimum_tickets} tickets by ${event.deposit_deadline}. Additional guests can purchase their tickets later.`
-                }
+                  : `To secure your booking, please purchase at least ${event.minimum_tickets} tickets by ${event.deposit_deadline}. Additional guests can purchase their tickets later.`}
               </Text>
             </Section>
 
             {/* Payment Button */}
             <Section className="text-center mb-6">
-              <Button 
+              <Button
                 href={product.purchase_url}
                 className="bg-green-600 text-white px-8 py-4 rounded-lg font-semibold text-lg"
               >
@@ -238,18 +224,10 @@ function ChefEventAcceptedEmailComponent({
 
             {/* What's Next */}
             <Section className="bg-blue-50 rounded-lg p-6 mb-6">
-              <Heading className="text-lg font-semibold text-gray-800 mb-4">
-                What's Next?
-              </Heading>
-              <Text className="text-gray-600 mb-3">
-                1. Pay your deposit to secure the booking
-              </Text>
-              <Text className="text-gray-600 mb-3">
-                2. Our chef will contact you to discuss menu details
-              </Text>
-              <Text className="text-gray-600">
-                3. We'll send you a reminder 48 hours before the event
-              </Text>
+              <Heading className="text-lg font-semibold text-gray-800 mb-4">What's Next?</Heading>
+              <Text className="text-gray-600 mb-3">1. Pay your deposit to secure the booking</Text>
+              <Text className="text-gray-600 mb-3">2. Our chef will contact you to discuss menu details</Text>
+              <Text className="text-gray-600">3. We'll send you a reminder 48 hours before the event</Text>
             </Section>
 
             {/* Reference Number */}
@@ -257,9 +235,7 @@ function ChefEventAcceptedEmailComponent({
               <Text className="text-sm text-gray-500">
                 Reference: <strong>{requestReference}</strong>
               </Text>
-              <Text className="text-sm text-gray-500">
-                Accepted on: {acceptanceDate}
-              </Text>
+              <Text className="text-sm text-gray-500">Accepted on: {acceptanceDate}</Text>
             </Section>
           </Container>
 
@@ -281,9 +257,9 @@ function ChefEventAcceptedEmailComponent({
         </Body>
       </Html>
     </Tailwind>
-  )
+  );
 }
 
 export const chefEventAcceptedEmail = (props: ChefEventAcceptedEmailProps) => (
   <ChefEventAcceptedEmailComponent {...props} />
-) 
+);
