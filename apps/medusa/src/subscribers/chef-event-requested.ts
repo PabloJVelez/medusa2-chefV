@@ -113,28 +113,33 @@ export default async function chefEventRequestedHandler({ event: { data }, conta
     if (chefEmails.length === 0) {
       logger.warn('No chef emails configured in CHEF_NOTIFICATIONS_LIST');
     } else {
-      // Send individual notifications to each chef
-      const chefNotifications = chefEmails.map(
-        (email) =>
-          ({
-            to: email,
-            channel: 'email' as const,
-            template: 'chef-event-requested',
-            data: {
-              ...emailData,
-              emailType: 'chef_notification',
-              requestReference: chefEvent.id.slice(0, 8).toUpperCase(),
-              chefContact: {
-                email: 'support@chefvelez.com',
-                phone: '(347) 695-4445',
-              },
-              magicLinkUrl: magicLinkUrl,
+      // Send individual notifications to each chef with 2-second delay between each
+      for (let i = 0; i < chefEmails.length; i++) {
+        const email = chefEmails[i];
+        const notification = {
+          to: email,
+          channel: 'email' as const,
+          template: 'chef-event-requested',
+          data: {
+            ...emailData,
+            emailType: 'chef_notification',
+            requestReference: chefEvent.id.slice(0, 8).toUpperCase(),
+            chefContact: {
+              email: 'support@chefvelez.com',
+              phone: '(347) 695-4445',
             },
-          }) as CreateNotificationDTO,
-      );
+            magicLinkUrl: magicLinkUrl,
+          },
+        } as CreateNotificationDTO;
 
-      // Send all notifications
-      await Promise.all(chefNotifications.map((notification) => notificationService.createNotifications(notification)));
+        // Send notification
+        await notificationService.createNotifications(notification);
+
+        // Wait 2 seconds before sending the next email (except for the last one)
+        if (i < chefEmails.length - 1) {
+          await new Promise((resolve) => setTimeout(resolve, 2000));
+        }
+      }
 
       logger.info(`Sent chef event notifications to ${chefEmails.length} chef(s): ${chefEmails.join(', ')}`);
     }
