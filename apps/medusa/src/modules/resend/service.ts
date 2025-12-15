@@ -123,12 +123,14 @@ class ResendNotificationProviderService extends AbstractNotificationProviderServ
       emailOptions = {
         ...commonOptions,
         html: template,
-      };
+        from: this.options.from,
+      } as CreateEmailOptions;
     } else {
       emailOptions = {
         ...commonOptions,
         react: template(notification.data),
-      };
+        from: this.options.from,
+      } as CreateEmailOptions;
     }
 
     const { data, error } = await this.resendClient.emails.send(emailOptions);

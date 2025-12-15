@@ -38,19 +38,11 @@ export default async function chefEventPaymentReminderHandler({
 
       product = await productModuleService.retrieveProduct(chefEvent.productId, {
         relations: ['variants'],
-        fields: ['*', 'variants.*', 'variants.inventory_quantity'],
       });
 
       // Calculate remaining tickets
       if (product && product.variants) {
         for (const variant of product.variants) {
-          // First, try to use variant's inventory_quantity if available (simpler approach)
-          if (variant.inventory_quantity !== undefined && variant.inventory_quantity !== null) {
-            const variantInventory = Number(variant.inventory_quantity);
-            remainingTickets += Math.max(0, variantInventory);
-            continue;
-          }
-
           if (!variant.sku) continue;
 
           // Get inventory items for this variant
@@ -66,8 +58,8 @@ export default async function chefEventPaymentReminderHandler({
 
             // Sum available inventory (stocked - reserved)
             for (const level of levels) {
-              const stocked = Number(level.stocked_quantity || level.stockedQuantity || 0);
-              const reserved = Number(level.reserved_quantity || level.reservedQuantity || 0);
+              const stocked = Number(level.stocked_quantity || 0);
+              const reserved = Number(level.reserved_quantity || 0);
               const available = stocked - reserved;
               remainingTickets += Math.max(0, available);
             }

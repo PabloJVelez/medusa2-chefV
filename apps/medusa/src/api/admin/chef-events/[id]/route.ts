@@ -46,7 +46,6 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
       // Retrieve product with variants and inventory information
       const product = await productModuleService.retrieveProduct(chefEvent.productId, {
         relations: ['variants'],
-        fields: ['*', 'variants.*', 'variants.inventory_quantity'],
       });
 
       logger.info(
@@ -55,14 +54,6 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
 
       if (product && product.variants) {
         for (const variant of product.variants) {
-          // First, try to use variant's inventory_quantity if available (simpler approach)
-          if (variant.inventory_quantity !== undefined && variant.inventory_quantity !== null) {
-            const variantInventory = Number(variant.inventory_quantity);
-            logger.info(`Using variant inventory_quantity: ${variantInventory} for variant ${variant.id}`);
-            availableTickets += Math.max(0, variantInventory);
-            continue;
-          }
-
           if (!variant.sku) {
             logger.warn(`Variant ${variant.id} has no SKU`);
             continue;
@@ -119,8 +110,8 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
 
             // Sum available inventory (stocked - reserved)
             for (const level of levels) {
-              const stocked = Number(level.stocked_quantity || level.stockedQuantity || 0);
-              const reserved = Number(level.reserved_quantity || level.reservedQuantity || 0);
+              const stocked = Number(level.stocked_quantity || 0);
+              const reserved = Number(level.reserved_quantity || 0);
               const available = stocked - reserved;
               logger.info(`Level ${level.id}: stocked=${stocked}, reserved=${reserved}, available=${available}`);
               availableTickets += Math.max(0, available);
@@ -141,7 +132,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
       const logger = req.scope.resolve('logger');
       logger.error(
         `Failed to calculate available tickets for chef event ${id}: ${error instanceof Error ? error.message : String(error)}`,
-        error,
+        error instanceof Error ? error : undefined,
       );
     }
   }
