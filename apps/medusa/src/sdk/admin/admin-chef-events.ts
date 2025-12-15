@@ -37,6 +37,8 @@ export interface AdminChefEventDTO {
   }>
   lastEmailSentAt?: Date
   customEmailRecipients?: string[]
+  // Inventory information
+  availableTickets?: number
   createdAt: Date
   updatedAt: Date
 }
@@ -119,6 +121,11 @@ export interface AdminResendEventEmailDTO {
   recipients: string[]
   notes?: string
   emailType?: "event_details_resend" | "custom_message"
+}
+
+export interface AdminSendPaymentReminderDTO {
+  recipients?: string[]
+  notes?: string
 }
 
 export class AdminChefEventsResource {
@@ -239,5 +246,19 @@ export class AdminChefEventsResource {
     return this.client.fetch<{ products: Array<{ id: string, title: string }> }>(`/admin/products`, {
       method: 'GET',
     })
+  }
+
+  /**
+   * Send payment reminder to host for remaining tickets
+   * @param id - Chef event ID
+   * @param data - Payment reminder data
+   * @returns Payment reminder result
+   */
+  async sendPaymentReminder(id: string, data: AdminSendPaymentReminderDTO = {}) {
+    const response = await this.client.fetch<{ success: boolean; data: any }>(`/admin/chef-events/${id}/send-payment-reminder`, {
+      method: 'POST',
+      body: data,
+    })
+    return response
   }
 }

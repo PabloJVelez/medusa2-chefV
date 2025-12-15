@@ -8,7 +8,8 @@ import type {
   AdminChefEventsResponse,
   AdminAcceptChefEventDTO,
   AdminRejectChefEventDTO,
-  AdminResendEventEmailDTO
+  AdminResendEventEmailDTO,
+  AdminSendPaymentReminderDTO
 } from '../../sdk/admin/admin-chef-events'
 
 const QUERY_KEY = ['chef-events']
@@ -116,6 +117,23 @@ export const useAdminGetMenuProducts = () => {
     queryKey: [...QUERY_KEY, 'menu-products'],
     queryFn: async () => {
       return sdk.admin.chefEvents.getMenuProducts()
+    },
+  })
+}
+
+/**
+ * Hook for sending payment reminder emails
+ */
+export const useAdminSendPaymentReminderMutation = () => {
+  const queryClient = useQueryClient()
+  
+  return useMutation({
+    mutationFn: async ({ chefEventId, ...data }: { chefEventId: string } & AdminSendPaymentReminderDTO) => {
+      return await sdk.admin.chefEvents.sendPaymentReminder(chefEventId, data)
+    },
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEY })
+      queryClient.invalidateQueries({ queryKey: [...QUERY_KEY, variables.chefEventId] })
     },
   })
 } 

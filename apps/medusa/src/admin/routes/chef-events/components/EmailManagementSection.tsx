@@ -14,6 +14,7 @@ const getEmailTypeLabel = (emailType: string): string => {
   const emailTypeMap: Record<string, string> = {
     event_details_resend: 'Event Details',
     custom_message: 'Custom Message',
+    payment_reminder: 'Payment Reminder',
     'chef-event-requested': 'Event Request',
     'chef-event-accepted': 'Event Accepted',
     'chef-event-rejected': 'Event Rejected',
