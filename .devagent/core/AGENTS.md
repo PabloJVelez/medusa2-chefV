@@ -104,7 +104,9 @@ When invoked with `devagent [workflow-name]` and required inputs, **EXECUTE IMME
 - `devagent brainstorm` — Facilitates structured ideation to generate, cluster, and prioritize candidates (often product features). Utilize when exploring solution spaces before research or when generating ideas from mission goals. See `.devagent/core/workflows/brainstorm.md`.
 - `devagent research` — Maps open questions and gathers vetted references. Utilize when a new task or feature needs discovery or spec clarification. See `.devagent/core/workflows/research.md`.
 - `devagent new-task` — From a short description, scaffold the minimal task hub with standard folders and a populated README, then recommend next workflows. See `.devagent/core/workflows/new-task.md`.
+- `devagent new-worktree` — Creates a new git worktree and optionally migrates uncommitted work from the current workspace to the new worktree, enabling concurrent feature development without context switching or stashing conflicts. Utilize when you need to work on multiple features simultaneously or spin off unrelated work into a separate worktree. See `.devagent/core/workflows/new-worktree.md`.
 - `devagent create-plan` — Synthesizes research into comprehensive plans combining product context and implementation tasks. Utilize when planning a task or major work item. See `.devagent/core/workflows/create-plan.md`.
+- `devagent review-plan` — Enables interactive review of plan documents before implementation, providing high-level summaries and adaptive suggestions for walking through plans to validate alignment with expectations. Utilize when you want to validate a plan created by `devagent create-plan` before proceeding to implementation. See `.devagent/core/workflows/review-plan.md`.
 - `devagent implement-plan` — Executes implementation tasks from plan documents, performing coding work sequentially and tracking progress in AGENTS.md files. Utilize when ready to implement tasks from a plan document created by `devagent create-plan`. See `.devagent/core/workflows/implement-plan.md`.
 - `devagent execute-full-task` — Executes a full task lifecycle end-to-end with complexity-based routing and task hub execution summaries. Utilize when you want a single prompt to run from task intake through completion. See `.devagent/core/workflows/execute-full-task.md`.
 - `devagent handoff` — Generates a structured handoff prompt for starting a new agent thread while preserving current context. Utilize when you need a manual copy/paste handoff to continue work in a fresh session. See `.devagent/core/workflows/handoff.md`.
@@ -114,7 +116,8 @@ When invoked with `devagent [workflow-name]` and required inputs, **EXECUTE IMME
 - `devagent update-tech-stack` — Creates or updates comprehensive tech stack documentation by analyzing codebases and gathering developer context. Utilize when documenting technology choices for a new or existing project. See `.devagent/core/workflows/update-tech-stack.md`.
 - `devagent build-workflow` — Designs high-quality agent prompts and instruction sheets that integrate with the DevAgent roster. Utilize when creating new agents or updating agent templates. See `.devagent/core/workflows/build-workflow.md`.
 - `devagent update-constitution` — Updates the project constitution and related governance documents. Utilize when constitutional changes or updates are needed. See `.devagent/core/workflows/update-constitution.md`.
-- `devagent update-devagent` — Updates DevAgent core files, commands, and skills by running the core update script and summarizing changes. Utilize when syncing with the DevAgent repository. See `.devagent/core/workflows/update-devagent.md`.
+- `devagent update-devagent` — Updates DevAgent core files, plugins, commands, and skills by running update scripts and summarizing changes. Utilize when syncing with the DevAgent repository. See `.devagent/core/workflows/update-devagent.md`.
+- `devagent verify-plugins` — Verifies that configured plugins are properly installed, valid, and wired. See `.devagent/core/workflows/verify-plugins.md`.
 - `devagent mark-task-complete` — Moves a completed task (task hub) from `active/` to `completed/` status, updating all status references and path references throughout the task directory. Utilize when a task is complete and ready to be archived. See `.devagent/core/workflows/mark-task-complete.md`.
 
 ## Workflow Naming Convention
@@ -128,15 +131,18 @@ Workflows follow a consistent `action-target` naming pattern for clarity and mem
 | brainstorm | Generates and prioritizes idea candidates |
 | research | Researches and gathers references for tasks |
 | create-plan | Designs plans combining product context and implementation tasks |
+| review-plan | Reviews plan documents interactively to validate alignment before implementation |
 | implement-plan | Executes implementation tasks from plan documents with progress tracking |
 | execute-full-task | Executes a full task lifecycle end-to-end with complexity-based routing |
 | handoff | Generates a structured handoff prompt for starting a new agent thread |
 | new-task | Scaffolds a minimal task hub from a short description |
+| new-worktree | Creates a new git worktree and optionally migrates uncommitted work |
 | review-progress | Captures progress state for efficient resumption |
 | review-pr | Reviews pull requests with requirements validation and code quality assessment |
 | compare-prs | Compares multiple PRs to determine which is best to work with |
 | update-tech-stack | Documents technology stack choices |
 | build-workflow | Builds new agent prompts and templates |
 | update-constitution | Updates project constitution and governance |
-| update-devagent | Updates DevAgent core files, commands, and skills |
+| update-devagent | Updates DevAgent core files, plugins, commands, and skills |
+| verify-plugins | Verifies plugin installation and wiring |
 | mark-task-complete | Moves completed tasks to archived status with path updates |

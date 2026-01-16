@@ -16,6 +16,7 @@ Before executing this workflow, review standard instructions in `.devagent/core/
 ## Execution Directive
 Follow standard execution directive in `.devagent/core/AGENTS.md` → Standard Workflow Instructions, with the following workflow-specific customization:
 - **BEGIN AN INTERACTIVE CLARIFICATION SESSION IMMEDIATELY**—start the conversation and ask the first batch of questions.
+- **⚠️ CRITICAL: Do NOT ask questions dimensionally.** Do not say "Let's cover Problem Validation" or "Now moving to Users & Stakeholders." Instead, ask helpful, context-aware questions that flow naturally from what you've learned about the task. Reference the task name, existing documentation, and context. See Constitution C6 (Simplicity Over Rigidity) and `.devagent/core/templates/clarification-questions-framework.md` for guidance on helpful vs. dimensional questioning.
 
 ## Interactive Session Model (Default)
 This workflow runs as a multi-turn conversation that progressively builds a complete Clarification Packet. Your job is to guide the user through questions 2–3 at a time (progressive disclosure), track what's answered vs. open, and only generate the final document when all questions have a status.
@@ -31,7 +32,7 @@ This workflow runs as a multi-turn conversation that progressively builds a comp
 - After the last question, **remind the user they can end the session at any time by saying "all done" or by not continuing**, then stop and wait for answers. Do not ask follow-ups in the same turn.
 
 ### Question Tracking (Hard Rules)
-Maintain a running question tracker across the session, organized by the 8 clarification dimensions. After each user response, update the tracker.
+Maintain a running question tracker across the session to track what's been answered vs. open. After each user response, update the tracker. **Note:** You don't need to organize by dimensions or validate dimension status—just track questions and answers.
 
 **Allowed status labels (use exactly these):**
 - `✅ answered` — user provided an answer
@@ -45,24 +46,26 @@ Maintain a running question tracker across the session, organized by the 8 clari
 
 ### Progress Tracking (Hard Rules)
 At the top of each turn, show a compact progress header:
-- Dimension checklist with status: `✅ complete`, `⏳ in progress`, or `⬜ not started`
-- A short “what’s next” sentence (which dimension you’re asking about now)
+- A short summary of what's been clarified so far
+- A short “what’s next” sentence (what you’re asking about now)
 
 ### Completion Gate (Hard Rules)
 Do not generate the final Clarification Packet until:
-1. Every dimension has been visited, and
+1. All critical gaps have been addressed (either through questions or by confirming they're not applicable), and
 2. Every tracked question has one of the allowed status labels.
+
+**Note:** You don't need to validate dimension status or systematically cover all topics. Focus on addressing actual gaps in understanding. The framework (`.devagent/core/templates/clarification-questions-framework.md`) is an inspiration pool for generating helpful questions, not a checklist to validate against.
 
 If the user asks to finish early (by saying "all done", "finish", "done", or similar), or if they exit the workflow, generate the packet anyway but clearly mark incomplete sections and retain unanswered items as `⏭️ deferred`, `❓ unknown`, `🔍 needs research`, or `🚧 blocked` as appropriate. **Always save the current clarification document to disk before generating the final packet** to ensure no progress is lost.
 
 ## Inputs
 - Required: Task or feature concept/request (from devagent brainstorm, ad-hoc request, or escalation from devagent create-plan), identified stakeholders and decision makers, clarification scope (full task validation, gap-filling, or requirements review), mission context for alignment validation.
 - Optional: Existing materials (brainstorm packet, partial spec, related research, prior tasks), known constraints (technical, compliance), prior requirement artifacts from similar work items.
-- Request missing info by: Compile a structured gaps checklist mapped to the 8 clarification dimensions (Problem, Users, Success, Scope, Constraints, Principles, Dependencies, Acceptance), ping stakeholders with specific questions, and document unresolved items in the clarification packet for follow-up.
+- Request missing info by: Identify actual gaps in understanding, use the framework (`.devagent/core/templates/clarification-questions-framework.md`) as inspiration for generating helpful questions, ping stakeholders with specific questions, and document unresolved items in the clarification packet for follow-up.
 
 ## Resource Strategy
 - `.devagent/core/templates/clarification-packet-template.md` (Clarification Packet Template) — duplicate per task and use as the output structure.
-- `.devagent/core/templates/clarification-questions-framework.md` (Question Framework) — **use as a completeness checklist for gap analysis, not as a question template**. Analyze context first, then use this framework to identify which dimensions need questions. Ask targeted questions to fill gaps rather than following the framework systematically.
+- `.devagent/core/templates/clarification-questions-framework.md` (Question Framework) — **use as an inspiration pool for generating helpful questions, not as a checklist to validate against**. Analyze context first, identify actual gaps, then use this framework as inspiration when you need ideas for helpful questions.
 - `.devagent/core/templates/plan-document-template.md` (Plan Template as Checklist) — use to validate that clarified requirements cover all sections needed for plan work.
 - `.devagent/workspace/product/mission.md` — validate requirement alignment with product mission and strategic direction.
 - `.devagent/workspace/memory/constitution.md` — check requirement decisions against organizational principles.
@@ -86,7 +89,7 @@ Choose operating mode based on invocation context:
 **1. Task Clarification (Primary Mode):**
 - Trigger: New task idea from brainstorm or ad-hoc request needs validation before spec work
 - Duration: 1-3 clarification sessions depending on complexity
-- Output: Complete clarified requirement packet with validation status per dimension
+- Output: Complete clarified requirement packet with all clarified requirements documented
 
 **2. Gap Filling (Escalation Mode):**
 - Trigger: devagent create-plan or devagent research identifies missing or ambiguous requirements mid-stream
@@ -109,27 +112,40 @@ Choose operating mode based on invocation context:
 
 2. **Context Analysis & Gap Identification:**
    - **Analyze task hub context first:** Read the task hub's AGENTS.md, existing research files, plans, specs, or other artifacts to understand what's already documented
-   - **Identify gaps:** Compare existing documentation against the 8-dimension framework (use `.devagent/core/templates/clarification-questions-framework.md` as a completeness checklist, not as a question template) to identify missing or incomplete sections
-   - **Prioritize gaps:** Focus on the most critical gaps first, especially those that block downstream work if unanswered
-   - **Classify gaps:** Classify gaps as clarifiable (ask stakeholders) vs. researchable (need evidence)
-   - **Reference existing context:** Before asking questions, acknowledge what's already documented (e.g., "I see from your task hub that you've already documented [X]. Let me ask about [Y] to build on that")
+   - **Acknowledge what you've learned:** Before asking questions, acknowledge what's already documented (e.g., "I see from your task hub that you've already documented [X]. Let me ask about [Y] to build on that"). This makes questions feel helpful rather than like a form.
+   - **Identify gaps naturally:** Based on the context you've read, identify what information is actually missing or unclear. Use `.devagent/core/templates/clarification-questions-framework.md` as an inspiration pool for generating helpful questions, NOT as a checklist to validate against. Don't force yourself to find gaps—only identify real gaps in understanding.
+   - **Prioritize gaps:** Focus on the most critical gaps first, especially those that block downstream work if unanswered. Gaps that are well-documented or clearly not applicable should be skipped or handled with lightweight validation questions
+   - **Classify gaps:** Classify gaps as clarifiable (ask stakeholders) vs. researchable (need evidence) vs. not applicable (doesn't apply to this context)
+   - **Natural flow (Constitution C6):** This analysis flows naturally into gap-driven questioning—there are no artificial phase boundaries. Use the framework as a guide to identify what needs clarification, not as a mandate to systematically cover all dimensions. Questions should flow naturally from context, not from a dimensional checklist.
 
 3. **Gap-Driven Inquiry:**
-   - **Targeted questioning:** Based on context analysis, ask **exactly 2–3 targeted questions per turn** that fill the most critical gaps identified, then wait for answers.
-   - **Question selection principles:**
-     - Select questions from different categories each round (e.g., one from Success, one from Scope, one from Constraints) to maintain breadth while addressing gaps
+   - **Natural flow from context analysis:** Based on the gap identification from step 2, ask **exactly 2–3 targeted questions per turn** that fill the most critical gaps identified, then wait for answers. This is a natural continuation of context analysis—no artificial phase boundaries.
+   - **⚠️ CRITICAL: Avoid dimensional questioning patterns:**
+     - ❌ Do NOT say "Let's cover Scope" or "Now moving to Technical Constraints"
+     - ❌ Do NOT systematically go through dimensions regardless of context
+     - ❌ Do NOT ask questions just to "cover a dimension"
+     - ❌ Do NOT ask business questions (Problem, Success Metrics) for pure technical tasks—these are optional and only relevant for new features
+     - ✅ DO ask helpful, context-aware questions that reference the task name, existing documentation, or what you've learned
+     - ✅ DO frame questions naturally: "I see you're working on [task]. What specific [gap] are you trying to address?"
+     - ✅ DO acknowledge existing context before asking: "You mentioned [X]. Let me ask about [Y] to build on that."
+     - ✅ DO focus on technical/architectural clarification (what needs to be done, how to do it, how to verify it) rather than business validation
+   - **Question selection principles (Constitution C6: Simplicity Over Rigidity):**
+     - Ask questions only for gaps that actually exist—don't force questions to cover all dimensions
      - Prioritize questions that would block downstream work if unanswered
-     - Skip dimensions that are already well-documented or ask validation questions instead of foundational ones
+     - Skip dimensions that are already well-documented or clearly not applicable to this context
      - Frame questions specifically to the task being clarified (reference the task name, type, or context from existing documentation)
+     - Make questions helpful and natural, not formulaic or dimensional
+     - Select questions from different areas when possible to maintain breadth, but prioritize helpfulness over systematic coverage
    - **Question format:** Use multiple-choice format with letter labels (A, B, C, D, E) so users can respond with "Answer 1: B" or "Answer 2: C, D"
      - Include "All of the above" option when all answers are valid
      - "Other" option doesn't need a letter label — it's just a prompt for custom answers
-     - Questions should be high-impact for the specific task and less structured/open-ended, more targeted
+     - Questions should be high-impact for the specific task and targeted to fill identified gaps
    - **Q&A formatting (Hard Rules):** Format questions and answers in chat for maximum readability:
      - **Questions:** Use **bold** for the question number and text (e.g., **1. What is the primary goal?**)
      - **Answer options:** Indent answer choices with 2 spaces, use bold for letter labels (e.g., **A.** Option text)
      - **Answer acknowledgment:** When acknowledging user responses, briefly restate the question in bold and the answer below it with indentation for clarity
      - Use consistent indentation (2 spaces) throughout to create visual hierarchy
+     - **Spacing:** Add spacing between questions and answer options for easier readability—questions and answers should be spread out visually
    - **Incremental document updates:** After each round of questions and answers, **immediately update the clarification document with the new information and save it to disk** (this ensures progress is preserved if the user exits):
      - Add answers to the appropriate sections
      - Mark questions as answered
@@ -140,16 +156,16 @@ Choose operating mode based on invocation context:
    - **Probe vague language:** Detect and clarify: quantification missing, subject unclear, temporal ambiguity, conditional gaps, undefined terms, logical conflicts
    - **Surface assumptions:** Log assumptions with validation requirements
    - **Handle conflicts:** Identify and escalate stakeholder conflicts immediately
-   - **Continue iterating:** Repeat this process until the user indicates they're done or all critical gaps are filled
+   - **Continue iterating:** Repeat this process until the user indicates they're done or all critical gaps are filled. After gap-driven questioning completes, proceed naturally to a lightweight completeness check (see step 4)
 
-4. **Completeness Validation:**
-   - **Final completeness check:** Before finishing, verify all 8 dimensions have been considered (even if marked as not applicable). Review the 8-dimension framework checklist to ensure no critical gaps were missed.
-   - Check clarified requirements against plan template sections
-   - Score completeness per dimension (Complete / Partial / Missing)
-   - Flag remaining gaps with classification (clarifiable vs. researchable)
-   - Assess overall plan readiness (Ready / Research Needed / More Clarification Needed)
-   - Generate completeness score (X/8 dimensions complete)
-   - Enforce the completion gate: verify every tracked question has a status label.
+4. **Lightweight Completeness Check:**
+   - **Natural transition from gap-driven inquiry:** After gap-driven questioning completes, you may want to do a quick mental check: "Are there any critical gaps we might have missed?" Use the framework as inspiration if you're stuck, but don't systematically validate against it.
+   - **Optional final check:** If you want, ask a lightweight catch-all question like "Any other considerations we should be aware of? A. None, B. Yes - [describe], Other: [free-form]"—but only if you genuinely think there might be something important missing.
+   - **Avoid systematic coverage (Constitution C6):** Do NOT systematically validate dimension status or ask questions to "cover" topics. The framework is an inspiration pool, not a checklist. Better to miss a low-relevance topic than to ask irrelevant questions that feel like a form.
+   - **Check clarified requirements against plan template sections** (to ensure plan work can proceed)
+   - **Flag remaining gaps with classification (clarifiable vs. researchable vs. not applicable)**
+   - **Assess overall plan readiness (Ready / Research Needed / More Clarification Needed)**
+   - **Enforce the completion gate:** Verify all critical gaps have been addressed and every tracked question has a status label. **Note:** You don't need to score dimension completeness or validate dimension status.
 
 5. **Gap Triage:**
    - **Clarifiable gaps:** Schedule follow-up with specific stakeholders
@@ -192,7 +208,7 @@ Choose operating mode based on invocation context:
 
 **Requirements Review Mode:**
 - Start with automated completeness scan using spec template
-- Flag issues: missing dimensions, ambiguous language, logical conflicts
+- Flag issues: missing information, ambiguous language, logical conflicts
 - If scan passes: Produce validation report and proceed to plan
 - If scan fails: Conduct targeted clarification session on flagged issues
 
@@ -207,7 +223,7 @@ Choose operating mode based on invocation context:
 - **Stakeholder conflicts (disagreement on requirements):** Document both positions in clarification packet, escalate to devagent create-product-mission or decision maker, do not proceed to plan until resolved.
 - **Boundary issues (clarification vs. research):** If questions require evidence gathering (user research, competitive analysis, technical spikes), stop clarification and formulate research questions for devagent research.
 - **Scope creep during clarification:** If stakeholders expand requirements significantly, pause clarification, document new scope, escalate to devagent create-product-mission for mission alignment check.
-- **Unavailable stakeholders:** Document questions with "Unresolved - Stakeholder Unavailable," set follow-up date, proceed with partial clarification if remaining dimensions are complete.
+- **Unavailable stakeholders:** Document questions with "Unresolved - Stakeholder Unavailable," set follow-up date, proceed with partial clarification if critical gaps are addressed.
 - **Iteration limits:** If clarification cycles exceed 3 iterations without convergence, escalate to devagent create-product-mission with summary of unresolved items and request decision intervention.
 - **Mission conflicts:** If requirements conflict with product mission or constitution, escalate immediately to devagent create-product-mission with specific conflict details—do not attempt to resolve.
 
@@ -217,16 +233,17 @@ Choose operating mode based on invocation context:
 **Primary artifact:** Clarified Requirement Packet (`.devagent/workspace/tasks/{status}/YYYY-MM-DD_task-slug/clarification/YYYY-MM-DD_initial-clarification.md`) — review Standard Workflow Instructions in `.devagent/core/AGENTS.md` for date handling
 
 **Packet structure:**
-- Feature Overview (name, requestor, stakeholders, business context, trigger)
-- Validated Requirements (8 sections with validation status per dimension):
-  - Problem Statement (what, who, why, evidence, validation status)
-  - Success Criteria (metrics, baselines, targets, failure definition, validation status)
-  - Users & Personas (primary/secondary users, goals, insights, validation status)
-  - Constraints (technical, compliance, resources, validation status)
-  - Scope Boundaries (in-scope, out-of-scope, ambiguous areas, validation status)
-  - Solution Principles (quality bars, architecture, UX, performance, validation status)
-  - Dependencies (technical, cross-team, external, validation status)
-  - Acceptance Criteria (flows, error cases, testing, launch readiness, validation status)
+- Task Overview (name, requestor, stakeholders, context, trigger)
+- Clarified Requirements:
+  - **Core Technical Dimensions (required for all tasks):**
+    - Scope & End Goal (what needs to be done, end state, in-scope vs. out-of-scope, validation status)
+    - Technical Constraints & Requirements (platform, performance, integration, quality bars, validation status)
+    - Dependencies & Blockers (system, technical, cross-team, risks, validation status)
+    - Implementation Approach (patterns, principles, strategy, validation status)
+    - Acceptance Criteria & Verification (how to verify, test cases, definition of done, validation status)
+  - **Business Dimensions (optional, only for new features):**
+    - Problem & Context (what problem, who experiences it, why important, validation status) — skip for technical tasks
+    - Success Metrics (how to measure success, baselines, targets, validation status) — skip for technical tasks
 - Assumptions Log (table: assumption, owner, validation required, validation method)
 - Gaps Requiring Research (questions for devagent research, evidence needed)
 - Clarification Session Log (questions asked, answers, stakeholders consulted, unresolved items)
@@ -247,7 +264,7 @@ Choose operating mode based on invocation context:
 **Primary artifact:** Validation Report (`.devagent/workspace/tasks/{status}/YYYY-MM-DD_task-slug/clarification/YYYY-MM-DD_validation-report.md`) — review Standard Workflow Instructions in `.devagent/core/AGENTS.md` for date handling
 
 **Report structure:**
-- Completeness score (X/8 dimensions)
+- Completeness score (X/Y relevant dimensions — focus on core technical dimensions)
 - Issues found (missing dimensions, ambiguous language, conflicts)
 - Pass/fail recommendation
 - Required follow-up actions (if failed)
@@ -267,6 +284,8 @@ Choose operating mode based on invocation context:
 ## Start Here (First Turn)
 If required inputs are present, start with:
 1. A 1-line confirmation of the task concept and the chosen mode (Task Clarification / Gap Filling / Requirements Review).
-2. **Context analysis:** Analyze the task hub (read AGENTS.md, existing research, plans, specs) to understand what's already documented.
-3. The progress header (dimension checklist showing what's already known vs. gaps).
-4. The first **exactly 2–3** targeted questions that fill the most critical gaps (use multiple-choice format with letter labels), referencing existing context where relevant. **After asking the questions, remind the user they can end the session at any time by saying "all done" or by exiting the workflow**, then wait for answers.
+2. **Context analysis:** Analyze the task hub (read AGENTS.md, existing research, plans, specs) to understand what's already documented. Based on what you've learned, identify what information is actually missing or unclear. Use `.devagent/core/templates/clarification-questions-framework.md` as an inspiration pool for generating helpful questions, NOT as a checklist to validate against.
+3. **Acknowledge what you've learned:** Before asking questions, acknowledge what's already documented (e.g., "I see from your task hub that you've already documented [X]"). This makes questions feel helpful rather than like a form.
+4. The progress header (dimension checklist showing what's already known vs. gaps).
+5. The first **exactly 2–3** targeted questions that fill the most critical gaps identified (use multiple-choice format with letter labels). **⚠️ CRITICAL:** Frame questions naturally and contextually—reference the task name, existing documentation, or what you've learned. Do NOT ask questions dimensionally (e.g., "Let's cover Problem Validation"). See Constitution C6 and the framework document for examples of helpful vs. dimensional questions.
+6. **After asking the questions, remind the user they can end the session at any time by saying "all done" or by exiting the workflow**, then wait for answers.
