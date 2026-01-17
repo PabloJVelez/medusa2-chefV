@@ -13,7 +13,7 @@ import {
   Button,
 } from '@react-email/components';
 
-type EventDetailsResendEmailProps = {
+export type EventDetailsResendEmailProps = {
   customer: {
     first_name: string;
     last_name: string;
@@ -229,3 +229,5 @@ function EventDetailsResendEmailComponent({
 export const eventDetailsResendEmail = (props: EventDetailsResendEmailProps) => (
   <EventDetailsResendEmailComponent {...props} />
 );
+
+export default EventDetailsResendEmailComponent;

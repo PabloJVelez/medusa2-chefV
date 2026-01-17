@@ -37,6 +37,9 @@ export interface AdminChefEventDTO {
   }>
   lastEmailSentAt?: Date
   customEmailRecipients?: string[]
+  // Tip tracking fields
+  tipAmount?: number
+  tipMethod?: string
   // Inventory information
   availableTickets?: number
   createdAt: Date
@@ -126,6 +129,14 @@ export interface AdminResendEventEmailDTO {
 export interface AdminSendPaymentReminderDTO {
   recipients?: string[]
   notes?: string
+}
+
+export interface AdminSendReceiptDTO {
+  recipients?: string[]
+  notes?: string
+  tipAmount?: number
+  tipMethod?: string
+  receiptDate?: string
 }
 
 export class AdminChefEventsResource {
@@ -256,6 +267,20 @@ export class AdminChefEventsResource {
    */
   async sendPaymentReminder(id: string, data: AdminSendPaymentReminderDTO = {}) {
     const response = await this.client.fetch<{ success: boolean; data: any }>(`/admin/chef-events/${id}/send-payment-reminder`, {
+      method: 'POST',
+      body: data,
+    })
+    return response
+  }
+
+  /**
+   * Send receipt to host for chef event
+   * @param id - Chef event ID
+   * @param data - Receipt data including optional tip information
+   * @returns Receipt result
+   */
+  async sendReceipt(id: string, data: AdminSendReceiptDTO = {}) {
+    const response = await this.client.fetch<{ success: boolean; data: any }>(`/admin/chef-events/${id}/send-receipt`, {
       method: 'POST',
       body: data,
     })

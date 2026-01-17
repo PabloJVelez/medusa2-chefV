@@ -14,7 +14,7 @@ import {
   Button,
 } from '@react-email/components';
 
-type ChefEventRejectedEmailProps = {
+export type ChefEventRejectedEmailProps = {
   customer: {
     first_name: string;
     last_name: string;
@@ -221,3 +221,5 @@ function ChefEventRejectedEmailComponent({
 export const chefEventRejectedEmail = (props: ChefEventRejectedEmailProps) => (
   <ChefEventRejectedEmailComponent {...props} />
 );
+
+export default ChefEventRejectedEmailComponent;

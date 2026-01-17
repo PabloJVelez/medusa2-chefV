@@ -15,7 +15,7 @@ import {
 } from "@react-email/components"
 import { BigNumberValue, CustomerDTO, OrderDTO } from "@medusajs/framework/types"
 
-type OrderPlacedEmailProps = {
+export type OrderPlacedEmailProps = {
   order: OrderDTO & {
     customer: CustomerDTO
   }
@@ -166,4 +166,6 @@ function OrderPlacedEmailComponent({ order, email_banner }: OrderPlacedEmailProp
 
 export const orderPlacedEmail = (props: OrderPlacedEmailProps) => (
   <OrderPlacedEmailComponent {...props} />
-) 
+);
+
+export default OrderPlacedEmailComponent;

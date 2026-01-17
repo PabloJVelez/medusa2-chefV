@@ -9,7 +9,8 @@ import type {
   AdminAcceptChefEventDTO,
   AdminRejectChefEventDTO,
   AdminResendEventEmailDTO,
-  AdminSendPaymentReminderDTO
+  AdminSendPaymentReminderDTO,
+  AdminSendReceiptDTO
 } from '../../sdk/admin/admin-chef-events'
 
 const QUERY_KEY = ['chef-events']
@@ -130,6 +131,23 @@ export const useAdminSendPaymentReminderMutation = () => {
   return useMutation({
     mutationFn: async ({ chefEventId, ...data }: { chefEventId: string } & AdminSendPaymentReminderDTO) => {
       return await sdk.admin.chefEvents.sendPaymentReminder(chefEventId, data)
+    },
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEY })
+      queryClient.invalidateQueries({ queryKey: [...QUERY_KEY, variables.chefEventId] })
+    },
+  })
+}
+
+/**
+ * Hook for sending receipt emails
+ */
+export const useAdminSendReceiptMutation = () => {
+  const queryClient = useQueryClient()
+  
+  return useMutation({
+    mutationFn: async ({ chefEventId, ...data }: { chefEventId: string } & AdminSendReceiptDTO) => {
+      return await sdk.admin.chefEvents.sendReceipt(chefEventId, data)
     },
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })

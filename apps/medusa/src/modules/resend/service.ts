@@ -25,6 +25,7 @@ enum Templates {
   CHEF_EVENT_REJECTED = 'chef-event-rejected',
   EVENT_DETAILS_RESEND = 'event-details-resend',
   PAYMENT_REMINDER = 'payment-reminder',
+  RECEIPT = 'receipt',
 }
 
 // Import email templates
@@ -34,6 +35,7 @@ import { chefEventAcceptedEmail } from './emails/chef-event-accepted';
 import { chefEventRejectedEmail } from './emails/chef-event-rejected';
 import { eventDetailsResendEmail } from './emails/event-details-resend';
 import { paymentReminderEmail } from './emails/payment-reminder';
+import { receiptEmail } from './emails/receipt';
 
 const templates: { [key in Templates]?: (props: any) => React.ReactNode } = {
   [Templates.ORDER_PLACED]: orderPlacedEmail,
@@ -42,6 +44,7 @@ const templates: { [key in Templates]?: (props: any) => React.ReactNode } = {
   [Templates.CHEF_EVENT_REJECTED]: chefEventRejectedEmail,
   [Templates.EVENT_DETAILS_RESEND]: eventDetailsResendEmail,
   [Templates.PAYMENT_REMINDER]: paymentReminderEmail,
+  [Templates.RECEIPT]: receiptEmail,
 };
 
 class ResendNotificationProviderService extends AbstractNotificationProviderService {
@@ -96,6 +99,8 @@ class ResendNotificationProviderService extends AbstractNotificationProviderServ
         return '📧 Event Details Reminder';
       case Templates.PAYMENT_REMINDER:
         return 'Payment Reminder - Complete Your Event Purchase';
+      case Templates.RECEIPT:
+        return 'Receipt - Your Chef Event with Chef Luis Velez';
       default:
         return 'New Email';
     }
