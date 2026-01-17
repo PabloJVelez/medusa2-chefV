@@ -24,6 +24,14 @@ This task involves creating a new feature that enables chefs to send receipts to
 - [2026-01-15] Event: Research completed. Comprehensive research packet created documenting payment reminder implementation pattern, button enablement logic, event date/time validation, ticket purchase checking, email template structure, and email history tracking. See `research/2026-01-15_chef-receipt-feature-research.md`.
 - [2026-01-15] Event: Clarification completed. All critical requirements clarified including receipt email contents, tip storage approach, event date validation, tip input UI flow, and multiple receipts handling. See `clarification/2026-01-15_initial-clarification.md`.
 - [2026-01-15] Event: Implementation plan created. Comprehensive plan with 8 execution-focused tasks covering model migration, workflow, subscriber, email template, API route, SDK/hooks, admin UI, and template registration. See `plan/2026-01-15_chef-receipt-implementation-plan.md`.
+- [2026-01-15] Event: Task 1 completed. Added tipAmount and tipMethod fields to chef event model, created migration (Migration20260115223449.ts), and updated TypeScript types in SDK. Files: `apps/medusa/src/modules/chef-event/models/chef-event.ts`, `apps/medusa/src/modules/chef-event/migrations/Migration20260115223449.ts`, `apps/medusa/src/sdk/admin/admin-chef-events.ts`.
+- [2026-01-15] Event: Task 2 completed. Created send receipt workflow following payment reminder pattern. Workflow updates email history, tip fields, and emits receipt event. File: `apps/medusa/src/workflows/send-receipt.ts`.
+- [2026-01-15] Event: Task 3 completed. Created receipt email subscriber that listens for receipt event, formats email data including tip information, and sends receipt email. File: `apps/medusa/src/subscribers/chef-event-receipt.ts`.
+- [2026-01-15] Event: Task 4 completed. Created receipt email template with all required sections: event details, pricing breakdown, ticket purchases, optional tip section, and grand total. File: `apps/medusa/src/modules/resend/emails/receipt.tsx`.
+- [2026-01-15] Event: Task 5 completed. Created send receipt API route with validation for tip amount and method. Route validates event status and executes receipt workflow. File: `apps/medusa/src/api/admin/chef-events/[id]/send-receipt/route.ts`.
+- [2026-01-15] Event: Task 6 completed. Added sendReceipt SDK method and useAdminSendReceiptMutation React hook following payment reminder pattern. Files: `apps/medusa/src/sdk/admin/admin-chef-events.ts`, `apps/medusa/src/admin/hooks/chef-events.ts`.
+- [2026-01-15] Event: Task 7 completed. Added receipt button to chef event detail page with tip input modal. Button enabled when event date passed OR all tickets purchased. Modal includes tip amount input, cash checkbox, dropdown for other methods, and custom method text input. Warning shown if receipt previously sent. File: `apps/medusa/src/admin/routes/chef-events/[id]/page.tsx`.
+- [2026-01-15] Event: Task 8 completed. Registered receipt email template in Resend notification service. Template mapped to 'receipt' template name. File: `apps/medusa/src/modules/resend/service.ts`.
 
 ## Implementation Checklist
 - [x] Research: Analyze existing send payment reminder implementation pattern
@@ -33,12 +41,12 @@ This task involves creating a new feature that enables chefs to send receipts to
 - [x] Plan: Define API endpoint structure for sending receipts
 - [x] Plan: Design UI flow for tip amount input before sending receipt
 - [x] Plan: Define validation rules for receipt button enablement (event date passed OR all tickets purchased)
-- [ ] Implement: Create receipt sending workflow
-- [ ] Implement: Create API route for sending receipts
-- [ ] Implement: Add receipt button to chef event detail page
-- [ ] Implement: Add tip amount input modal/dialog
-- [ ] Implement: Create receipt email template
-- [ ] Implement: Add email history tracking for receipts
+- [x] Implement: Create receipt sending workflow
+- [x] Implement: Create API route for sending receipts
+- [x] Implement: Add receipt button to chef event detail page
+- [x] Implement: Add tip amount input modal/dialog
+- [x] Implement: Create receipt email template
+- [x] Implement: Add email history tracking for receipts
 - [ ] Test: Verify receipt email generation and sending
 - [ ] Test: Verify tip amount inclusion in receipts
 - [ ] Test: Verify button enablement logic

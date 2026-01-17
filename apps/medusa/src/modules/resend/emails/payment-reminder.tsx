@@ -13,7 +13,7 @@ import {
   Button,
 } from '@react-email/components';
 
-type PaymentReminderEmailProps = {
+export type PaymentReminderEmailProps = {
   customer: {
     first_name: string;
     last_name: string;
@@ -240,3 +240,5 @@ function PaymentReminderEmailComponent({
 }
 
 export const paymentReminderEmail = (props: PaymentReminderEmailProps) => <PaymentReminderEmailComponent {...props} />;
+
+export default PaymentReminderEmailComponent;

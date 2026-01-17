@@ -54,6 +54,10 @@ export const ChefEvent = model.define("chef_event", {
   lastEmailSentAt: model.dateTime().nullable(), // Last email activity timestamp
   customEmailRecipients: model.json().nullable(), // Additional email recipients for resends
   
+  // Tip tracking fields
+  tipAmount: model.number().nullable(), // Optional tip amount received
+  tipMethod: model.text().nullable(), // Tip payment method (cash, venmo, zelle, paypal, or custom string)
+  
 }).cascades({
   delete: [] // Add any cascading deletes if needed
 })
@@ -99,4 +103,7 @@ export type ChefEventType = {
   }>
   lastEmailSentAt?: Date
   customEmailRecipients?: string[]
+  // Tip tracking fields
+  tipAmount?: number
+  tipMethod?: string
 }
