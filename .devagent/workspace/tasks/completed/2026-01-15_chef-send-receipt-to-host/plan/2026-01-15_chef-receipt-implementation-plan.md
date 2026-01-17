@@ -3,7 +3,7 @@
 - Owner: PabloJVelez
 - Last Updated: 2026-01-15
 - Status: Draft
-- Related Task Hub: `.devagent/workspace/tasks/active/2026-01-15_chef-send-receipt-to-host/`
+- Related Task Hub: `.devagent/workspace/tasks/completed/2026-01-15_chef-send-receipt-to-host/`
 - Stakeholders: PabloJVelez (Owner/Decision Maker)
 - Notes: Implementation plan following payment reminder pattern for consistency.
 

@@ -5,7 +5,7 @@
 - Date: 2026-01-15
 - Mode: Task Clarification
 - Status: Complete
-- Related Task Hub: `.devagent/workspace/tasks/active/2026-01-15_chef-send-receipt-to-host/`
+- Related Task Hub: `.devagent/workspace/tasks/completed/2026-01-15_chef-send-receipt-to-host/`
 - Notes: Clarification session in progress. Documenting answers incrementally.
 
 ## Task Overview
@@ -237,7 +237,7 @@ Ready to proceed to plan creation.
 - [x] Research complete (`research/2026-01-15_chef-receipt-feature-research.md`)
 - [x] Clarification complete (this packet)
 - [ ] Proceed to `devagent create-plan` with this clarification packet
-- [ ] Provide link to this clarification packet: `.devagent/workspace/tasks/active/2026-01-15_chef-send-receipt-to-host/clarification/2026-01-15_initial-clarification.md`
+- [ ] Provide link to this clarification packet: `.devagent/workspace/tasks/completed/2026-01-15_chef-send-receipt-to-host/clarification/2026-01-15_initial-clarification.md`
 
 **Key decisions to highlight in plan:**
 - Tip storage in chef event model (`tipAmount`, `tipMethod`)

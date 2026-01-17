@@ -1,9 +1,9 @@
 # Enable Chef to Send Receipts to Host for Chef Events Progress Tracker
 
 - Owner: PabloJVelez
-- Last Updated: 2026-01-15
-- Status: Active
-- Task Hub: `.devagent/workspace/tasks/active/2026-01-15_chef-send-receipt-to-host/`
+- Last Updated: 2026-01-16
+- Status: Complete
+- Task Hub: `.devagent/workspace/tasks/completed/2026-01-15_chef-send-receipt-to-host/`
 
 ## Summary
 This task involves creating a new feature that enables chefs to send receipts to hosts for chef events. The feature should be implemented as a button on the chef event detail page, similar to the existing "send payment reminder" button. The receipt button will only be enabled after the event has taken place OR all tickets for the event have been purchased. Additionally, the feature must include the ability for chefs to optionally include a tip amount (received either through cash or direct Venmo on the day of the event) before sending the email. This tip amount should be included in the receipt email that gets sent to the host.
@@ -32,6 +32,7 @@ This task involves creating a new feature that enables chefs to send receipts to
 - [2026-01-15] Event: Task 6 completed. Added sendReceipt SDK method and useAdminSendReceiptMutation React hook following payment reminder pattern. Files: `apps/medusa/src/sdk/admin/admin-chef-events.ts`, `apps/medusa/src/admin/hooks/chef-events.ts`.
 - [2026-01-15] Event: Task 7 completed. Added receipt button to chef event detail page with tip input modal. Button enabled when event date passed OR all tickets purchased. Modal includes tip amount input, cash checkbox, dropdown for other methods, and custom method text input. Warning shown if receipt previously sent. File: `apps/medusa/src/admin/routes/chef-events/[id]/page.tsx`.
 - [2026-01-15] Event: Task 8 completed. Registered receipt email template in Resend notification service. Template mapped to 'receipt' template name. File: `apps/medusa/src/modules/resend/service.ts`.
+- [2026-01-16] Event: Task moved to completed. Updated all status references and file paths from active/ to completed/ throughout task directory.
 
 ## Implementation Checklist
 - [x] Research: Analyze existing send payment reminder implementation pattern
