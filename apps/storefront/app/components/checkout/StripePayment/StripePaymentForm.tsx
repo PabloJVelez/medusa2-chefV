@@ -16,7 +16,11 @@ export interface StripePaymentFormProps extends PropsWithChildren {
   isDigitalOnly?: boolean;
 }
 
-export const StripePaymentForm: FC<StripePaymentFormProps> = ({ isActiveStep, paymentMethods, isDigitalOnly = false }) => {
+export const StripePaymentForm: FC<StripePaymentFormProps> = ({
+  isActiveStep,
+  paymentMethods,
+  isDigitalOnly = false,
+}) => {
   const [stripeElement, setStripeElement] = useState<StripePaymentElement>();
   const [stripeError, setStripeError] = useState<string | undefined>();
   const stripe = useStripe();
@@ -79,21 +83,38 @@ export const StripePaymentForm: FC<StripePaymentFormProps> = ({ isActiveStep, pa
 
     setSubmitting(true);
 
+    // Get the client_secret from the active payment session
+    const clientSecret = activePaymentSession?.data?.client_secret as string;
+
+    // Check if the PaymentIntent is already confirmed (handles retries with same cart)
+    if (clientSecret) {
+      try {
+        const { paymentIntent: existingPI } = await stripe.retrievePaymentIntent(clientSecret);
+
+        // If already succeeded, processing, or requires_capture - proceed with form submission
+        if (
+          existingPI?.status === 'succeeded' ||
+          existingPI?.status === 'processing' ||
+          existingPI?.status === 'requires_capture'
+        ) {
+          submit(event.target as HTMLFormElement);
+          return;
+        }
+      } catch {
+        // Continue with confirmation attempt if retrieval fails
+      }
+    }
+
     return stripe
       .confirmPayment({
-        //`Elements` instance that was used to create the Payment Element
         elements,
         confirmParams: {
-          // return_url: siteURL(redirectPath),
           return_url: 'http://localhost:3000/checkout/success',
-
-          // We need to add the billing details manually because we are disabling
-          // the billing address fields on the `PaymentElement`
           payment_method_data: { billing_details: stripeBillingDetails },
         },
         redirect: 'if_required',
       })
-      .then(({ paymentIntent, error }) => {
+      .then(({ error }) => {
         if (error) {
           setStripeError(error.message);
           setSubmitting(false);
@@ -102,16 +123,10 @@ export const StripePaymentForm: FC<StripePaymentFormProps> = ({ isActiveStep, pa
         }
 
         submit(event.target as HTMLFormElement);
-
-        // This point will only be reached if there is an immediate error when
-        // confirming the payment. Show error to your customer (e.g., payment
-        // details incomplete)
-        // if (error) return handleError(error);
-        // if (!is_default) return handleSuccess(setupIntent);
       })
       .catch((error) => {
         setSubmitting(false);
-        console.error(error);
+        setStripeError(error?.message || 'An unexpected error occurred');
       });
   };
 
