@@ -30,6 +30,17 @@ Whether to refund the platform's application fee when processing refunds.
 - When `true`: Platform fee is also refunded proportionally
 - Example: `REFUND_APPLICATION_FEE=false`
 
+### `INCLUDE_STRIPE_FEES` (new)
+Whether to include Stripe's processing fees in the application fee calculation.
+- Default: `false`
+- When `false`: Application fee is calculated as a percentage of the payment amount. Platform pays Stripe fees separately, so net platform fee is less than feePercent.
+- When `true`: Application fee includes estimated Stripe fees (2.9% + $0.30), ensuring platform receives feePercent as net after Stripe fees.
+- Example with `INCLUDE_STRIPE_FEES=true` and `PLATFORM_FEE_PERCENT=5` on $149.99 payment:
+  - Application fee: $7.50 (5%) + $4.65 (estimated Stripe fees) = $12.15
+  - Platform net: $12.15 - $4.65 = $7.50 (5% as desired)
+  - Connected account receives: $149.99 - $12.15 = $137.84
+- Example: `INCLUDE_STRIPE_FEES=false`
+
 ### `STRIPE_WEBHOOK_SECRET` (existing, may need update)
 The webhook signing secret for verifying Stripe webhook events.
 - Format: `whsec_...`

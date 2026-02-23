@@ -74,6 +74,7 @@ class StripeConnectProviderService extends AbstractPaymentProvider<StripeConnect
       connectedAccountId,
       feePercent: options.feePercent ?? 5,
       refundApplicationFee: options.refundApplicationFee ?? false,
+      includeStripeFees: options.includeStripeFees ?? false,
       webhookSecret: options.webhookSecret,
       automaticPaymentMethods: options.automaticPaymentMethods ?? true,
       captureMethod: options.captureMethod ?? 'automatic',
@@ -166,12 +167,40 @@ class StripeConnectProviderService extends AbstractPaymentProvider<StripeConnect
 
   /**
    * Calculate the application fee amount based on the total amount.
+   *
+   * If includeStripeFees is true, adds estimated Stripe processing fees to ensure
+   * the platform receives the feePercent as net after Stripe fees are deducted.
+   *
+   * Stripe fees are estimated as 2.9% + $0.30 (typical for US cards).
+   * Actual Stripe fees may vary slightly based on card type, country, etc.
    */
   private calculateApplicationFee(amount: number): number {
     if (this.config_.feePercent <= 0) {
       return 0;
     }
-    return Math.round(amount * (this.config_.feePercent / 100));
+
+    // Calculate base platform fee (percentage of amount)
+    const baseFee = Math.round(amount * (this.config_.feePercent / 100));
+
+    // If not including Stripe fees, return base fee
+    if (!this.config_.includeStripeFees) {
+      return baseFee;
+    }
+
+    // Estimate Stripe processing fees (2.9% + $0.30)
+    // Stripe fee = (amount * 0.029) + 30 cents (in smallest currency unit)
+    const estimatedStripeFee = Math.round(amount * 0.029) + 30;
+
+    // Application fee = platform fee + Stripe fees (so platform nets the platform fee)
+    // This ensures platform receives feePercent as net after Stripe fees
+    const applicationFee = baseFee + estimatedStripeFee;
+
+    this.logger_.debug(
+      `[stripe] Fee calculation: amount=${amount}, platformFee=${baseFee} (${this.config_.feePercent}%), ` +
+        `estimatedStripeFee=${estimatedStripeFee}, applicationFee=${applicationFee}`,
+    );
+
+    return applicationFee;
   }
 
   /**

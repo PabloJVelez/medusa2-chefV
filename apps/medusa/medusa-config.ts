@@ -11,6 +11,7 @@ const STRIPE_API_KEY = process.env.STRIPE_API_KEY;
 const STRIPE_CONNECTED_ACCOUNT_ID = process.env.STRIPE_CONNECTED_ACCOUNT_ID;
 const PLATFORM_FEE_PERCENT = parseInt(process.env.PLATFORM_FEE_PERCENT || '5', 10);
 const REFUND_APPLICATION_FEE = process.env.REFUND_APPLICATION_FEE === 'true';
+const INCLUDE_STRIPE_FEES = process.env.INCLUDE_STRIPE_FEES === 'true';
 const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
 const SENTRY_DSN = process.env.SENTRY_DSN || '';
 // const SENTRY_API_TOKEN = process.env.SENTRY_API_TOKEN || ""; // Only needed for webhooks
@@ -154,6 +155,7 @@ module.exports = defineConfig({
               connectedAccountId: STRIPE_CONNECTED_ACCOUNT_ID,
               feePercent: PLATFORM_FEE_PERCENT,
               refundApplicationFee: REFUND_APPLICATION_FEE,
+              includeStripeFees: INCLUDE_STRIPE_FEES,
               webhookSecret: STRIPE_WEBHOOK_SECRET,
             },
           },
