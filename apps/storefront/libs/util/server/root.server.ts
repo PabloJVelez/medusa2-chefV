@@ -10,14 +10,16 @@ import { getSelectedRegionId, setSelectedRegionId } from './cookies.server';
 import { enrichLineItems, retrieveCart } from './data/cart.server';
 import { getCustomer } from './data/customer.server';
 import { getSelectedRegion, listRegions } from './data/regions.server';
+import { fetchProducts } from './products.server';
 
 export const getRootLoader = async ({ request }: LoaderFunctionArgs) => {
   const region = await getSelectedRegion(request.headers);
 
-  const [cart, regions, customer] = await Promise.all([
+  const [cart, regions, customer, productsResponse] = await Promise.all([
     retrieveCart(request),
     listRegions(),
     getCustomer(request),
+    fetchProducts(request, { limit: 1, fields: 'id' }).catch(() => ({ products: [] })),
   ]);
 
   const headers = new Headers();
@@ -51,6 +53,7 @@ export const getRootLoader = async ({ request }: LoaderFunctionArgs) => {
       customer,
       regions,
       region,
+      hasPublishedProducts: productsResponse.products.length > 0,
       siteDetails: {
         store: {
           name: 'Chef Velez',

@@ -134,7 +134,7 @@ async function ensureUSRegion(container: any, logger: any) {
           name: "United States",
           currency_code: "usd",
           countries: ["us"],
-          payment_providers: ["pp_stripe_stripe"],
+          payment_providers: ["pp_stripe-connect_stripe-connect"],
         },
       ],
     },
@@ -500,4 +500,3 @@ async function ensureDigitalShipping(
 
   logger.info('   Created Digital Delivery Shipping Option');
 }
-

@@ -1,211 +1,198 @@
 /**
- * Stripe Connect Payment Provider Service
+ * Stripe Connect Payment Provider
  *
- * Implements Medusa's AbstractPaymentProvider for Stripe Connect,
- * enabling platform fee collection via destination charges.
- *
- * Payment Flow:
- * 1. Customer pays full amount to platform
- * 2. Platform collects application fee (configurable %)
- * 3. Remaining amount transfers to connected account
+ * Uses connected accounts with direct charges: PaymentIntents are created
+ * on the connected account via { stripeAccount }, and the platform collects its
+ * cut via application_fee_amount.
  */
-
-import Stripe from 'stripe';
-import { AbstractPaymentProvider, MedusaError, PaymentSessionStatus, BigNumber } from '@medusajs/framework/utils';
 import type {
-  Logger,
-  InitiatePaymentInput,
-  InitiatePaymentOutput,
   AuthorizePaymentInput,
   AuthorizePaymentOutput,
-  CapturePaymentInput,
-  CapturePaymentOutput,
-  RefundPaymentInput,
-  RefundPaymentOutput,
   CancelPaymentInput,
   CancelPaymentOutput,
+  CapturePaymentInput,
+  CapturePaymentOutput,
   DeletePaymentInput,
   DeletePaymentOutput,
+  GetPaymentStatusInput,
+  GetPaymentStatusOutput,
+  ICartModuleService,
+  InitiatePaymentInput,
+  InitiatePaymentOutput,
+  Logger,
+  ProviderWebhookPayload,
+  RefundPaymentInput,
+  RefundPaymentOutput,
   RetrievePaymentInput,
   RetrievePaymentOutput,
   UpdatePaymentInput,
   UpdatePaymentOutput,
-  GetPaymentStatusInput,
-  GetPaymentStatusOutput,
-  ProviderWebhookPayload,
   WebhookActionResult,
 } from '@medusajs/framework/types';
-import type { StripeConnectProviderOptions, StripeConnectConfig, StripeConnectPaymentData } from './types';
+import { AbstractPaymentProvider, BigNumber, MedusaError, PaymentSessionStatus } from '@medusajs/framework/utils';
+import Stripe from 'stripe';
+import type {
+  PlatformFeeLineItem,
+  StripeConnectConfig,
+  StripeConnectPaymentData,
+  StripeConnectProviderOptions,
+} from './types';
+import { getPlatformFeeConfigFromEnv } from './utils/get-fee-config';
+import { getSmallestUnit } from './utils/get-smallest-unit';
+import { calculatePlatformFeeFromLines } from './utils/platform-fee';
+
+type ConnectedStripeAccount = {
+  stripe_account_id: string;
+  account_type: 'express' | 'standard';
+  connection_method: 'platform_onboarding' | 'oauth';
+};
+
+interface StripeConnectAccountService {
+  getConnectedAccount?(): Promise<ConnectedStripeAccount | null>;
+  getConnectedAccountId(): Promise<string | null>;
+}
 
 type InjectedDependencies = {
   logger: Logger;
+  stripeConnectAccountModuleService?: StripeConnectAccountService;
+  cart?: ICartModuleService;
 };
 
+const NO_ACCOUNT_MESSAGE =
+  'No Stripe Connect account has been onboarded. Complete onboarding in the admin first.';
+
 class StripeConnectProviderService extends AbstractPaymentProvider<StripeConnectProviderOptions> {
-  // Keep identifier as 'stripe' to maintain frontend compatibility
-  // The frontend expects 'pp_stripe_stripe' as the provider ID
-  static identifier = 'stripe';
+  static identifier = 'stripe-connect';
 
   protected config_: StripeConnectConfig;
   protected logger_: Logger;
   protected stripe_: Stripe;
+  protected stripeConnectAccountService_?: StripeConnectAccountService;
+  private cartModuleService_?: ICartModuleService;
+  private static readonly LOG_PREFIX = '[stripe-connect]';
 
-  constructor({ logger }: InjectedDependencies, options: StripeConnectProviderOptions) {
-    super({ logger }, options);
+  constructor(
+    { logger, stripeConnectAccountModuleService, cart }: InjectedDependencies,
+    options: StripeConnectProviderOptions,
+  ) {
+    super({ logger, stripeConnectAccountModuleService, cart }, options);
+    this.cartModuleService_ = cart;
 
-    // Validate required options
     if (!options.apiKey) {
       throw new MedusaError(MedusaError.Types.INVALID_DATA, 'Stripe API key is required for stripe-connect provider');
     }
 
-    // Validate connected account ID format if provided
-    let connectedAccountId = options.connectedAccountId || '';
-    if (connectedAccountId && !connectedAccountId.startsWith('acct_')) {
-      logger.warn(
-        `[stripe] Invalid connected account ID format: "${connectedAccountId}". Connected account IDs should start with "acct_". Platform fees will be DISABLED.`,
-      );
-      connectedAccountId = ''; // Disable Connect features for invalid account ID
-    }
-
-    // Build internal config with defaults
-    // connectedAccountId is optional - when not set, works like regular Stripe (no platform fees)
+    this.stripeConnectAccountService_ = stripeConnectAccountModuleService;
+    const feeConfig = getPlatformFeeConfigFromEnv();
     this.config_ = {
       apiKey: options.apiKey,
-      connectedAccountId,
-      feePercent: options.feePercent ?? 5,
       refundApplicationFee: options.refundApplicationFee ?? false,
-      includeStripeFees: options.includeStripeFees ?? false,
       webhookSecret: options.webhookSecret,
       automaticPaymentMethods: options.automaticPaymentMethods ?? true,
       captureMethod: options.captureMethod ?? 'automatic',
+      ...feeConfig,
     };
 
     this.logger_ = logger;
     this.stripe_ = new Stripe(this.config_.apiKey);
 
-    if (this.config_.connectedAccountId) {
-      this.logger_.info(
-        `[stripe] Stripe Connect provider initialized with connected account: ${this.config_.connectedAccountId}, fee: ${this.config_.feePercent}%`,
-      );
-    } else {
+    const feeSummary = this.config_.feePerUnitBased
+      ? `per-unit — events: ${
+          this.config_.feeModeEvents === 'per_unit'
+            ? `${this.config_.feePerEventCents}¢/ticket`
+            : `${this.config_.feePercentEvents ?? this.config_.feePercent}% of ticket lines`
+        }; products: ${
+          this.config_.feeModeProducts === 'per_unit'
+            ? `${this.config_.feePerProductCents}¢/item`
+            : `${this.config_.feePercentProducts ?? this.config_.feePercent}% of product lines`
+        }`
+      : `${this.config_.feePercent}% of order total`;
+    this.logger_.info(
+      `${StripeConnectProviderService.LOG_PREFIX} Direct charges enabled for connected accounts, fee ${feeSummary}`,
+    );
+    this.logger_.info(
+      `${StripeConnectProviderService.LOG_PREFIX} [fee] config: feePerUnitBased=${this.config_.feePerUnitBased} feeModeEvents=${this.config_.feeModeEvents} feePerEventCents=${this.config_.feePerEventCents} feeModeProducts=${this.config_.feeModeProducts} feePerProductCents=${this.config_.feePerProductCents} feePercentEvents=${this.config_.feePercentEvents} feePercentProducts=${this.config_.feePercentProducts}`,
+    );
+  }
+
+  /**
+   * Resolves the active connected account from the DB-backed onboarding module.
+   */
+  private async getConnectedAccount(): Promise<ConnectedStripeAccount | null> {
+    if (!this.stripeConnectAccountService_) {
       this.logger_.warn(
-        `[stripe] Stripe Connect provider initialized WITHOUT connected account - platform fees disabled. Set STRIPE_CONNECTED_ACCOUNT_ID to enable.`,
+        `${StripeConnectProviderService.LOG_PREFIX} stripeConnectAccountModuleService not available — add it to the payment module's dependencies in medusa-config.ts.`,
       );
+      return null;
+    }
+
+    try {
+      if (this.stripeConnectAccountService_.getConnectedAccount) {
+        return await this.stripeConnectAccountService_.getConnectedAccount();
+      }
+
+      const connectedAccountId =
+        await this.stripeConnectAccountService_.getConnectedAccountId();
+      return connectedAccountId
+        ? {
+            stripe_account_id: connectedAccountId,
+            account_type: 'express',
+            connection_method: 'platform_onboarding',
+          }
+        : null;
+    } catch (e) {
+      this.logger_.warn(
+        `${StripeConnectProviderService.LOG_PREFIX} Failed to resolve connected account: ${(e as Error).message}`,
+      );
+      return null;
     }
   }
 
   /**
-   * Convert BigNumber/BigNumberInput to a numeric value in smallest currency unit.
-   * Medusa passes amounts that may be BigNumber objects.
-   *
-   * IMPORTANT: Medusa sometimes passes amounts in dollars (with decimals) instead of cents.
-   * We detect this and multiply by 100 when needed.
+   * Extracts connected_account_id from payment data for Stripe API calls on existing payments.
    */
-  private convertToSmallestUnit(amount: unknown): number {
-    if (amount === null || amount === undefined) {
-      return 0;
-    }
-
-    let numericValue: number | null = null;
-
-    // Handle BigNumber objects (they have a numeric property or can be converted via toString)
-    if (typeof amount === 'object' && amount !== null) {
-      // BigNumber from @medusajs/framework/utils has a numeric value accessible
-      const bigNum = amount as { value?: string; numeric?: number; toString?: () => string };
-
-      // Try to get numeric value
-      if (typeof bigNum.numeric === 'number') {
-        numericValue = bigNum.numeric;
-      }
-      // Try to convert via toString
-      else if (typeof bigNum.toString === 'function') {
-        const strValue = bigNum.toString();
-        const parsed = parseFloat(strValue);
-        if (!isNaN(parsed)) {
-          numericValue = parsed;
-        }
-      }
-      // Try value property
-      else if (typeof bigNum.value === 'string') {
-        const parsed = parseFloat(bigNum.value);
-        if (!isNaN(parsed)) {
-          numericValue = parsed;
-        }
-      }
-    }
-    // Handle string
-    else if (typeof amount === 'string') {
-      const parsed = parseFloat(amount);
-      if (!isNaN(parsed)) {
-        numericValue = parsed;
-      }
-    }
-    // Handle number
-    else if (typeof amount === 'number') {
-      numericValue = amount;
-    }
-
-    if (numericValue === null) {
-      this.logger_.warn(`[stripe] Could not convert amount to number: ${JSON.stringify(amount)}, defaulting to 0`);
-      return 0;
-    }
-
-    // Detect if amount is in dollars format (has decimal places)
-    // e.g., 149.99 is dollars, 14999 is cents
-    // Key insight: if the number has decimal places, it's definitely in dollars
-    // because Stripe amounts in cents are always whole numbers
-    const hasDecimalPlaces = numericValue !== Math.floor(numericValue);
-
-    if (hasDecimalPlaces) {
-      // Amount has decimal places, so it must be in dollars - convert to cents
-      return Math.round(numericValue * 100);
-    }
-
-    // Amount is a whole number - assume it's already in cents
-    return Math.round(numericValue);
+  private getStripeAccountFromData(data?: Record<string, unknown>): string | undefined {
+    const id = data?.connected_account_id;
+    return typeof id === 'string' && id.startsWith('acct_') ? id : undefined;
   }
 
   /**
-   * Calculate the application fee amount based on the total amount.
-   *
-   * If includeStripeFees is true, adds estimated Stripe processing fees to ensure
-   * the platform receives the feePercent as net after Stripe fees are deducted.
-   *
-   * Stripe fees are estimated as 2.9% + $0.30 (typical for US cards).
-   * Actual Stripe fees may vary slightly based on card type, country, etc.
+   * Resolves cart to line items with sku, quantity, unit_price_cents via cart module.
+   * Returns [] if cart module is unavailable or cart has no items. Used for per-line platform fee.
    */
+  private async getCartLines(cartId: string, currencyCode: string): Promise<PlatformFeeLineItem[]> {
+    if (!this.cartModuleService_) {
+      this.logger_.warn(
+        `${StripeConnectProviderService.LOG_PREFIX} [fee] getCartLines: no cartModuleService, returning []`,
+      );
+      return [];
+    }
+    try {
+      const items = await this.cartModuleService_.listLineItems({ cart_id: cartId }, { take: 500 });
+      this.logger_.info(
+        `${StripeConnectProviderService.LOG_PREFIX} [fee] getCartLines(cartId=${cartId}) raw items=${items.length}`,
+      );
+      return items.map((item) => ({
+        sku: item.variant_sku ?? '',
+        quantity: Number(item.quantity) || 0,
+        unit_price_cents: (() => {
+          const raw = Number(item.unit_price) || 0;
+          return Number.isInteger(raw) ? raw : getSmallestUnit(raw, currencyCode);
+        })(),
+      }));
+    } catch (e) {
+      this.logger_.warn(`${StripeConnectProviderService.LOG_PREFIX} getCartLines failed: ${(e as Error).message}`);
+      throw e;
+    }
+  }
+
   private calculateApplicationFee(amount: number): number {
     if (this.config_.feePercent <= 0) {
       return 0;
     }
-
-    // Calculate base platform fee (percentage of amount)
-    const baseFee = Math.round(amount * (this.config_.feePercent / 100));
-
-    // If not including Stripe fees, return base fee
-    if (!this.config_.includeStripeFees) {
-      return baseFee;
-    }
-
-    // Estimate Stripe processing fees (2.9% + $0.30)
-    // Stripe fee = (amount * 0.029) + 30 cents (in smallest currency unit)
-    const estimatedStripeFee = Math.round(amount * 0.029) + 30;
-
-    // Application fee = platform fee + Stripe fees (so platform nets the platform fee)
-    // This ensures platform receives feePercent as net after Stripe fees
-    const applicationFee = baseFee + estimatedStripeFee;
-
-    this.logger_.debug(
-      `[stripe] Fee calculation: amount=${amount}, platformFee=${baseFee} (${this.config_.feePercent}%), ` +
-        `estimatedStripeFee=${estimatedStripeFee}, applicationFee=${applicationFee}`,
-    );
-
-    return applicationFee;
+    return Math.round(amount * (this.config_.feePercent / 100));
   }
 
-  /**
-   * Map Stripe PaymentIntent status to Medusa PaymentSessionStatus.
-   */
   private mapStripeStatus(stripeStatus: Stripe.PaymentIntent.Status): PaymentSessionStatus {
     switch (stripeStatus) {
       case 'succeeded':
@@ -225,36 +212,110 @@ class StripeConnectProviderService extends AbstractPaymentProvider<StripeConnect
     }
   }
 
-  /**
-   * Safely extract payment intent ID from data object.
-   */
   private getPaymentIntentId(data?: Record<string, unknown>): string | undefined {
     if (!data) return undefined;
     return data.id as string | undefined;
   }
 
   /**
-   * Initiates a payment by creating a Stripe PaymentIntent with Connect parameters.
-   *
-   * This creates a PaymentIntent with:
-   * - application_fee_amount: Platform's fee
-   * - transfer_data.destination: Connected account to receive funds
+   * Persist Connect-related PI fields on Medusa Payment.data for downstream use
+   * (admin payout widget, storefront stripeAccount param).
    */
-  async initiatePayment(input: InitiatePaymentInput): Promise<InitiatePaymentOutput> {
-    const { amount, currency_code, context } = input;
+  private persistDataFromPaymentIntent(
+    pi: Stripe.PaymentIntent,
+    connectedAccountId?: string,
+    existingData?: Record<string, unknown>,
+  ): Record<string, unknown> {
+    const out: Record<string, unknown> = {};
+    if (typeof pi.application_fee_amount === 'number') {
+      out.application_fee_amount = pi.application_fee_amount;
+    }
+    if (connectedAccountId) {
+      out.connected_account_id = connectedAccountId;
+    }
+    const accountType = existingData?.connected_account_type;
+    if (accountType === 'express' || accountType === 'standard') {
+      out.connected_account_type = accountType;
+    }
+    const connectionMethod = existingData?.connected_account_connection_method;
+    if (connectionMethod === 'platform_onboarding' || connectionMethod === 'oauth') {
+      out.connected_account_connection_method = connectionMethod;
+    }
+    return out;
+  }
 
-    // Properly convert BigNumber/BigNumberInput to number
-    // Medusa passes amount as BigNumber which needs proper conversion
-    const amountInSmallestUnit = this.convertToSmallestUnit(amount);
-    const applicationFeeAmount = this.calculateApplicationFee(amountInSmallestUnit);
+  async initiatePayment(input: InitiatePaymentInput): Promise<InitiatePaymentOutput> {
+    const { amount, currency_code, context, data: inputData } = input;
+    const amountInCents = getSmallestUnit(amount as unknown as number, currency_code);
+
+    const dataObj = inputData as Record<string, unknown> | undefined;
+    const ctx = context as Record<string, unknown> | undefined;
+    const cartIdFromData = typeof dataObj?.cart_id === 'string' ? dataObj.cart_id : undefined;
+    const cartIdFromContext = (ctx?.cart_id ?? ctx?.resource_id) as string | undefined;
+    const cartId = cartIdFromData ?? cartIdFromContext;
+
+    let applicationFeeAmount: number;
+    if (!this.config_.feePerUnitBased) {
+      applicationFeeAmount = this.calculateApplicationFee(amountInCents);
+      this.logger_.info(
+        `${StripeConnectProviderService.LOG_PREFIX} [fee] mode=per_cart amount=${amountInCents} cents → application_fee=${applicationFeeAmount} (${this.config_.feePercent}% of cart)`,
+      );
+    } else {
+      this.logger_.info(
+        `${StripeConnectProviderService.LOG_PREFIX} [fee] mode=per_unit cart_id=${
+          cartId ?? 'none'
+        } (from data=${!!cartIdFromData} context_keys=${ctx ? Object.keys(ctx).join(',') : 'none'})`,
+      );
+      if (cartId && typeof cartId === 'string') {
+        try {
+          const lines = await this.getCartLines(cartId, currency_code);
+          this.logger_.info(
+            `${StripeConnectProviderService.LOG_PREFIX} [fee] cart lines count=${lines.length} items=${JSON.stringify(
+              lines.map((l) => ({
+                sku: l.sku,
+                qty: l.quantity,
+                unit_cents: l.unit_price_cents,
+              })),
+            )}`,
+          );
+          if (lines.length > 0) {
+            applicationFeeAmount = calculatePlatformFeeFromLines(lines, this.config_);
+            this.logger_.info(
+              `${StripeConnectProviderService.LOG_PREFIX} [fee] platform fee from lines=${applicationFeeAmount} cents`,
+            );
+          } else {
+            applicationFeeAmount = this.calculateApplicationFee(amountInCents);
+            this.logger_.info(
+              `${StripeConnectProviderService.LOG_PREFIX} [fee] no cart lines, fallback to cart % → application_fee=${applicationFeeAmount}`,
+            );
+          }
+        } catch (e) {
+          this.logger_.warn(
+            `${StripeConnectProviderService.LOG_PREFIX} Could not resolve cart lines for per-line fee, using percentage of total: ${(e as Error).message}`,
+          );
+          applicationFeeAmount = this.calculateApplicationFee(amountInCents);
+        }
+      } else {
+        applicationFeeAmount = this.calculateApplicationFee(amountInCents);
+        this.logger_.info(
+          `${StripeConnectProviderService.LOG_PREFIX} [fee] no cart_id in context/data, fallback to cart % → application_fee=${applicationFeeAmount}`,
+        );
+      }
+    }
 
     try {
+      const connectedAccount = await this.getConnectedAccount();
+      if (!connectedAccount) {
+        this.logger_.error(`${StripeConnectProviderService.LOG_PREFIX} ${NO_ACCOUNT_MESSAGE}`);
+        throw new MedusaError(MedusaError.Types.NOT_ALLOWED, NO_ACCOUNT_MESSAGE);
+      }
+      const connectedAccountId = connectedAccount.stripe_account_id;
+
       const paymentIntentParams: Stripe.PaymentIntentCreateParams = {
-        amount: amountInSmallestUnit,
+        amount: amountInCents,
         currency: currency_code.toLowerCase(),
         capture_method: this.config_.captureMethod,
         metadata: {
-          // Store session and resource IDs for webhook correlation
           ...(context && {
             session_id: String((context as Record<string, unknown>).session_id || ''),
             resource_id: String((context as Record<string, unknown>).resource_id || ''),
@@ -262,37 +323,32 @@ class StripeConnectProviderService extends AbstractPaymentProvider<StripeConnect
         },
       };
 
-      // Add automatic payment methods if enabled
       if (this.config_.automaticPaymentMethods) {
         paymentIntentParams.automatic_payment_methods = { enabled: true };
       }
 
-      // Add Connect-specific parameters for destination charges ONLY if connected account is configured
-      if (this.config_.connectedAccountId) {
-        if (applicationFeeAmount > 0) {
-          paymentIntentParams.application_fee_amount = applicationFeeAmount;
-        }
-
-        paymentIntentParams.transfer_data = {
-          destination: this.config_.connectedAccountId,
-        };
+      if (applicationFeeAmount > 0) {
+        paymentIntentParams.application_fee_amount = applicationFeeAmount;
       }
 
-      const paymentIntent = await this.stripe_.paymentIntents.create(paymentIntentParams);
+      const paymentIntent = await this.stripe_.paymentIntents.create(paymentIntentParams, {
+        stripeAccount: connectedAccountId,
+      });
 
       this.logger_.info(
-        `[stripe] Created PaymentIntent ${paymentIntent.id}: ${amountInSmallestUnit} ${currency_code}` +
-          (this.config_.connectedAccountId ? `, fee: ${applicationFeeAmount} (${this.config_.feePercent}%)` : ''),
+        `${StripeConnectProviderService.LOG_PREFIX} Created PaymentIntent ${paymentIntent.id} on ${connectedAccountId} (${connectedAccount.account_type}/${connectedAccount.connection_method}): amount=${amountInCents} ${currency_code} application_fee_amount=${applicationFeeAmount}`,
       );
 
       const paymentData: StripeConnectPaymentData = {
         id: paymentIntent.id,
         client_secret: paymentIntent.client_secret || undefined,
         status: paymentIntent.status,
-        amount: amountInSmallestUnit,
+        amount: amountInCents,
         currency: currency_code.toLowerCase(),
-        connected_account_id: this.config_.connectedAccountId || undefined,
-        application_fee_amount: this.config_.connectedAccountId ? applicationFeeAmount : undefined,
+        connected_account_id: connectedAccountId,
+        connected_account_type: connectedAccount.account_type,
+        connected_account_connection_method: connectedAccount.connection_method,
+        application_fee_amount: applicationFeeAmount > 0 ? applicationFeeAmount : undefined,
       };
 
       return {
@@ -300,20 +356,14 @@ class StripeConnectProviderService extends AbstractPaymentProvider<StripeConnect
         data: paymentData as unknown as Record<string, unknown>,
       };
     } catch (error) {
+      if (error instanceof MedusaError) throw error;
+
       const stripeError = error as Stripe.errors.StripeError;
       this.logger_.error(
-        `[stripe] Failed to create PaymentIntent: ${stripeError.message}` +
+        `${StripeConnectProviderService.LOG_PREFIX} Failed to create PaymentIntent: ${stripeError.message}` +
           (stripeError.code ? ` (code: ${stripeError.code})` : '') +
           (stripeError.param ? ` (param: ${stripeError.param})` : ''),
       );
-
-      // Provide helpful error messages for common Connect issues
-      if (stripeError.code === 'account_invalid' || stripeError.param === 'transfer_data[destination]') {
-        this.logger_.error(
-          `[stripe] The connected account "${this.config_.connectedAccountId}" is invalid or not connected to your platform. ` +
-            `Please verify the account ID and ensure it's properly onboarded via Stripe Connect.`,
-        );
-      }
 
       throw new MedusaError(
         MedusaError.Types.PAYMENT_AUTHORIZATION_ERROR,
@@ -322,27 +372,22 @@ class StripeConnectProviderService extends AbstractPaymentProvider<StripeConnect
     }
   }
 
-  /**
-   * Authorizes a payment session.
-   *
-   * For Stripe with automatic capture, the payment is already captured when this is called.
-   * We return AUTHORIZED for succeeded payments since Medusa expects this status
-   * to proceed with cart completion. The actual capture is already done by Stripe.
-   */
   async authorizePayment(input: AuthorizePaymentInput): Promise<AuthorizePaymentOutput> {
     const { data } = input;
     const paymentIntentId = this.getPaymentIntentId(data);
+    const stripeAccount = this.getStripeAccountFromData(data);
 
     if (!paymentIntentId) {
       throw new MedusaError(MedusaError.Types.INVALID_DATA, 'PaymentIntent ID is required for authorization');
     }
 
     try {
-      const paymentIntent = await this.stripe_.paymentIntents.retrieve(paymentIntentId);
+      const paymentIntent = await this.stripe_.paymentIntents.retrieve(
+        paymentIntentId,
+        undefined,
+        stripeAccount ? { stripeAccount } : undefined,
+      );
 
-      // For automatic capture mode, 'succeeded' means already captured
-      // We return AUTHORIZED because Medusa expects this to proceed with order completion
-      // The capturePayment method will handle the already-captured case gracefully
       let status: PaymentSessionStatus;
       if (paymentIntent.status === 'succeeded' || paymentIntent.status === 'requires_capture') {
         status = PaymentSessionStatus.AUTHORIZED;
@@ -357,10 +402,13 @@ class StripeConnectProviderService extends AbstractPaymentProvider<StripeConnect
           status: paymentIntent.status,
           amount: paymentIntent.amount,
           currency: paymentIntent.currency,
+          ...this.persistDataFromPaymentIntent(paymentIntent, stripeAccount, data),
         },
       };
     } catch (error) {
-      this.logger_.error(`[stripe] Failed to authorize payment: ${(error as Error).message}`);
+      this.logger_.error(
+        `${StripeConnectProviderService.LOG_PREFIX} Failed to authorize payment: ${(error as Error).message}`,
+      );
       throw new MedusaError(
         MedusaError.Types.PAYMENT_AUTHORIZATION_ERROR,
         `Failed to authorize payment: ${(error as Error).message}`,
@@ -368,26 +416,22 @@ class StripeConnectProviderService extends AbstractPaymentProvider<StripeConnect
     }
   }
 
-  /**
-   * Captures an authorized payment.
-   *
-   * Only needed if capture_method is "manual".
-   * With capture_method: "automatic", this may still be called by Medusa
-   * but the payment will already be captured - we handle that gracefully.
-   */
   async capturePayment(input: CapturePaymentInput): Promise<CapturePaymentOutput> {
     const { data } = input;
     const paymentIntentId = this.getPaymentIntentId(data);
+    const stripeAccount = this.getStripeAccountFromData(data);
 
     if (!paymentIntentId) {
       throw new MedusaError(MedusaError.Types.INVALID_DATA, 'PaymentIntent ID is required for capture');
     }
 
     try {
-      // First, retrieve the current status to check if already captured
-      const existingIntent = await this.stripe_.paymentIntents.retrieve(paymentIntentId);
+      const existingIntent = await this.stripe_.paymentIntents.retrieve(
+        paymentIntentId,
+        undefined,
+        stripeAccount ? { stripeAccount } : undefined,
+      );
 
-      // If already captured (succeeded), return the existing data
       if (existingIntent.status === 'succeeded') {
         return {
           data: {
@@ -395,27 +439,30 @@ class StripeConnectProviderService extends AbstractPaymentProvider<StripeConnect
             status: existingIntent.status,
             amount: existingIntent.amount,
             currency: existingIntent.currency,
+            ...this.persistDataFromPaymentIntent(existingIntent, stripeAccount, data),
           },
         };
       }
 
-      // If not captured yet, capture it
       if (existingIntent.status === 'requires_capture') {
-        const paymentIntent = await this.stripe_.paymentIntents.capture(paymentIntentId);
-
+        const paymentIntent = await this.stripe_.paymentIntents.capture(
+          paymentIntentId,
+          undefined,
+          stripeAccount ? { stripeAccount } : undefined,
+        );
         return {
           data: {
             id: paymentIntent.id,
             status: paymentIntent.status,
             amount: paymentIntent.amount,
             currency: paymentIntent.currency,
+            ...this.persistDataFromPaymentIntent(paymentIntent, stripeAccount, data),
           },
         };
       }
 
-      // For other statuses, return current state
       this.logger_.warn(
-        `[stripe] PaymentIntent ${paymentIntentId} in unexpected state for capture: ${existingIntent.status}`,
+        `${StripeConnectProviderService.LOG_PREFIX} PaymentIntent ${paymentIntentId} in unexpected state for capture: ${existingIntent.status}`,
       );
       return {
         data: {
@@ -423,10 +470,13 @@ class StripeConnectProviderService extends AbstractPaymentProvider<StripeConnect
           status: existingIntent.status,
           amount: existingIntent.amount,
           currency: existingIntent.currency,
+          ...this.persistDataFromPaymentIntent(existingIntent, stripeAccount, data),
         },
       };
     } catch (error) {
-      this.logger_.error(`[stripe] Failed to capture payment: ${(error as Error).message}`);
+      this.logger_.error(
+        `${StripeConnectProviderService.LOG_PREFIX} Failed to capture payment: ${(error as Error).message}`,
+      );
       throw new MedusaError(
         MedusaError.Types.UNEXPECTED_STATE,
         `Failed to capture payment: ${(error as Error).message}`,
@@ -434,16 +484,11 @@ class StripeConnectProviderService extends AbstractPaymentProvider<StripeConnect
     }
   }
 
-  /**
-   * Refunds a payment.
-   *
-   * The refund_application_fee parameter is config-driven:
-   * - false (default): Platform keeps the fee, connected account bears full refund
-   * - true: Platform fee is also refunded proportionally
-   */
   async refundPayment(input: RefundPaymentInput): Promise<RefundPaymentOutput> {
     const { data, amount } = input;
+    const currencyCode = (data?.currency_code as string) || 'usd';
     const paymentIntentId = this.getPaymentIntentId(data);
+    const stripeAccount = this.getStripeAccountFromData(data);
 
     if (!paymentIntentId) {
       throw new MedusaError(MedusaError.Types.INVALID_DATA, 'PaymentIntent ID is required for refund');
@@ -455,15 +500,17 @@ class StripeConnectProviderService extends AbstractPaymentProvider<StripeConnect
         refund_application_fee: this.config_.refundApplicationFee,
       };
 
-      // Add amount if partial refund (properly convert BigNumber)
       if (amount) {
-        refundParams.amount = this.convertToSmallestUnit(amount);
+        refundParams.amount = getSmallestUnit(amount as unknown as number, currencyCode);
       }
 
-      const refund = await this.stripe_.refunds.create(refundParams);
+      const refund = await this.stripe_.refunds.create(
+        refundParams,
+        stripeAccount ? { stripeAccount } : undefined,
+      );
 
-      this.logger_.debug(
-        `[stripe-connect] Refunded ${refund.amount} for PaymentIntent ${paymentIntentId}, refund_application_fee: ${this.config_.refundApplicationFee}`,
+      this.logger_.info(
+        `${StripeConnectProviderService.LOG_PREFIX} Refunded ${refund.amount} for PaymentIntent ${paymentIntentId}, refund_application_fee: ${this.config_.refundApplicationFee}`,
       );
 
       return {
@@ -475,7 +522,9 @@ class StripeConnectProviderService extends AbstractPaymentProvider<StripeConnect
         },
       };
     } catch (error) {
-      this.logger_.error(`[stripe-connect] Failed to refund payment: ${(error as Error).message}`);
+      this.logger_.error(
+        `${StripeConnectProviderService.LOG_PREFIX} Failed to refund payment: ${(error as Error).message}`,
+      );
       throw new MedusaError(
         MedusaError.Types.UNEXPECTED_STATE,
         `Failed to refund payment: ${(error as Error).message}`,
@@ -483,21 +532,23 @@ class StripeConnectProviderService extends AbstractPaymentProvider<StripeConnect
     }
   }
 
-  /**
-   * Cancels a payment by canceling the PaymentIntent.
-   */
   async cancelPayment(input: CancelPaymentInput): Promise<CancelPaymentOutput> {
     const { data } = input;
     const paymentIntentId = this.getPaymentIntentId(data);
+    const stripeAccount = this.getStripeAccountFromData(data);
 
     if (!paymentIntentId) {
       throw new MedusaError(MedusaError.Types.INVALID_DATA, 'PaymentIntent ID is required for cancellation');
     }
 
     try {
-      const paymentIntent = await this.stripe_.paymentIntents.cancel(paymentIntentId);
+      const paymentIntent = await this.stripe_.paymentIntents.cancel(
+        paymentIntentId,
+        undefined,
+        stripeAccount ? { stripeAccount } : undefined,
+      );
 
-      this.logger_.debug(`[stripe-connect] Canceled PaymentIntent ${paymentIntentId}`);
+      this.logger_.info(`${StripeConnectProviderService.LOG_PREFIX} Canceled PaymentIntent ${paymentIntentId}`);
 
       return {
         data: {
@@ -506,18 +557,16 @@ class StripeConnectProviderService extends AbstractPaymentProvider<StripeConnect
         },
       };
     } catch (error) {
-      // If already canceled or cannot be canceled, that's okay
       if ((error as Stripe.errors.StripeError).code === 'payment_intent_unexpected_state') {
-        this.logger_.warn(`[stripe-connect] PaymentIntent ${paymentIntentId} already in final state`);
-        return {
-          data: {
-            id: paymentIntentId,
-            status: 'canceled',
-          },
-        };
+        this.logger_.warn(
+          `${StripeConnectProviderService.LOG_PREFIX} PaymentIntent ${paymentIntentId} already in final state`,
+        );
+        return { data: { id: paymentIntentId, status: 'canceled' } };
       }
 
-      this.logger_.error(`[stripe-connect] Failed to cancel payment: ${(error as Error).message}`);
+      this.logger_.error(
+        `${StripeConnectProviderService.LOG_PREFIX} Failed to cancel payment: ${(error as Error).message}`,
+      );
       throw new MedusaError(
         MedusaError.Types.UNEXPECTED_STATE,
         `Failed to cancel payment: ${(error as Error).message}`,
@@ -525,53 +574,57 @@ class StripeConnectProviderService extends AbstractPaymentProvider<StripeConnect
     }
   }
 
-  /**
-   * Deletes payment session data.
-   *
-   * For Stripe, we cancel the PaymentIntent if it's still active.
-   */
   async deletePayment(input: DeletePaymentInput): Promise<DeletePaymentOutput> {
     const { data } = input;
     const paymentIntentId = this.getPaymentIntentId(data);
+    const stripeAccount = this.getStripeAccountFromData(data);
 
     if (!paymentIntentId) {
-      // Nothing to delete
       return { data: {} };
     }
 
     try {
-      // Try to cancel if not already in final state
-      const paymentIntent = await this.stripe_.paymentIntents.retrieve(paymentIntentId);
-
+      const paymentIntent = await this.stripe_.paymentIntents.retrieve(
+        paymentIntentId,
+        undefined,
+        stripeAccount ? { stripeAccount } : undefined,
+      );
       if (paymentIntent.status !== 'canceled' && paymentIntent.status !== 'succeeded') {
-        await this.stripe_.paymentIntents.cancel(paymentIntentId);
-        this.logger_.debug(`[stripe-connect] Deleted (canceled) PaymentIntent ${paymentIntentId}`);
+        await this.stripe_.paymentIntents.cancel(
+          paymentIntentId,
+          undefined,
+          stripeAccount ? { stripeAccount } : undefined,
+        );
+        this.logger_.info(
+          `${StripeConnectProviderService.LOG_PREFIX} Deleted (canceled) PaymentIntent ${paymentIntentId}`,
+        );
       }
-
       return { data: {} };
     } catch (error) {
-      // Log but don't fail - deletion is best effort
       this.logger_.warn(
-        `[stripe-connect] Could not delete PaymentIntent ${paymentIntentId}: ${(error as Error).message}`,
+        `${StripeConnectProviderService.LOG_PREFIX} Could not delete PaymentIntent ${paymentIntentId}: ${
+          (error as Error).message
+        }`,
       );
       return { data: {} };
     }
   }
 
-  /**
-   * Retrieves the current status of a payment.
-   */
   async retrievePayment(input: RetrievePaymentInput): Promise<RetrievePaymentOutput> {
     const { data } = input;
     const paymentIntentId = this.getPaymentIntentId(data);
+    const stripeAccount = this.getStripeAccountFromData(data);
 
     if (!paymentIntentId) {
       throw new MedusaError(MedusaError.Types.INVALID_DATA, 'PaymentIntent ID is required for retrieval');
     }
 
     try {
-      const paymentIntent = await this.stripe_.paymentIntents.retrieve(paymentIntentId);
-
+      const paymentIntent = await this.stripe_.paymentIntents.retrieve(
+        paymentIntentId,
+        undefined,
+        stripeAccount ? { stripeAccount } : undefined,
+      );
       return {
         data: {
           id: paymentIntent.id,
@@ -579,49 +632,55 @@ class StripeConnectProviderService extends AbstractPaymentProvider<StripeConnect
           amount: paymentIntent.amount,
           currency: paymentIntent.currency,
           client_secret: paymentIntent.client_secret,
+          ...this.persistDataFromPaymentIntent(paymentIntent, stripeAccount, data),
         },
       };
     } catch (error) {
-      this.logger_.error(`[stripe-connect] Failed to retrieve payment: ${(error as Error).message}`);
+      this.logger_.error(
+        `${StripeConnectProviderService.LOG_PREFIX} Failed to retrieve payment: ${(error as Error).message}`,
+      );
       throw new MedusaError(MedusaError.Types.NOT_FOUND, `Failed to retrieve payment: ${(error as Error).message}`);
     }
   }
 
-  /**
-   * Gets the payment status from Stripe.
-   */
   async getPaymentStatus(input: GetPaymentStatusInput): Promise<GetPaymentStatusOutput> {
     const { data } = input;
     const paymentIntentId = this.getPaymentIntentId(data);
+    const stripeAccount = this.getStripeAccountFromData(data);
 
     if (!paymentIntentId) {
       return { status: PaymentSessionStatus.PENDING };
     }
 
     try {
-      const paymentIntent = await this.stripe_.paymentIntents.retrieve(paymentIntentId);
-
-      const status = this.mapStripeStatus(paymentIntent.status);
-
+      const paymentIntent = await this.stripe_.paymentIntents.retrieve(
+        paymentIntentId,
+        undefined,
+        stripeAccount ? { stripeAccount } : undefined,
+      );
       return {
-        status,
+        status: this.mapStripeStatus(paymentIntent.status),
         data: {
           id: paymentIntent.id,
           stripe_status: paymentIntent.status,
         },
       };
     } catch (error) {
-      this.logger_.warn(`[stripe-connect] Could not get payment status: ${(error as Error).message}`);
+      this.logger_.warn(
+        `${StripeConnectProviderService.LOG_PREFIX} Could not get payment status: ${(error as Error).message}`,
+      );
       return { status: PaymentSessionStatus.ERROR };
     }
   }
 
   /**
-   * Updates a payment (e.g., amount change).
+   * Updates payment (e.g. cart amount changed). Fee is recalculated as percentage of new amount;
+   * no cart/line context is available on update, so per-line fee is not applied here.
    */
   async updatePayment(input: UpdatePaymentInput): Promise<UpdatePaymentOutput> {
     const { data, amount, currency_code } = input;
     const paymentIntentId = this.getPaymentIntentId(data);
+    const stripeAccount = this.getStripeAccountFromData(data);
 
     if (!paymentIntentId) {
       throw new MedusaError(MedusaError.Types.INVALID_DATA, 'PaymentIntent ID is required for update');
@@ -631,11 +690,10 @@ class StripeConnectProviderService extends AbstractPaymentProvider<StripeConnect
       const updateParams: Stripe.PaymentIntentUpdateParams = {};
 
       if (amount !== undefined) {
-        const amountInSmallestUnit = Math.round(typeof amount === 'number' ? amount : Number(amount));
-        updateParams.amount = amountInSmallestUnit;
+        const amountInCents = getSmallestUnit(amount as unknown as number, currency_code);
+        updateParams.amount = amountInCents;
 
-        // Recalculate application fee for new amount
-        const applicationFeeAmount = this.calculateApplicationFee(amountInSmallestUnit);
+        const applicationFeeAmount = this.calculateApplicationFee(amountInCents);
         if (applicationFeeAmount > 0) {
           updateParams.application_fee_amount = applicationFeeAmount;
         }
@@ -645,9 +703,13 @@ class StripeConnectProviderService extends AbstractPaymentProvider<StripeConnect
         updateParams.currency = currency_code.toLowerCase();
       }
 
-      const paymentIntent = await this.stripe_.paymentIntents.update(paymentIntentId, updateParams);
+      const paymentIntent = await this.stripe_.paymentIntents.update(
+        paymentIntentId,
+        updateParams,
+        stripeAccount ? { stripeAccount } : undefined,
+      );
 
-      this.logger_.debug(`[stripe-connect] Updated PaymentIntent ${paymentIntentId}`);
+      this.logger_.info(`${StripeConnectProviderService.LOG_PREFIX} Updated PaymentIntent ${paymentIntentId}`);
 
       const paymentData: StripeConnectPaymentData = {
         id: paymentIntent.id,
@@ -655,15 +717,22 @@ class StripeConnectProviderService extends AbstractPaymentProvider<StripeConnect
         status: paymentIntent.status,
         amount: paymentIntent.amount,
         currency: paymentIntent.currency,
-        connected_account_id: this.config_.connectedAccountId,
-        application_fee_amount: paymentIntent.application_fee_amount || undefined,
+        connected_account_id: stripeAccount,
+        connected_account_type: data?.connected_account_type as 'express' | 'standard' | undefined,
+        connected_account_connection_method: data?.connected_account_connection_method as
+          | 'platform_onboarding'
+          | 'oauth'
+          | undefined,
+        application_fee_amount: paymentIntent.application_fee_amount ?? undefined,
       };
 
       return {
         data: paymentData as unknown as Record<string, unknown>,
       };
     } catch (error) {
-      this.logger_.error(`[stripe-connect] Failed to update payment: ${(error as Error).message}`);
+      this.logger_.error(
+        `${StripeConnectProviderService.LOG_PREFIX} Failed to update payment: ${(error as Error).message}`,
+      );
       throw new MedusaError(
         MedusaError.Types.PAYMENT_AUTHORIZATION_ERROR,
         `Failed to update payment: ${(error as Error).message}`,
@@ -673,13 +742,11 @@ class StripeConnectProviderService extends AbstractPaymentProvider<StripeConnect
 
   /**
    * Handles Stripe webhook events.
-   *
-   * Returns the appropriate action for Medusa to take based on the event type.
+   * Session correlation: resource_id (Medusa session) or session_id, then PaymentIntent id.
    */
   async getWebhookActionAndData(payload: ProviderWebhookPayload['payload']): Promise<WebhookActionResult> {
     const { data, rawData, headers } = payload;
 
-    // Verify webhook signature if secret is configured
     if (this.config_.webhookSecret && rawData && headers) {
       const signature = headers['stripe-signature'];
       if (signature) {
@@ -690,77 +757,78 @@ class StripeConnectProviderService extends AbstractPaymentProvider<StripeConnect
             this.config_.webhookSecret,
           );
         } catch (error) {
-          this.logger_.error(`[stripe-connect] Webhook signature verification failed: ${(error as Error).message}`);
+          this.logger_.error(
+            `${StripeConnectProviderService.LOG_PREFIX} Webhook signature verification failed: ${
+              (error as Error).message
+            }`,
+          );
           return {
             action: 'failed',
-            data: {
-              session_id: '',
-              amount: new BigNumber(0),
-            },
+            data: { session_id: '', amount: new BigNumber(0) },
           };
         }
       }
     }
 
-    // Cast data to Stripe event
     const event = data as unknown as Stripe.Event;
 
     if (!event || !event.type) {
-      this.logger_.warn('[stripe-connect] Received webhook with no event type');
+      this.logger_.warn(`${StripeConnectProviderService.LOG_PREFIX} Received webhook with no event type`);
       return {
         action: 'not_supported',
-        data: {
-          session_id: '',
-          amount: new BigNumber(0),
-        },
+        data: { session_id: '', amount: new BigNumber(0) },
       };
     }
 
     try {
       switch (event.type) {
         case 'payment_intent.succeeded': {
-          const paymentIntent = event.data.object as Stripe.PaymentIntent;
-          const sessionId = (paymentIntent.metadata?.session_id as string) || paymentIntent.id;
+          const pi = event.data.object as Stripe.PaymentIntent;
+          const sessionId = pi.metadata?.resource_id || pi.metadata?.session_id || pi.id;
 
-          this.logger_.debug(`[stripe-connect] Webhook: payment_intent.succeeded for ${paymentIntent.id}`);
+          this.logger_.info(
+            `${StripeConnectProviderService.LOG_PREFIX} Webhook: payment_intent.succeeded for ${pi.id} (session: ${sessionId})`,
+          );
 
           return {
             action: 'captured',
             data: {
               session_id: sessionId,
-              amount: new BigNumber(paymentIntent.amount),
+              amount: new BigNumber(pi.amount),
             },
           };
         }
 
         case 'payment_intent.amount_capturable_updated': {
-          const paymentIntent = event.data.object as Stripe.PaymentIntent;
-          const sessionId = (paymentIntent.metadata?.session_id as string) || paymentIntent.id;
+          const pi = event.data.object as Stripe.PaymentIntent;
+          const sessionId = pi.metadata?.resource_id || pi.metadata?.session_id || pi.id;
 
-          this.logger_.debug(
-            `[stripe-connect] Webhook: payment_intent.amount_capturable_updated for ${paymentIntent.id}`,
+          this.logger_.info(
+            `${StripeConnectProviderService.LOG_PREFIX} Webhook: payment_intent.amount_capturable_updated for ${pi.id} (session: ${sessionId})`,
           );
 
           return {
             action: 'authorized',
             data: {
               session_id: sessionId,
-              amount: new BigNumber(paymentIntent.amount_capturable || 0),
+              amount: new BigNumber(pi.amount_capturable || 0),
             },
           };
         }
 
         case 'payment_intent.payment_failed': {
-          const paymentIntent = event.data.object as Stripe.PaymentIntent;
-          const sessionId = (paymentIntent.metadata?.session_id as string) || paymentIntent.id;
+          const pi = event.data.object as Stripe.PaymentIntent;
+          const sessionId = pi.metadata?.resource_id || pi.metadata?.session_id || pi.id;
 
-          this.logger_.warn(`[stripe-connect] Webhook: payment_intent.payment_failed for ${paymentIntent.id}`);
+          this.logger_.warn(
+            `${StripeConnectProviderService.LOG_PREFIX} Webhook: payment_intent.payment_failed for ${pi.id} (session: ${sessionId})`,
+          );
 
           return {
             action: 'failed',
             data: {
               session_id: sessionId,
-              amount: new BigNumber(paymentIntent.amount),
+              amount: new BigNumber(pi.amount),
             },
           };
         }
@@ -770,7 +838,7 @@ class StripeConnectProviderService extends AbstractPaymentProvider<StripeConnect
           const paymentIntentId = charge.payment_intent as string;
           const sessionId = paymentIntentId || charge.id;
 
-          this.logger_.debug(`[stripe-connect] Webhook: charge.refunded for ${sessionId}`);
+          this.logger_.info(`${StripeConnectProviderService.LOG_PREFIX} Webhook: charge.refunded for ${sessionId}`);
 
           return {
             action: 'not_supported',
@@ -782,23 +850,19 @@ class StripeConnectProviderService extends AbstractPaymentProvider<StripeConnect
         }
 
         default:
-          this.logger_.debug(`[stripe-connect] Webhook: unhandled event type ${event.type}`);
+          this.logger_.debug(`${StripeConnectProviderService.LOG_PREFIX} Webhook: unhandled event type ${event.type}`);
           return {
             action: 'not_supported',
-            data: {
-              session_id: '',
-              amount: new BigNumber(0),
-            },
+            data: { session_id: '', amount: new BigNumber(0) },
           };
       }
     } catch (error) {
-      this.logger_.error(`[stripe-connect] Webhook processing error: ${(error as Error).message}`);
+      this.logger_.error(
+        `${StripeConnectProviderService.LOG_PREFIX} Webhook processing error: ${(error as Error).message}`,
+      );
       return {
         action: 'failed',
-        data: {
-          session_id: '',
-          amount: new BigNumber(0),
-        },
+        data: { session_id: '', amount: new BigNumber(0) },
       };
     }
   }

@@ -236,7 +236,7 @@ const ChefEventDetailPage = () => {
                   <Checkbox
                     id="send-acceptance-email"
                     checked={sendAcceptanceEmail}
-                    onCheckedChange={setSendAcceptanceEmail}
+                    onCheckedChange={(checked) => setSendAcceptanceEmail(checked === true)}
                   />
                   <Label htmlFor="send-acceptance-email">Send acceptance email to customer</Label>
                 </div>

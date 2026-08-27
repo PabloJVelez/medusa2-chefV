@@ -3,6 +3,7 @@ import { useCheckout } from '@app/hooks/useCheckout';
 import { CompleteCheckoutFormData } from '@app/routes/api.checkout.complete';
 import type { Address, CustomPaymentSession, MedusaAddress } from '@libs/types';
 import { medusaAddressToAddress } from '@libs/util';
+import { STRIPE_CONNECT_PROVIDER_ID } from '@libs/util/stripe/stripe-connect-session';
 import { PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js';
 import { PaymentMethodCreateParams, StripePaymentElement } from '@stripe/stripe-js';
 import clsx from 'clsx';
@@ -16,18 +17,14 @@ export interface StripePaymentFormProps extends PropsWithChildren {
   isDigitalOnly?: boolean;
 }
 
-export const StripePaymentForm: FC<StripePaymentFormProps> = ({
-  isActiveStep,
-  paymentMethods,
-  isDigitalOnly = false,
-}) => {
+export const StripePaymentForm: FC<StripePaymentFormProps> = ({ isActiveStep, paymentMethods, isDigitalOnly = false }) => {
   const [stripeElement, setStripeElement] = useState<StripePaymentElement>();
   const [stripeError, setStripeError] = useState<string | undefined>();
   const stripe = useStripe();
   const elements = useElements();
   const { activePaymentSession, cart } = useCheckout();
   const stripePaymentMethods = useMemo(
-    () => paymentMethods?.filter((pm) => pm.provider_id === 'pp_stripe_stripe'),
+    () => paymentMethods?.filter((pm) => pm.provider_id === STRIPE_CONNECT_PROVIDER_ID),
     [paymentMethods],
   );
 
@@ -83,38 +80,20 @@ export const StripePaymentForm: FC<StripePaymentFormProps> = ({
 
     setSubmitting(true);
 
-    // Get the client_secret from the active payment session
-    const clientSecret = activePaymentSession?.data?.client_secret as string;
-
-    // Check if the PaymentIntent is already confirmed (handles retries with same cart)
-    if (clientSecret) {
-      try {
-        const { paymentIntent: existingPI } = await stripe.retrievePaymentIntent(clientSecret);
-
-        // If already succeeded, processing, or requires_capture - proceed with form submission
-        if (
-          existingPI?.status === 'succeeded' ||
-          existingPI?.status === 'processing' ||
-          existingPI?.status === 'requires_capture'
-        ) {
-          submit(event.target as HTMLFormElement);
-          return;
-        }
-      } catch {
-        // Continue with confirmation attempt if retrieval fails
-      }
-    }
-
     return stripe
       .confirmPayment({
+        //`Elements` instance that was used to create the Payment Element
         elements,
         confirmParams: {
-          return_url: 'http://localhost:3000/checkout/success',
+          return_url: `${window.location.origin}/checkout/success`,
+
+          // We need to add the billing details manually because we are disabling
+          // the billing address fields on the `PaymentElement`
           payment_method_data: { billing_details: stripeBillingDetails },
         },
         redirect: 'if_required',
       })
-      .then(({ error }) => {
+      .then(({ paymentIntent, error }) => {
         if (error) {
           setStripeError(error.message);
           setSubmitting(false);
@@ -123,10 +102,16 @@ export const StripePaymentForm: FC<StripePaymentFormProps> = ({
         }
 
         submit(event.target as HTMLFormElement);
+
+        // This point will only be reached if there is an immediate error when
+        // confirming the payment. Show error to your customer (e.g., payment
+        // details incomplete)
+        // if (error) return handleError(error);
+        // if (!is_default) return handleSuccess(setupIntent);
       })
       .catch((error) => {
         setSubmitting(false);
-        setStripeError(error?.message || 'An unexpected error occurred');
+        console.error(error);
       });
   };
 
@@ -137,7 +122,7 @@ export const StripePaymentForm: FC<StripePaymentFormProps> = ({
   return (
     <>
       <CompleteCheckoutForm
-        providerId="pp_stripe_stripe"
+        providerId={STRIPE_CONNECT_PROVIDER_ID}
         id="stripePaymentForm"
         paymentMethods={stripePaymentMethods}
         onSubmit={handleSubmit}

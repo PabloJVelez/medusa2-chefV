@@ -8,11 +8,12 @@ loadEnv(process.env.NODE_ENV || 'development', process.cwd());
 
 const REDIS_URL = process.env.REDIS_URL;
 const STRIPE_API_KEY = process.env.STRIPE_API_KEY;
-const STRIPE_CONNECTED_ACCOUNT_ID = process.env.STRIPE_CONNECTED_ACCOUNT_ID;
-const PLATFORM_FEE_PERCENT = parseInt(process.env.PLATFORM_FEE_PERCENT || '5', 10);
 const REFUND_APPLICATION_FEE = process.env.REFUND_APPLICATION_FEE === 'true';
-const INCLUDE_STRIPE_FEES = process.env.INCLUDE_STRIPE_FEES === 'true';
 const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
+const STRIPE_CONNECT_CLIENT_ID = process.env.STRIPE_CONNECT_CLIENT_ID;
+const STRIPE_CONNECT_OAUTH_REDIRECT_URI = process.env.STRIPE_CONNECT_OAUTH_REDIRECT_URI;
+const STRIPE_CONNECT_STATE_SECRET = process.env.STRIPE_CONNECT_STATE_SECRET;
+const MEDUSA_ADMIN_URL = process.env.MEDUSA_ADMIN_URL || process.env.ADMIN_BACKEND_URL || '';
 const SENTRY_DSN = process.env.SENTRY_DSN || '';
 // const SENTRY_API_TOKEN = process.env.SENTRY_API_TOKEN || ""; // Only needed for webhooks
 const IS_TEST = process.env.NODE_ENV === 'test';
@@ -26,6 +27,16 @@ const customModules = [
   {
     resolve: './src/modules/chef-event',
     options: {},
+  },
+  {
+    resolve: './src/modules/stripe-connect-account',
+    options: {
+      stripeApiKey: STRIPE_API_KEY,
+      adminUrl: MEDUSA_ADMIN_URL,
+      connectClientId: STRIPE_CONNECT_CLIENT_ID,
+      oauthRedirectUri: STRIPE_CONNECT_OAUTH_REDIRECT_URI,
+      oauthStateSecret: STRIPE_CONNECT_STATE_SECRET,
+    },
   },
 ];
 
@@ -141,21 +152,15 @@ module.exports = defineConfig({
     ...customModules,
     {
       resolve: '@medusajs/medusa/payment',
+      dependencies: ['stripeConnectAccountModuleService', 'cart'],
       options: {
         providers: [
-          // Stripe Connect provider for platform fee collection
-          // Uses destination charges: platform is merchant of record,
-          // connected account (ChefV) receives payment minus platform fee
-          // NOTE: id='stripe' maintains frontend compatibility (expects 'pp_stripe_stripe')
           {
             resolve: './src/modules/stripe-connect',
-            id: 'stripe',
+            id: 'stripe-connect',
             options: {
               apiKey: STRIPE_API_KEY,
-              connectedAccountId: STRIPE_CONNECTED_ACCOUNT_ID,
-              feePercent: PLATFORM_FEE_PERCENT,
               refundApplicationFee: REFUND_APPLICATION_FEE,
-              includeStripeFees: INCLUDE_STRIPE_FEES,
               webhookSecret: STRIPE_WEBHOOK_SECRET,
             },
           },

@@ -1,124 +1,78 @@
 /**
- * Stripe Connect Payment Provider Types
+ * Stripe Connect payment provider types.
+ * Options passed from medusa-config (env); config is normalized for internal use.
  *
- * Configuration options for the Stripe Connect payment provider
- * that enables platform fee collection via destination charges.
+ * Uses connected accounts with direct charges — the PaymentIntent is created
+ * on the connected account via { stripeAccount }, and the platform collects its cut
+ * via application_fee_amount.
  */
 
-/**
- * Options passed to the Stripe Connect payment provider during initialization.
- */
+/** Fee mode per product type: per_unit = fixed cents per item, percent = percentage of line total. */
+export type PlatformFeeMode = "per_unit" | "percent";
+
 export interface StripeConnectProviderOptions {
-  /**
-   * The Stripe API key for the platform account.
-   * This is the secret key from the platform's Stripe dashboard.
-   */
   apiKey: string;
-
-  /**
-   * The connected account ID (e.g., acct_1234ABC...) that will receive
-   * the payment minus the platform fee.
-   * Optional - when not set, works like regular Stripe (no platform fees).
-   */
-  connectedAccountId?: string;
-
-  /**
-   * The platform fee percentage (0-100) to collect on each transaction.
-   * @default 5
-   */
+  /** Platform fee percentage (e.g. 5 for 5%). Default 5. Used when mode is percent or as fallback when no line data. */
   feePercent?: number;
-
-  /**
-   * Whether to include Stripe's processing fees in the application fee calculation.
-   * If true, the application fee will be increased to cover Stripe fees, ensuring
-   * the platform receives the feePercent as net after Stripe fees.
-   *
-   * Example: With feePercent=5 and includeStripeFees=true on $149.99 payment:
-   * - Stripe fee: ~$4.65 (2.9% + $0.30)
-   * - Application fee: $7.50 (5%) + $4.65 (Stripe fees) = $12.15
-   * - Platform net: $12.15 - $4.65 = $7.50 (5% as desired)
-   * - Connected account receives: $149.99 - $12.15 = $137.84
-   *
-   * @default false (platform fee is calculated before Stripe fees are deducted)
-   */
-  includeStripeFees?: boolean;
-
-  /**
-   * Whether to refund the platform's application fee when processing refunds.
-   * - true: Platform fee is refunded along with the payment
-   * - false: Platform keeps the fee, connected account bears full refund
-   * @default false
-   */
+  /** When true, refunds include application fee refund. Default false (platform keeps fee). */
   refundApplicationFee?: boolean;
-
-  /**
-   * The webhook secret for verifying Stripe webhook signatures.
-   */
+  /** Webhook signing secret for signature verification. */
   webhookSecret?: string;
-
-  /**
-   * Whether to enable automatic payment methods on PaymentIntents.
-   * @default true
-   */
+  /** Enable Stripe automatic_payment_methods. Default true. */
   automaticPaymentMethods?: boolean;
-
+  /** capture_method: "automatic" | "manual". Default "automatic". */
+  captureMethod?: "automatic" | "manual";
   /**
-   * Whether to capture payments automatically or require manual capture.
-   * @default "automatic"
+   * When true, commission is per unit (events/products) using cart lines.
+   * When false, commission is per cart (single percentage of cart total). Default false.
    */
-  captureMethod?: 'automatic' | 'manual';
+  feePerUnitBased?: boolean;
+  /** Fee mode for events (e.g. EVENT-* SKU). Default "percent". Only used when feePerUnitBased is true. */
+  feeModeEvents?: PlatformFeeMode;
+  /** Fee mode for products/other. Default "percent". Only used when feePerUnitBased is true. */
+  feeModeProducts?: PlatformFeeMode;
+  /** Fixed fee in cents per event when feeModeEvents is per_unit. */
+  feePerEventCents?: number;
+  /** Fixed fee in cents per product when feeModeProducts is per_unit. */
+  feePerProductCents?: number;
+  /** Percentage for events when feeModeEvents is percent. Defaults to feePercent if unset. */
+  feePercentEvents?: number;
+  /** Percentage for products when feeModeProducts is percent. Defaults to feePercent if unset. */
+  feePercentProducts?: number;
 }
 
-/**
- * Internal configuration derived from provider options.
- */
 export interface StripeConnectConfig {
   apiKey: string;
-  connectedAccountId: string;
   feePercent: number;
   refundApplicationFee: boolean;
-  includeStripeFees: boolean;
   webhookSecret?: string;
   automaticPaymentMethods: boolean;
-  captureMethod: 'automatic' | 'manual';
+  captureMethod: "automatic" | "manual";
+  /** When true, use per-line fee (event/product). When false, always use cart-level percentage. */
+  feePerUnitBased: boolean;
+  feeModeEvents: PlatformFeeMode;
+  feeModeProducts: PlatformFeeMode;
+  feePerEventCents: number;
+  feePerProductCents: number;
+  feePercentEvents: number;
+  feePercentProducts: number;
 }
 
-/**
- * Data stored in payment session/payment data property.
- */
 export interface StripeConnectPaymentData {
-  /**
-   * The Stripe PaymentIntent ID.
-   */
   id: string;
-
-  /**
-   * The client secret for confirming the PaymentIntent on the frontend.
-   */
   client_secret?: string;
-
-  /**
-   * The current status of the PaymentIntent.
-   */
-  status?: string;
-
-  /**
-   * The amount in the smallest currency unit.
-   */
-  amount?: number;
-
-  /**
-   * The currency code (e.g., "usd").
-   */
-  currency?: string;
-
-  /**
-   * The connected account ID for the transfer.
-   */
+  status: string;
+  amount: number;
+  currency: string;
   connected_account_id?: string;
-
-  /**
-   * The application fee amount in the smallest currency unit.
-   */
+  connected_account_type?: "express" | "standard";
+  connected_account_connection_method?: "platform_onboarding" | "oauth";
   application_fee_amount?: number;
+}
+
+/** Line item for platform fee calculation. unit_price_cents = price per unit in smallest currency unit. */
+export interface PlatformFeeLineItem {
+  sku: string;
+  quantity: number;
+  unit_price_cents: number;
 }
