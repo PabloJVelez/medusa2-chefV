@@ -1,3 +1,5 @@
+import { unlock } from '@unlockable/vite-plugin-unlock';
+import { medusa as unlockMedusa } from '@unlockable/vite-plugin-unlock/medusa';
 import { defineConfig, loadEnv } from '@medusajs/framework/utils';
 import type { Integration } from '@sentry/types';
 import type * as SentryNode from '@sentry/node';
@@ -26,6 +28,10 @@ const customModules = [
   },
   {
     resolve: './src/modules/chef-event',
+    options: {},
+  },
+  {
+    resolve: './src/modules/experience-type',
     options: {},
   },
   {
@@ -177,5 +183,15 @@ module.exports = defineConfig({
     // ADD ADMIN DISABLE CONFIGURATION
     disable: false,
     backendUrl: process.env.ADMIN_BACKEND_URL,
+    vite: () => ({
+      plugins: [
+        unlock(
+          unlockMedusa({
+            overrides: './src/admin/overrides',
+            debug: IS_DEV,
+          }),
+        ),
+      ],
+    }),
   },
 });

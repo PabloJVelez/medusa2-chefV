@@ -3,8 +3,9 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { Button, Label, Text, Input } from "@medusajs/ui"
 import { useState } from "react"
 import { menuSchema } from "../schemas"
-import type { AdminCreateMenuDTO, AdminMenuDTO, AdminUpdateMenuDTO } from "../../../../sdk/admin/admin-menus"
+import type { AdminCreateMenuDTO, AdminMenuDTO } from "../../../../sdk/admin/admin-menus"
 import { MenuMedia } from "./menu-media/MenuMedia"
+import { MenuPricingTab } from "./menu-pricing-tab"
 
 interface MenuFormProps {
   initialData?: AdminMenuDTO
@@ -13,7 +14,7 @@ interface MenuFormProps {
   isLoading?: boolean
 }
 
-type TabType = "general" | "courses" | "media"
+type TabType = "general" | "courses" | "media" | "pricing"
 
 //REFACTOR : Use form to handle state and validation not useState
 
@@ -31,12 +32,14 @@ export const MenuForm = ({ initialData, onSubmit, onCancel, isLoading }: MenuFor
     if (!initialData) {
       return {
         name: "",
+        status: "draft" as const,
         courses: []
       }
     }
     
     return {
       name: initialData.name,
+      status: (initialData.status as "draft" | "active" | "inactive") || "draft",
       courses: initialData.courses?.map(course => ({
         name: course.name,
         dishes: course.dishes?.map(dish => ({
@@ -115,6 +118,7 @@ export const MenuForm = ({ initialData, onSubmit, onCancel, isLoading }: MenuFor
           <TabButton tab="general" label="General Info" />
           <TabButton tab="courses" label="Courses" count={courseFields.length} />
           <TabButton tab="media" label="Media" />
+          {initialData && <TabButton tab="pricing" label="Pricing" />}
         </div>
 
         {/* Tab Content */}
@@ -144,6 +148,10 @@ export const MenuForm = ({ initialData, onSubmit, onCancel, isLoading }: MenuFor
             value={mediaState}
             onChange={setMediaState}
           />
+        )}
+
+        {activeTab === "pricing" && initialData && (
+          <MenuPricingTab menuId={initialData.id} />
         )}
 
         {/* Form Actions */}
@@ -184,6 +192,27 @@ const GeneralInfoTab = ({ form, onNextToCourses, isEditing, courseCount }: { for
       {form.formState.errors.name && (
         <Text className="text-red-500 text-sm mt-1">
           {form.formState.errors.name.message}
+        </Text>
+      )}
+    </div>
+
+    <div>
+      <Label htmlFor="status">Status</Label>
+      <select
+        id="status"
+        className="mt-1 h-10 w-full rounded-md border border-ui-border-base bg-ui-bg-field px-3 text-ui-fg-base"
+        {...form.register("status")}
+      >
+        <option value="draft">Draft</option>
+        <option value="active">Active</option>
+        <option value="inactive">Inactive</option>
+      </select>
+      <Text size="small" className="mt-1 text-ui-fg-subtle">
+        Only menus with status Active are visible on the storefront.
+      </Text>
+      {form.formState.errors.status && (
+        <Text className="text-red-500 text-sm mt-1">
+          {form.formState.errors.status.message}
         </Text>
       )}
     </div>

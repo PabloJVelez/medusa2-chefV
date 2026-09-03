@@ -36,15 +36,18 @@ export interface AdminMenuImageDTO {
 export interface AdminMenuDTO {
   id: string
   name: string
+  status: string
   courses: AdminCourseDTO[]
   images: AdminMenuImageDTO[]
   thumbnail?: string | null
+  allow_tbd_pricing?: boolean
   created_at: string
   updated_at: string
 }
 
 export interface AdminCreateMenuDTO {
   name: string
+  status?: "draft" | "active" | "inactive"
   courses?: Array<{
     name: string
     dishes: Array<{
@@ -63,6 +66,7 @@ export interface AdminCreateMenuDTO {
 
 export interface AdminUpdateMenuDTO {
   name?: string
+  status?: "draft" | "active" | "inactive"
   courses?: Array<{
     id?: string
     name: string
@@ -82,10 +86,33 @@ export interface AdminUpdateMenuDTO {
   image_files?: { url: string; file_id?: string }[]
 }
 
+export interface AdminMenuExperiencePriceDTO {
+  id: string
+  menu_id: string
+  experience_type_id: string
+  price_per_person: number
+  created_at: string
+  updated_at: string
+}
+
+export interface AdminUpsertMenuPricingDTO {
+  prices: Array<{
+    experience_type_id: string
+    price_per_person: number
+  }>
+  allow_tbd_pricing?: boolean
+}
+
+export interface AdminMenuPricingResponse {
+  prices: AdminMenuExperiencePriceDTO[]
+  allow_tbd_pricing: boolean
+}
+
 export interface AdminListMenusQuery {
   limit?: number
   offset?: number
   q?: string
+  status?: "draft" | "active" | "inactive"
 }
 
 export interface AdminMenusResponse {
@@ -154,6 +181,26 @@ export class AdminMenusResource {
   async delete(id: string) {
     return this.client.fetch<void>(`/admin/menus/${id}`, {
       method: 'DELETE',
+    })
+  }
+
+  async listPricing(menuId: string) {
+    return this.client.fetch<AdminMenuPricingResponse>(`/admin/menus/${menuId}/pricing`, {
+      method: 'GET',
+    })
+  }
+
+  async upsertPricing(menuId: string, data: AdminUpsertMenuPricingDTO) {
+    return this.client.fetch<AdminMenuPricingResponse>(`/admin/menus/${menuId}/pricing`, {
+      method: 'POST',
+      body: data,
+    })
+  }
+
+  async duplicate(id: string, data?: { name?: string }) {
+    return this.client.fetch<AdminMenuDTO>(`/admin/menus/${id}/duplicate`, {
+      method: "POST",
+      body: data,
     })
   }
 } 
