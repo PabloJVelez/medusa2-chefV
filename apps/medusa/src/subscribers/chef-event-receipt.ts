@@ -1,196 +1,136 @@
-import type { SubscriberArgs, SubscriberConfig } from '@medusajs/framework';
-import { CHEF_EVENT_MODULE } from '../modules/chef-event';
-import { Modules, ContainerRegistrationKeys } from '@medusajs/framework/utils';
-import { DateTime } from 'luxon';
+import type { SubscriberArgs, SubscriberConfig } from "@medusajs/medusa"
+import { Modules, ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import type { CreateNotificationDTO } from "@medusajs/types"
+import { DateTime } from "luxon"
+import { resolveChefEventTypeEmailLabel } from "../lib/chef-event-email-display"
+import { fallbackPricePerPersonFromStrings } from "../lib/chef-event-legacy-pricing"
 
 type EventData = {
-  chefEventId: string;
-  recipients: string[];
-  notes?: string;
-  tipAmount?: number;
-  tipMethod?: string;
-  receiptDate?: string;
-};
+  chefEventId: string
+  recipients: string[]
+  notes?: string
+  tipAmount?: number
+  tipMethod?: string
+}
 
-export default async function chefEventReceiptHandler({ event: { data }, container }: SubscriberArgs<EventData>) {
-  const logger = container.resolve(ContainerRegistrationKeys.LOGGER);
+const LOCATION_TYPE_LABELS: Record<string, string> = {
+  customer_location: "at Customer's Location",
+  chef_location: "at Chef's Location",
+}
 
-  logger.info(`Processing receipt request for chef event: ${data.chefEventId}`);
+export default async function chefEventReceiptHandler({
+  event: { data },
+  container,
+}: SubscriberArgs<EventData>) {
+  const logger = container.resolve(ContainerRegistrationKeys.LOGGER)
+  logger.info(`Processing receipt send for chef event: ${data.chefEventId}`)
 
   try {
-    const chefEventModuleService = container.resolve(CHEF_EVENT_MODULE) as any;
-    const notificationService = container.resolve(Modules.NOTIFICATION);
+    const chefEventService = container.resolve("chefEventModuleService") as {
+      retrieveChefEvent: (id: string) => Promise<Record<string, unknown>>
+    }
+    const notificationService = container.resolve(Modules.NOTIFICATION)
+    const productService = container.resolve(Modules.PRODUCT)
 
-    // Get chef event details
-    const chefEvent = await chefEventModuleService.retrieveChefEvent(data.chefEventId);
-
+    const chefEvent = (await chefEventService.retrieveChefEvent(
+      data.chefEventId
+    )) as Record<string, unknown>
     if (!chefEvent) {
-      throw new Error(`Chef event not found: ${data.chefEventId}`);
+      throw new Error(`Chef event not found: ${data.chefEventId}`)
     }
 
-    // Get product details if event is confirmed
-    let product = null;
-    let purchasedTickets = 0;
-    let availableTickets = 0;
-
-    if (chefEvent.productId) {
-      const productModuleService = container.resolve(Modules.PRODUCT);
-      const inventoryModuleService = container.resolve(Modules.INVENTORY);
-
-      product = await productModuleService.retrieveProduct(chefEvent.productId, {
-        relations: ['variants'],
-      });
-
-      // Calculate ticket information
-      if (product && product.variants) {
-        for (const variant of product.variants) {
-          if (!variant.sku) continue;
-
-          // Get inventory items for this variant
-          const inventoryItems = await inventoryModuleService.listInventoryItems({
-            sku: variant.sku,
-          });
-
-          if (inventoryItems.length > 0) {
-            // Get inventory levels for this item
-            const levels = await inventoryModuleService.listInventoryLevels({
-              inventory_item_id: inventoryItems[0].id,
-            });
-
-            // Sum available inventory (stocked - reserved)
-            for (const level of levels) {
-              const stocked = Number(level.stocked_quantity || 0);
-              const reserved = Number(level.reserved_quantity || 0);
-              const available = stocked - reserved;
-              availableTickets += Math.max(0, available);
-            }
-          }
-        }
-      }
-
-      // Calculate purchased tickets: original party size minus available tickets
-      purchasedTickets = chefEvent.partySize - availableTickets;
+    const productId = chefEvent.productId as string | undefined
+    if (!productId) {
+      throw new Error(`Chef event has no product: ${data.chefEventId}`)
     }
 
-    // Format data for email template
-    const formattedDate = DateTime.fromJSDate(chefEvent.requestedDate).toFormat('LLL d, yyyy');
-    const formattedTime = chefEvent.requestedTime;
+    const product = await productService.retrieveProduct(productId)
+    if (!product) {
+      throw new Error(`Product not found: ${productId}`)
+    }
 
-    const eventTypeMap: Record<string, string> = {
-      cooking_class: 'Cooking Class',
-      plated_dinner: 'Plated Dinner',
-      buffet_style: 'Buffet Style',
-    };
+    const partySize = Number(chefEvent.partySize ?? 0)
+    const storedTotal = Number(chefEvent.totalPrice)
+    const totalPrice = Number.isFinite(storedTotal) && storedTotal > 0
+      ? storedTotal
+      : fallbackPricePerPersonFromStrings(String(chefEvent.eventType), null) * partySize
+    const pricePerPerson = partySize > 0 ? totalPrice / partySize : 0
+    const eventTypeLabel = await resolveChefEventTypeEmailLabel(container, chefEvent)
 
-    const locationTypeMap: Record<string, string> = {
-      customer_location: "at Customer's Location",
-      chef_location: "at Chef's Location",
-    };
+    const requestedDate =
+      typeof chefEvent.requestedDate === "string"
+        ? new Date(chefEvent.requestedDate)
+        : (chefEvent.requestedDate as Date)
+    const formattedDate = DateTime.fromJSDate(requestedDate).toFormat("LLL d, yyyy")
+    const requestedTime = String(chefEvent.requestedTime ?? "")
+    const formattedTime = requestedTime
+      ? DateTime.fromFormat(requestedTime, "HH:mm").toFormat("h:mm a")
+      : requestedTime
 
-    // Calculate pricing
-    const PRICING_STRUCTURE = {
-      buffet_style: 99.99,
-      cooking_class: 119.99,
-      plated_dinner: 149.99,
-    };
-
-    const pricePerPerson = PRICING_STRUCTURE[chefEvent.eventType as keyof typeof PRICING_STRUCTURE];
-    const totalEventPrice = pricePerPerson * chefEvent.partySize;
-    const totalPurchasedPrice = pricePerPerson * purchasedTickets;
-
-    // Common email data
     const emailData = {
       customer: {
-        first_name: chefEvent.firstName,
-        last_name: chefEvent.lastName,
-        email: chefEvent.email,
-        phone: chefEvent.phone || 'Not provided',
+        first_name: String(chefEvent.firstName ?? ""),
+        last_name: String(chefEvent.lastName ?? ""),
+        email: String(chefEvent.email ?? ""),
+        phone: String(chefEvent.phone || "Not provided"),
       },
       booking: {
         date: formattedDate,
         time: formattedTime,
-        event_type: eventTypeMap[chefEvent.eventType] || chefEvent.eventType,
-        location_type: locationTypeMap[chefEvent.locationType] || chefEvent.locationType,
-        location_address: chefEvent.locationAddress || 'Not provided',
-        party_size: chefEvent.partySize,
-        notes: chefEvent.notes || 'No special notes provided',
+        event_type: eventTypeLabel,
+        location_type:
+          LOCATION_TYPE_LABELS[String(chefEvent.locationType)] || String(chefEvent.locationType),
+        location_address: String(chefEvent.locationAddress || "Not provided"),
+        party_size: partySize,
+        notes: String(chefEvent.notes || "No special notes provided"),
       },
       event: {
-        status: chefEvent.status,
-        total_price: totalEventPrice.toFixed(2),
+        status: String(chefEvent.status ?? "confirmed"),
+        total_price: totalPrice.toFixed(2),
         price_per_person: pricePerPerson.toFixed(2),
       },
-      product: product
-        ? {
-            id: product.id,
-            handle: product.handle,
-            title: product.title,
-            purchase_url: `${process.env.STOREFRONT_URL || 'http://localhost:3000'}/products/${product.handle}`,
-          }
-        : null,
-      purchasedTickets: purchasedTickets,
-      totalPurchasedPrice: totalPurchasedPrice.toFixed(2),
+      product: {
+        id: product.id,
+        handle: product.handle,
+        title: product.title,
+        purchase_url: `${process.env.STOREFRONT_URL ?? "http://localhost:3000"}/products/${product.handle}`,
+      },
+      purchasedTickets: partySize,
+      totalPurchasedPrice: totalPrice.toFixed(2),
       tipAmount: data.tipAmount,
       tipMethod: data.tipMethod,
       chef: {
-        name: 'Chef Luis Velez',
-        email: 'support@chefvelez.com',
-        phone: '(702) 349-6158',
+        name: "Chef John Doe",
+        email: "support@example.com",
+        phone: "(347) 695-4445",
       },
-      requestReference: chefEvent.id.slice(0, 8).toUpperCase(),
-      receiptDate: data.receiptDate,
+      requestReference: String(chefEvent.id).slice(0, 8).toUpperCase(),
+      receiptDate: DateTime.now().toFormat("yyyy-MM-dd"),
       customNotes: data.notes,
-    };
-
-    // Combine customer recipients with chef notification list
-    const chefEmails =
-      process.env.CHEF_NOTIFICATIONS_LIST?.split(',')
-        .map((email) => email.trim())
-        .filter(Boolean) || [];
-
-    // Create full recipient list (customer recipients + chef notifications)
-    const allRecipients = [...data.recipients];
-
-    // Add chef emails that aren't already in the list
-    for (const chefEmail of chefEmails) {
-      if (!allRecipients.includes(chefEmail)) {
-        allRecipients.push(chefEmail);
-      }
     }
 
-    if (chefEmails.length === 0) {
-      logger.warn('No chef emails configured in CHEF_NOTIFICATIONS_LIST');
-    }
+    const recipients =
+      data.recipients?.length && data.recipients.length > 0
+        ? data.recipients
+        : [String(chefEvent.email)]
 
-    // Send emails to all recipients with 2-second delay between each
-    // (Resend free plan has rate limits for concurrent sends)
-    for (let i = 0; i < allRecipients.length; i++) {
-      const recipient = allRecipients[i];
-
+    for (const to of recipients) {
       await notificationService.createNotifications({
-        to: recipient,
-        channel: 'email',
-        template: 'receipt',
+        to,
+        channel: "email",
+        template: "receipt",
         data: emailData,
-      });
-
-      logger.info(`Receipt email sent to ${recipient}`);
-
-      // Wait 2 seconds before sending the next email (except for the last one)
-      if (i < allRecipients.length - 1) {
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-      }
+      } as CreateNotificationDTO)
+      logger.info(`Receipt email sent to ${to}`)
     }
-
-    logger.info(`Receipt sent to ${allRecipients.length} recipient(s): ${allRecipients.join(', ')}`);
   } catch (error) {
     logger.error(
-      `Failed to process receipt for ${data.chefEventId}: ${error instanceof Error ? error.message : String(error)}`,
-    );
-    throw error;
+      `Failed to process receipt for ${data.chefEventId}: ${error instanceof Error ? error.message : String(error)}`
+    )
+    throw error
   }
 }
 
 export const config: SubscriberConfig = {
-  event: 'chef-event.receipt',
-};
+  event: "chef-event.receipt",
+}

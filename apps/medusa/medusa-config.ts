@@ -20,6 +20,16 @@ const SENTRY_DSN = process.env.SENTRY_DSN || '';
 // const SENTRY_API_TOKEN = process.env.SENTRY_API_TOKEN || ""; // Only needed for webhooks
 const IS_TEST = process.env.NODE_ENV === 'test';
 const IS_DEV = process.env.NODE_ENV === 'development';
+const GOOGLE_CALENDAR_CLIENT_ID = process.env.GOOGLE_CALENDAR_CLIENT_ID;
+const GOOGLE_CALENDAR_CLIENT_SECRET = process.env.GOOGLE_CALENDAR_CLIENT_SECRET;
+const GOOGLE_CALENDAR_REDIRECT_URI = process.env.GOOGLE_CALENDAR_REDIRECT_URI;
+const GOOGLE_CALENDAR_WEBHOOK_URL = process.env.GOOGLE_CALENDAR_WEBHOOK_URL;
+const GOOGLE_CALENDAR_SCOPE = process.env.GOOGLE_CALENDAR_SCOPE;
+const GOOGLE_CALENDAR_SIGNING_SECRET = process.env.GOOGLE_CALENDAR_SIGNING_SECRET;
+const GOOGLE_CALENDAR_TOKEN_ENCRYPTION_KEY =
+  process.env.GOOGLE_CALENDAR_TOKEN_ENCRYPTION_KEY;
+const GOOGLE_CALENDAR_DEFAULT_TIMEZONE =
+  process.env.GOOGLE_CALENDAR_DEFAULT_TIMEZONE;
 
 const customModules = [
   {
@@ -42,6 +52,19 @@ const customModules = [
       connectClientId: STRIPE_CONNECT_CLIENT_ID,
       oauthRedirectUri: STRIPE_CONNECT_OAUTH_REDIRECT_URI,
       oauthStateSecret: STRIPE_CONNECT_STATE_SECRET,
+    },
+  },
+  {
+    resolve: './src/modules/google-calendar-connection',
+    options: {
+      clientId: GOOGLE_CALENDAR_CLIENT_ID,
+      clientSecret: GOOGLE_CALENDAR_CLIENT_SECRET,
+      redirectUri: GOOGLE_CALENDAR_REDIRECT_URI,
+      webhookUrl: GOOGLE_CALENDAR_WEBHOOK_URL,
+      scope: GOOGLE_CALENDAR_SCOPE,
+      signingSecret: GOOGLE_CALENDAR_SIGNING_SECRET,
+      tokenEncryptionKey: GOOGLE_CALENDAR_TOKEN_ENCRYPTION_KEY,
+      defaultTimezone: GOOGLE_CALENDAR_DEFAULT_TIMEZONE,
     },
   },
 ];

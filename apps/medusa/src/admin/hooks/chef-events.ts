@@ -25,9 +25,10 @@ export const useAdminListChefEvents = (query: AdminListChefEventsQuery = {}) => 
   })
 }
 
-export const useAdminRetrieveChefEvent = (id: string) => {
+export const useAdminRetrieveChefEvent = (id: string, options?: { enabled?: boolean }) => {
   return useQuery<AdminChefEventDTO>({
     queryKey: [...QUERY_KEY, id],
+    enabled: options?.enabled !== false && !!id,
     queryFn: async () => {
       return sdk.admin.chefEvents.retrieve(id)
     },
@@ -154,4 +155,38 @@ export const useAdminSendReceiptMutation = () => {
       queryClient.invalidateQueries({ queryKey: [...QUERY_KEY, variables.chefEventId] })
     },
   })
-} 
+}
+
+export const useAdminDeriveChefEventMenuMutation = () => {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (chefEventId: string) => {
+      return await sdk.admin.chefEvents.deriveMenu(chefEventId)
+    },
+    onSuccess: (_data, chefEventId) => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEY })
+      queryClient.invalidateQueries({ queryKey: [...QUERY_KEY, chefEventId] })
+      queryClient.invalidateQueries({ queryKey: ["menus"] })
+    },
+  })
+}
+
+export const useAdminRevertChefEventMenuMutation = () => {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({
+      chefEventId,
+      deleteDerivedMenu = false,
+    }: {
+      chefEventId: string
+      deleteDerivedMenu?: boolean
+    }) => {
+      return await sdk.admin.chefEvents.revertMenu(chefEventId, { deleteDerivedMenu })
+    },
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEY })
+      queryClient.invalidateQueries({ queryKey: [...QUERY_KEY, variables.chefEventId] })
+      queryClient.invalidateQueries({ queryKey: ["menus"] })
+    },
+  })
+}

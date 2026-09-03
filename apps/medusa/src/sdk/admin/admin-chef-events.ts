@@ -1,4 +1,39 @@
 import type { Client } from '@medusajs/js-sdk'
+import {
+  sortCalendarStatuses,
+  type ChefEventCalendarStatus,
+} from '../../lib/chef-event-calendar-status-params'
+
+export type AdminChefEventAdditionalCharge = {
+  id: string
+  name: string
+  amount: number
+  status: "pending" | "paid" | "void"
+  paid_at?: string | null
+  paid_order_id?: string | null
+  notes?: string | null
+  sort_order?: number | null
+  created_at: string
+  updated_at: string
+}
+
+export type MarketingAttributionTouch = {
+  utm_source?: string
+  utm_medium?: string
+  utm_campaign?: string
+  utm_content?: string
+  utm_term?: string
+  gclid?: string
+  fbclid?: string
+  landing_page: string
+  referrer?: string
+  seen_at: string
+}
+
+export type MarketingAttributionPayload = {
+  first_touch?: MarketingAttributionTouch
+  last_touch?: MarketingAttributionTouch
+}
 
 // Define the types for our chef events
 export interface AdminChefEventDTO {
@@ -7,8 +42,10 @@ export interface AdminChefEventDTO {
   requestedDate: Date
   requestedTime: string
   partySize: number
-  eventType: 'cooking_class' | 'plated_dinner' | 'buffet_style'
+  eventType: string
+  experience_type_id?: string | null
   templateProductId?: string
+  eventMenuId?: string | null
   locationType: 'customer_location' | 'chef_location'
   locationAddress: string
   firstName: string
@@ -16,10 +53,12 @@ export interface AdminChefEventDTO {
   email: string
   phone?: string
   notes?: string
+  attribution?: MarketingAttributionPayload | null
   totalPrice?: number
   depositPaid: boolean
   specialRequirements?: string
   estimatedDuration?: number
+  timeZone?: string
   // New acceptance/rejection fields
   productId?: string
   acceptedAt?: Date
@@ -37,9 +76,10 @@ export interface AdminChefEventDTO {
   }>
   lastEmailSentAt?: Date
   customEmailRecipients?: string[]
+  additionalCharges?: AdminChefEventAdditionalCharge[] | null
   // Tip tracking fields
-  tipAmount?: number
-  tipMethod?: string
+  tipAmount?: number | null
+  tipMethod?: string | null
   // Inventory information
   availableTickets?: number
   createdAt: Date
@@ -51,7 +91,8 @@ export interface AdminCreateChefEventDTO {
   requestedDate: string
   requestedTime: string
   partySize: number
-  eventType: 'cooking_class' | 'plated_dinner' | 'buffet_style'
+  eventType: string
+  experience_type_id?: string | null
   templateProductId?: string
   locationType: 'customer_location' | 'chef_location'
   locationAddress: string
@@ -60,10 +101,12 @@ export interface AdminCreateChefEventDTO {
   email: string
   phone?: string
   notes?: string
+  attribution?: MarketingAttributionPayload | null
   totalPrice?: number
   depositPaid?: boolean
   specialRequirements?: string
   estimatedDuration?: number
+  additionalCharges?: AdminChefEventAdditionalCharge[] | null
 }
 
 export interface AdminUpdateChefEventDTO {
@@ -71,7 +114,8 @@ export interface AdminUpdateChefEventDTO {
   requestedDate?: string
   requestedTime?: string
   partySize?: number
-  eventType?: 'cooking_class' | 'plated_dinner' | 'buffet_style'
+  eventType?: string
+  experience_type_id?: string | null
   templateProductId?: string
   locationType?: 'customer_location' | 'chef_location'
   locationAddress?: string
@@ -80,6 +124,7 @@ export interface AdminUpdateChefEventDTO {
   email?: string
   phone?: string
   notes?: string
+  attribution?: MarketingAttributionPayload | null
   totalPrice?: number
   depositPaid?: boolean
   specialRequirements?: string
@@ -90,6 +135,7 @@ export interface AdminUpdateChefEventDTO {
   acceptedBy?: string
   rejectionReason?: string
   chefNotes?: string
+  additionalCharges?: AdminChefEventAdditionalCharge[] | null
 }
 
 export interface AdminListChefEventsQuery {
@@ -97,6 +143,7 @@ export interface AdminListChefEventsQuery {
   offset?: number
   q?: string
   status?: string
+  statuses?: ChefEventCalendarStatus[]
   eventType?: string
   locationType?: string
 }
@@ -148,9 +195,23 @@ export class AdminChefEventsResource {
    * @returns List of chef events
    */
   async list(query: AdminListChefEventsQuery = {}) {
+    const { statuses, ...rest } = query
+    const queryParams: Record<string, string | number> = {}
+    if (rest.limit !== undefined) queryParams.limit = rest.limit
+    if (rest.offset !== undefined) queryParams.offset = rest.offset
+    if (rest.q) queryParams.q = rest.q
+    if (rest.status && rest.status !== 'all') queryParams.status = rest.status
+    if (rest.eventType && rest.eventType !== 'all') queryParams.eventType = rest.eventType
+    if (rest.locationType && rest.locationType !== 'all') {
+      queryParams.locationType = rest.locationType
+    }
+    if (statuses !== undefined && statuses.length > 0) {
+      queryParams.statuses = sortCalendarStatuses(statuses).join(',')
+    }
+
     return this.client.fetch<AdminChefEventsResponse>(`/admin/chef-events`, {
       method: 'GET',
-      query,
+      query: queryParams,
     })
   }
 
@@ -285,5 +346,31 @@ export class AdminChefEventsResource {
       body: data,
     })
     return response
+  }
+
+  /**
+   * Create or retrieve an event-specific menu derived from template.
+   */
+  async deriveMenu(id: string) {
+    return this.client.fetch<{ chefEvent: AdminChefEventDTO; menu: any; created: boolean }>(
+      `/admin/chef-events/${id}/derive-menu`,
+      {
+        method: "POST",
+      }
+    )
+  }
+
+  /**
+   * Revert event to initially selected menu and optionally delete derived menu.
+   */
+  async revertMenu(id: string, data?: { deleteDerivedMenu?: boolean }) {
+    return this.client.fetch<{
+      chefEvent: AdminChefEventDTO
+      deletedDerivedMenu: boolean
+      derivedMenuId: string
+    }>(`/admin/chef-events/${id}/revert-menu`, {
+      method: "POST",
+      body: data,
+    })
   }
 }
