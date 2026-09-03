@@ -4,16 +4,16 @@ import { Empty } from '@app/components/common/Empty/Empty';
 import { Button } from '@app/components/common/buttons/Button';
 import { CheckoutProvider } from '@app/providers/checkout-provider';
 import ShoppingCartIcon from '@heroicons/react/24/outline/ShoppingCartIcon';
+import { filterShippingOptionsForCart, hasOnlyDigitalItems, isDigitalShippingOption } from '@libs/util/cart/cart-helpers';
 import { sdk } from '@libs/util/server/client.server';
 import { getCartId, removeCartId } from '@libs/util/server/cookies.server';
-import { initiatePaymentSession, retrieveCart, setShippingMethod } from '@libs/util/server/data/cart.server';
+import { ensureStripePaymentSession, retrieveCart, setShippingMethod } from '@libs/util/server/data/cart.server';
 import { listCartPaymentProviders } from '@libs/util/server/data/payment.server';
+import { STRIPE_CONNECT_PROVIDER_ID } from '@libs/util/stripe/stripe-connect-session';
 import { CartDTO, StoreCart, StoreCartShippingOption, StorePaymentProvider } from '@medusajs/types';
 import { BasePaymentSession } from '@medusajs/types/dist/http/payment/common';
 import { LoaderFunctionArgs, redirect } from 'react-router';
 import { Link, useLoaderData } from 'react-router';
-
-const SYSTEM_PROVIDER_ID = 'pp_system_default';
 
 const fetchShippingOptions = async (cartId: string) => {
   if (!cartId) return [];
@@ -36,47 +36,33 @@ const findCheapestShippingOption = (shippingOptions: StoreCartShippingOption[]) 
 };
 
 const ensureSelectedCartShippingMethod = async (request: Request, cart: StoreCart) => {
-  const selectedShippingMethod = cart.shipping_methods?.[0];
-
-  if (selectedShippingMethod) return;
-
   const shippingOptions = await fetchShippingOptions(cart.id);
-
   if (shippingOptions.length === 0) return;
 
-  // If there's only one shipping option (likely digital), auto-select it
+  // For digital-only carts, always ensure the digital delivery option is selected
+  if (hasOnlyDigitalItems(cart)) {
+    const digitalOption = shippingOptions.find(isDigitalShippingOption);
+    if (digitalOption) {
+      const currentMethod = cart.shipping_methods?.[0];
+      if (!currentMethod || currentMethod.shipping_option_id !== digitalOption.id) {
+        await setShippingMethod(request, { cartId: cart.id, shippingOptionId: digitalOption.id });
+      }
+      return;
+    }
+  }
+
+  // For non-digital carts, only auto-select if no method is already set
+  if (cart.shipping_methods?.[0]) return;
+
   if (shippingOptions.length === 1) {
     await setShippingMethod(request, { cartId: cart.id, shippingOptionId: shippingOptions[0].id });
     return;
   }
 
-  // Otherwise, find the cheapest shipping option
   const cheapestShippingOption = findCheapestShippingOption(shippingOptions);
-
   if (cheapestShippingOption) {
     await setShippingMethod(request, { cartId: cart.id, shippingOptionId: cheapestShippingOption.id });
   }
-};
-
-const ensureCartPaymentSessions = async (request: Request, cart: StoreCart) => {
-  if (!cart) throw new Error('Cart was not provided.');
-
-  let activeSession = cart.payment_collection?.payment_sessions?.find((session) => session.status === 'pending');
-
-  if (!activeSession) {
-    const paymentProviders = await listCartPaymentProviders(cart.region_id!);
-    if (!paymentProviders.length) return activeSession;
-
-    const provider = paymentProviders.find((p) => p.id !== SYSTEM_PROVIDER_ID) || paymentProviders[0];
-
-    const { payment_collection } = await initiatePaymentSession(request, cart, {
-      provider_id: provider.id,
-    });
-
-    activeSession = payment_collection.payment_sessions?.find((session) => session.status === 'pending');
-  }
-
-  return activeSession as BasePaymentSession;
 };
 
 export const loader = async ({
@@ -113,17 +99,23 @@ export const loader = async ({
 
   await ensureSelectedCartShippingMethod(request, cart);
 
-  const [shippingOptions, paymentProviders, activePaymentSession] = await Promise.all([
+  const [shippingOptions, paymentProviders] = await Promise.all([
     await fetchShippingOptions(cartId),
     (await listCartPaymentProviders(cart.region_id!)) as StorePaymentProvider[],
-    await ensureCartPaymentSessions(request, cart),
   ]);
 
-  const updatedCart = await retrieveCart(request);
+  const cartWithPayment = paymentProviders.some((provider) => provider.id === STRIPE_CONNECT_PROVIDER_ID)
+    ? await ensureStripePaymentSession(request, cart)
+    : cart;
+  const updatedCart = (await retrieveCart(request)) ?? cartWithPayment;
+  const activePaymentSession =
+    updatedCart.payment_collection?.payment_sessions?.find(
+      (session) => session.status === 'pending' && session.provider_id === STRIPE_CONNECT_PROVIDER_ID,
+    ) ?? null;
 
   return {
     cart: updatedCart,
-    shippingOptions,
+    shippingOptions: filterShippingOptionsForCart(updatedCart, shippingOptions),
     paymentProviders: paymentProviders,
     activePaymentSession: activePaymentSession as BasePaymentSession,
   };

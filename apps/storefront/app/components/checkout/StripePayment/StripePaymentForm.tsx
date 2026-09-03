@@ -3,6 +3,7 @@ import { useCheckout } from '@app/hooks/useCheckout';
 import { CompleteCheckoutFormData } from '@app/routes/api.checkout.complete';
 import type { Address, CustomPaymentSession, MedusaAddress } from '@libs/types';
 import { medusaAddressToAddress } from '@libs/util';
+import { STRIPE_CONNECT_PROVIDER_ID } from '@libs/util/stripe/stripe-connect-session';
 import { PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js';
 import { PaymentMethodCreateParams, StripePaymentElement } from '@stripe/stripe-js';
 import clsx from 'clsx';
@@ -23,7 +24,7 @@ export const StripePaymentForm: FC<StripePaymentFormProps> = ({ isActiveStep, pa
   const elements = useElements();
   const { activePaymentSession, cart } = useCheckout();
   const stripePaymentMethods = useMemo(
-    () => paymentMethods?.filter((pm) => pm.provider_id === 'pp_stripe_stripe'),
+    () => paymentMethods?.filter((pm) => pm.provider_id === STRIPE_CONNECT_PROVIDER_ID),
     [paymentMethods],
   );
 
@@ -84,8 +85,7 @@ export const StripePaymentForm: FC<StripePaymentFormProps> = ({ isActiveStep, pa
         //`Elements` instance that was used to create the Payment Element
         elements,
         confirmParams: {
-          // return_url: siteURL(redirectPath),
-          return_url: 'http://localhost:3000/checkout/success',
+          return_url: `${window.location.origin}/checkout/success`,
 
           // We need to add the billing details manually because we are disabling
           // the billing address fields on the `PaymentElement`
@@ -122,7 +122,7 @@ export const StripePaymentForm: FC<StripePaymentFormProps> = ({ isActiveStep, pa
   return (
     <>
       <CompleteCheckoutForm
-        providerId="pp_stripe_stripe"
+        providerId={STRIPE_CONNECT_PROVIDER_ID}
         id="stripePaymentForm"
         paymentMethods={stripePaymentMethods}
         onSubmit={handleSubmit}

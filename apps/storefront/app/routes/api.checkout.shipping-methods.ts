@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
-  initiatePaymentSession,
+  refreshStripePaymentSession,
   retrieveCart,
   setShippingMethod,
   updateCart,
@@ -53,9 +53,7 @@ export async function action(actionArgs: ActionFunctionArgs) {
   // Force payment sessions to be updated
   const updatedCart = (await updateCart(actionArgs.request, {})).cart;
 
-  await initiatePaymentSession(actionArgs.request, updatedCart, {
-    provider_id: 'pp_stripe_stripe',
-  });
+  await refreshStripePaymentSession(actionArgs.request, updatedCart);
 
   const cart = (await retrieveCart(actionArgs.request)) as StoreCart;
 
