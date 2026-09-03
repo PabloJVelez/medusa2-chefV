@@ -61,13 +61,31 @@ type CartLineItemSnapshot = {
   metadata?: Record<string, unknown> | null
 }
 
+type QueryGraphInput = {
+  entity: string
+  fields: string[]
+  filters?: Record<string, unknown>
+  pagination?: {
+    skip?: number
+    take?: number
+  }
+}
+
+type QueryGraphClient = {
+  graph: <TRow = Record<string, unknown>>(
+    input: QueryGraphInput,
+  ) => Promise<{ data?: TRow[] }>
+}
+
 const initializeChefEventCartStep = createStep(
   "initialize-chef-event-cart-step",
   async (
     input: InitializeChefEventCartInput,
     { container },
   ): Promise<StepResponse<InitializeChefEventCartOutput>> => {
-    const query = container.resolve(ContainerRegistrationKeys.QUERY)
+    const query = container.resolve(
+      ContainerRegistrationKeys.QUERY,
+    ) as QueryGraphClient
 
     type ChefEventRow = {
       id: string
@@ -85,13 +103,20 @@ const initializeChefEventCartStep = createStep(
       id?: string
       variants?: ProductVariantRow[] | null
     }
+    type RegionRow = {
+      id?: string
+      currency_code?: string | null
+    }
+    type CartRow = {
+      id?: string
+      items?: CartLineItemSnapshot[] | null
+    }
 
-    const chefEventQueryResult = (await query.graph({
+    const { data: chefEvents } = await query.graph<ChefEventRow>({
       entity: "chef_event",
       fields: ["id", "status", "partySize", "productId", "additionalCharges"],
       filters: { id: input.chef_event_id },
-    })) as unknown as { data?: ChefEventRow[] }
-    const { data: chefEvents } = chefEventQueryResult
+    })
     const chefEvent = chefEvents?.[0]
     if (!chefEvent) {
       throw new MedusaError(MedusaError.Types.NOT_FOUND, "Chef event not found")
@@ -109,7 +134,7 @@ const initializeChefEventCartStep = createStep(
       )
     }
 
-    const { data: products } = (await query.graph({
+    const { data: products } = await query.graph<ProductRow>({
       entity: "product",
       fields: [
         "id",
@@ -119,7 +144,7 @@ const initializeChefEventCartStep = createStep(
         "variants.prices.currency_code",
       ],
       filters: { id: chefEvent.productId },
-    })) as { data?: ProductRow[] }
+    })
     const product = products?.[0]
     const eventVariant =
       product?.variants?.find((variant) =>
@@ -158,7 +183,7 @@ const initializeChefEventCartStep = createStep(
 
     let cartId = input.cart_id
     if (!cartId) {
-      const { data: regions } = await query.graph({
+      const { data: regions } = await query.graph<RegionRow>({
         entity: "region",
         fields: ["id", "currency_code"],
         pagination: { take: 1 },
@@ -188,7 +213,7 @@ const initializeChefEventCartStep = createStep(
       )
     }
 
-    const { data: cartRows } = await query.graph({
+    const { data: cartRows } = await query.graph<CartRow>({
       entity: "cart",
       fields: [
         "id",
@@ -200,7 +225,7 @@ const initializeChefEventCartStep = createStep(
       filters: { id: cartId },
     })
     const cart = cartRows?.[0]
-    const items = (cart?.items ?? []) as CartLineItemSnapshot[]
+    const items = cart?.items ?? []
 
     const pendingChargeIds = new Set(pendingCharges.map((charge) => charge.id))
     const existingChargeItemsByChargeId = new Map<
@@ -333,7 +358,7 @@ const initializeChefEventCartStep = createStep(
       })
     }
 
-    const { data: updatedRows } = await query.graph({
+    const { data: updatedRows } = await query.graph<Record<string, unknown>>({
       entity: "cart",
       fields: ["*"],
       filters: { id: cartId },
