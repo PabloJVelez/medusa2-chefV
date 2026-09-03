@@ -11,6 +11,7 @@ type EventData = {
   notes?: string
   tipAmount?: number
   tipMethod?: string
+  receiptDate?: string
 }
 
 const LOCATION_TYPE_LABELS: Record<string, string> = {
@@ -105,7 +106,7 @@ export default async function chefEventReceiptHandler({
         phone: "(347) 695-4445",
       },
       requestReference: String(chefEvent.id).slice(0, 8).toUpperCase(),
-      receiptDate: DateTime.now().toFormat("yyyy-MM-dd"),
+      receiptDate: data.receiptDate ?? DateTime.now().toFormat("yyyy-MM-dd"),
       customNotes: data.notes,
     }
 

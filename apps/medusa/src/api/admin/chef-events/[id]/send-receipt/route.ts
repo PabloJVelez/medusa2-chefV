@@ -9,6 +9,7 @@ const sendReceiptSchema = z.object({
   notes: z.string().optional(),
   tipAmount: z.number().nonnegative().optional(),
   tipMethod: z.string().min(1).optional(),
+  receiptDate: z.string().optional(),
 })
 
 export async function POST(req: MedusaRequest, res: MedusaResponse) {
@@ -66,6 +67,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
         notes: body.notes,
         tipAmount: tipAmount,
         tipMethod: tipMethod || undefined,
+        receiptDate: body.receiptDate,
       },
     })
 

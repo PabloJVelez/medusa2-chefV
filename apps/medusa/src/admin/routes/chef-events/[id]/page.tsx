@@ -1,10 +1,13 @@
-import { defineRouteConfig } from '@medusajs/admin-sdk';
-import { Container, Heading, toast, Button, FocusModal, Textarea, Label, Checkbox, Input, Select } from '@medusajs/ui';
-import { useParams } from 'react-router-dom';
-import { useState } from 'react';
-import { ChefEventForm } from '../components/chef-event-form';
-import { MenuDetails } from '../components/menu-details';
-import { EmailManagementSection } from '../components/EmailManagementSection';
+import { defineRouteConfig } from "@medusajs/admin-sdk"
+import { Container, Heading, toast, Button, FocusModal, Textarea, Label, Checkbox, Input, Text } from "@medusajs/ui"
+import { useNavigate, useParams, type UIMatch } from "react-router-dom"
+import { useState } from "react"
+import { DateTime } from "luxon"
+import { requestedStartInEventZone } from "../../../../lib/chef-event-datetime-display"
+import { ChefEventForm } from "../components/chef-event-form"
+import { MenuDetails } from "../components/menu-details"
+import { EmailManagementSection } from "../components/EmailManagementSection"
+import { AttributionDetails } from "../components/attribution-details"
 import {
   useAdminRetrieveChefEvent,
   useAdminUpdateChefEventMutation,
@@ -12,236 +15,198 @@ import {
   useAdminRejectChefEventMutation,
   useAdminSendPaymentReminderMutation,
   useAdminSendReceiptMutation,
-} from '../../../hooks/chef-events';
+  useAdminDeriveChefEventMenuMutation,
+  useAdminRevertChefEventMenuMutation,
+} from "../../../hooks/chef-events"
+import type { AdminChefEventDTO } from "../../../../sdk/admin/admin-chef-events"
+
+const chefEventDisplayName = (event: AdminChefEventDTO) => {
+  const parts = [event.firstName, event.lastName].filter(Boolean)
+  const name = parts.join(" ").trim()
+  return name.length > 0 ? name : event.email
+}
+
+const ChefEventDetailBreadcrumb = (props: UIMatch<unknown>) => {
+  const id = props.params?.id as string | undefined
+  const { data: chefEvent } = useAdminRetrieveChefEvent(id ?? "", { enabled: Boolean(id) })
+  if (!chefEvent) {
+    return null
+  }
+  return <span>{chefEventDisplayName(chefEvent)}</span>
+}
 
 const ChefEventDetailPage = () => {
-  const { id } = useParams<{ id: string }>();
-  const { data: chefEvent, isLoading } = useAdminRetrieveChefEvent(id!);
-  const updateChefEvent = useAdminUpdateChefEventMutation(id!);
-  const acceptChefEvent = useAdminAcceptChefEventMutation();
-  const rejectChefEvent = useAdminRejectChefEventMutation();
-  const sendPaymentReminder = useAdminSendPaymentReminderMutation();
-  const sendReceipt = useAdminSendReceiptMutation();
-
-  const [showAcceptModal, setShowAcceptModal] = useState(false);
-  const [showRejectModal, setShowRejectModal] = useState(false);
-  const [showReceiptModal, setShowReceiptModal] = useState(false);
-  const [chefNotes, setChefNotes] = useState('');
-  const [rejectionReason, setRejectionReason] = useState('');
-  const [sendAcceptanceEmail, setSendAcceptanceEmail] = useState(true);
+  const navigate = useNavigate()
+  const { id } = useParams<{ id: string }>()
+  const { data: chefEvent, isLoading } = useAdminRetrieveChefEvent(id!)
+  const updateChefEvent = useAdminUpdateChefEventMutation(id!)
+  const acceptChefEvent = useAdminAcceptChefEventMutation()
+  const rejectChefEvent = useAdminRejectChefEventMutation()
+  const sendPaymentReminder = useAdminSendPaymentReminderMutation()
+  const sendReceipt = useAdminSendReceiptMutation()
+  const deriveChefEventMenu = useAdminDeriveChefEventMenuMutation()
+  const revertChefEventMenu = useAdminRevertChefEventMenuMutation()
   
-  // Receipt tip input state
-  const [tipAmount, setTipAmount] = useState<string>('');
-  const [isCashTip, setIsCashTip] = useState(false);
-  const [tipMethod, setTipMethod] = useState<string>('');
-  const [customTipMethod, setCustomTipMethod] = useState<string>('');
-  const [receiptDate, setReceiptDate] = useState<string>('');
+  const [showAcceptModal, setShowAcceptModal] = useState(false)
+  const [showRejectModal, setShowRejectModal] = useState(false)
+  const [showReceiptModal, setShowReceiptModal] = useState(false)
+  const [chefNotes, setChefNotes] = useState("")
+  const [rejectionReason, setRejectionReason] = useState("")
+  const [sendAcceptanceEmail, setSendAcceptanceEmail] = useState(true)
+  const [receiptTipAmount, setReceiptTipAmount] = useState("")
+  const [receiptTipMethod, setReceiptTipMethod] = useState<string>("")
+  const [receiptTipMethodOther, setReceiptTipMethodOther] = useState("")
+  const [receiptDate, setReceiptDate] = useState("")
+  const [receiptNotes, setReceiptNotes] = useState("")
+  const [receiptDuplicateConfirmed, setReceiptDuplicateConfirmed] = useState(false)
+  const [showRevertMenuModal, setShowRevertMenuModal] = useState(false)
+  const [deleteDerivedMenuOnRevert, setDeleteDerivedMenuOnRevert] = useState(false)
 
   const handleUpdateChefEvent = async (data: any) => {
     try {
-      await updateChefEvent.mutateAsync(data);
-      toast.success('Chef Event Updated', {
-        description: 'The chef event has been updated successfully.',
+      await updateChefEvent.mutateAsync(data)
+      toast.success("Chef Event Updated", {
+        description: "The chef event has been updated successfully.",
         duration: 3000,
-      });
+      })
     } catch (error) {
-      console.error('Error updating chef event:', error);
-      toast.error('Update Failed', {
-        description: 'There was an error updating the chef event. Please try again.',
+      console.error("Error updating chef event:", error)
+      toast.error("Update Failed", {
+        description: "There was an error updating the chef event. Please try again.",
         duration: 5000,
-      });
+      })
     }
-  };
+  }
 
   const handleAcceptEvent = async () => {
     try {
-      await acceptChefEvent.mutateAsync({
-        id: id!,
-        data: {
+      await acceptChefEvent.mutateAsync({ 
+        id: id!, 
+        data: { 
           chefNotes: chefNotes || undefined,
-          sendAcceptanceEmail: sendAcceptanceEmail,
-        },
-      });
-      toast.success('Event Accepted', {
-        description: 'The event has been accepted and a product has been created for ticket sales.',
+          sendAcceptanceEmail: sendAcceptanceEmail
+        }
+      })
+      toast.success("Event Accepted", {
+        description: "The event has been accepted and a product has been created for ticket sales.",
         duration: 5000,
-      });
-      setShowAcceptModal(false);
-      setChefNotes('');
-      setSendAcceptanceEmail(true);
+      })
+      setShowAcceptModal(false)
+      setChefNotes("")
+      setSendAcceptanceEmail(true)
     } catch (error) {
-      console.error('Error accepting chef event:', error);
-      toast.error('Acceptance Failed', {
-        description: 'There was an error accepting the chef event. Please try again.',
+      console.error("Error accepting chef event:", error)
+      toast.error("Acceptance Failed", {
+        description: "There was an error accepting the chef event. Please try again.",
         duration: 5000,
-      });
+      })
     }
-  };
+  }
 
   const handleRejectEvent = async () => {
     if (!rejectionReason.trim()) {
-      toast.error('Rejection Reason Required', {
-        description: 'Please provide a reason for rejecting this event.',
+      toast.error("Rejection Reason Required", {
+        description: "Please provide a reason for rejecting this event.",
         duration: 3000,
-      });
-      return;
+      })
+      return
     }
 
     try {
-      await rejectChefEvent.mutateAsync({
-        id: id!,
-        data: {
+      await rejectChefEvent.mutateAsync({ 
+        id: id!, 
+        data: { 
           rejectionReason: rejectionReason.trim(),
-          chefNotes: chefNotes || undefined,
-        },
-      });
-      toast.success('Event Rejected', {
-        description: 'The event has been rejected and the customer has been notified.',
+          chefNotes: chefNotes || undefined
+        }
+      })
+      toast.success("Event Rejected", {
+        description: "The event has been rejected and the customer has been notified.",
         duration: 5000,
-      });
-      setShowRejectModal(false);
-      setRejectionReason('');
-      setChefNotes('');
+      })
+      setShowRejectModal(false)
+      setRejectionReason("")
+      setChefNotes("")
     } catch (error) {
-      console.error('Error rejecting chef event:', error);
-      toast.error('Rejection Failed', {
-        description: 'There was an error rejecting the chef event. Please try again.',
+      console.error("Error rejecting chef event:", error)
+      toast.error("Rejection Failed", {
+        description: "There was an error rejecting the chef event. Please try again.",
         duration: 5000,
-      });
+      })
     }
-  };
+  }
+
+  const handleCustomizeEventMenu = async () => {
+    try {
+      const result = await deriveChefEventMenu.mutateAsync(id!)
+      toast.success(
+        result.created ? "Event Menu Created" : "Opening existing event menu",
+        {
+          description: result.created
+            ? "A draft menu was created from the template for this event."
+            : "This event already has a custom menu draft.",
+          duration: 3000,
+        }
+      )
+      if (result.menu?.id) {
+        navigate(`/menus/${result.menu.id}`)
+      }
+    } catch (error) {
+      console.error("Error deriving event menu:", error)
+      toast.error("Menu Derivation Failed", {
+        description: "There was an error preparing the event menu. Please try again.",
+        duration: 5000,
+      })
+    }
+  }
+
+  const handleRevertEventMenu = async () => {
+    try {
+      const result = await revertChefEventMenu.mutateAsync({
+        chefEventId: id!,
+        deleteDerivedMenu: deleteDerivedMenuOnRevert,
+      })
+      toast.success("Event Menu Reverted", {
+        description: result.deletedDerivedMenu
+          ? "Reverted to the initial menu and deleted the derived menu."
+          : "Reverted to the initial menu. Derived menu was kept.",
+        duration: 3000,
+      })
+      setShowRevertMenuModal(false)
+      setDeleteDerivedMenuOnRevert(false)
+    } catch (error) {
+      console.error("Error reverting event menu:", error)
+      toast.error("Revert Failed", {
+        description: "There was an error reverting the menu. Please try again.",
+        duration: 5000,
+      })
+    }
+  }
 
   const handleSendPaymentReminder = async () => {
     try {
       await sendPaymentReminder.mutateAsync({
         chefEventId: id!,
-      });
-      toast.success('Payment Reminder Sent', {
-        description: 'The payment reminder has been sent to the host.',
+      })
+      toast.success("Payment Reminder Sent", {
+        description: "The payment reminder has been sent to the host.",
         duration: 3000,
-      });
+      })
     } catch (error) {
-      console.error('Error sending payment reminder:', error);
-      toast.error('Payment Reminder Failed', {
-        description: 'There was an error sending the payment reminder. Please try again.',
+      console.error("Error sending payment reminder:", error)
+      toast.error("Payment Reminder Failed", {
+        description: "There was an error sending the payment reminder. Please try again.",
         duration: 5000,
-      });
+      })
     }
-  };
-
-  // Helper function to check if event has taken place (date-only comparison)
-  const hasEventTakenPlace = (eventDate: Date): boolean => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const eventDateOnly = new Date(eventDate);
-    eventDateOnly.setHours(0, 0, 0, 0);
-    return eventDateOnly < today;
-  };
-
-  const handleSendReceipt = async () => {
-    // Validate tip amount if provided
-    if (tipAmount && tipAmount.trim() !== '') {
-      const amount = parseFloat(tipAmount);
-      if (isNaN(amount) || amount < 0) {
-        toast.error('Invalid Tip Amount', {
-          description: 'Tip amount must be a valid non-negative number.',
-          duration: 3000,
-        });
-        return;
-      }
-
-      // Validate tip method if tip amount provided
-      let finalTipMethod: string | undefined;
-      if (isCashTip) {
-        finalTipMethod = 'cash';
-      } else if (tipMethod) {
-        if (tipMethod === 'other') {
-          if (!customTipMethod.trim()) {
-            toast.error('Custom Tip Method Required', {
-              description: 'Please specify the tip method when "Other" is selected.',
-              duration: 3000,
-            });
-            return;
-          }
-          finalTipMethod = customTipMethod.trim();
-        } else {
-          finalTipMethod = tipMethod;
-        }
-      } else {
-        toast.error('Tip Method Required', {
-          description: 'Please select a tip method when tip amount is provided.',
-          duration: 3000,
-        });
-        return;
-      }
-
-      try {
-        await sendReceipt.mutateAsync({
-          chefEventId: id!,
-          tipAmount: amount,
-          tipMethod: finalTipMethod,
-          receiptDate: receiptDate || undefined,
-        });
-        toast.success('Receipt Sent', {
-          description: 'The receipt has been sent to the host.',
-          duration: 3000,
-        });
-        setShowReceiptModal(false);
-        // Reset tip fields
-        setTipAmount('');
-        setIsCashTip(false);
-        setTipMethod('');
-        setCustomTipMethod('');
-        setReceiptDate('');
-      } catch (error) {
-        console.error('Error sending receipt:', error);
-        toast.error('Receipt Failed', {
-          description: 'There was an error sending the receipt. Please try again.',
-          duration: 5000,
-        });
-      }
-    } else {
-      // Send receipt without tip
-      try {
-        await sendReceipt.mutateAsync({
-          chefEventId: id!,
-          receiptDate: receiptDate || undefined,
-        });
-        toast.success('Receipt Sent', {
-          description: 'The receipt has been sent to the host.',
-          duration: 3000,
-        });
-        setShowReceiptModal(false);
-        // Reset tip fields
-        setTipAmount('');
-        setIsCashTip(false);
-        setTipMethod('');
-        setCustomTipMethod('');
-        setReceiptDate('');
-      } catch (error) {
-        console.error('Error sending receipt:', error);
-        toast.error('Receipt Failed', {
-          description: 'There was an error sending the receipt. Please try again.',
-          duration: 5000,
-        });
-      }
-    }
-  };
-
-  // Check if receipt was previously sent
-  const hasReceiptBeenSent = (): boolean => {
-    if (!chefEvent?.emailHistory || !Array.isArray(chefEvent.emailHistory)) {
-      return false;
-    }
-    return chefEvent.emailHistory.some((entry: any) => entry.type === 'receipt');
-  };
+  }
 
   if (isLoading) {
     return (
       <Container className="p-6">
         <div>Loading...</div>
       </Container>
-    );
+    )
   }
 
   if (!chefEvent) {
@@ -249,37 +214,112 @@ const ChefEventDetailPage = () => {
       <Container className="p-6">
         <div>Chef event not found</div>
       </Container>
-    );
+    )
   }
 
-  const isPending = chefEvent.status === 'pending';
-  const isConfirmed = chefEvent.status === 'confirmed';
-  const availableTickets = (chefEvent as any).availableTickets ?? 0;
-  const showPaymentReminderButton = isConfirmed && chefEvent.productId && availableTickets > 0;
-  
-  // Receipt button enablement logic
-  const eventDate = chefEvent.requestedDate ? new Date(chefEvent.requestedDate) : null;
-  const eventHasTakenPlace = eventDate ? hasEventTakenPlace(eventDate) : false;
-  const allTicketsPurchased = availableTickets === 0;
-  const showReceiptButton = isConfirmed && chefEvent.productId && (eventHasTakenPlace || allTicketsPurchased);
+  const isPending = chefEvent.status === 'pending'
+  const isConfirmed = chefEvent.status === 'confirmed'
 
-  // Debug logging (can be removed in production)
-  if (isConfirmed && chefEvent.productId) {
-    console.log('Payment Reminder Button Debug:', {
-      isConfirmed,
-      productId: chefEvent.productId,
-      availableTickets,
-      showPaymentReminderButton,
-    });
+  const requestedDateRaw = chefEvent.requestedDate as string | Date | undefined
+  const eventStart =
+    requestedDateRaw == null
+      ? null
+      : requestedStartInEventZone({
+          requestedDate: requestedDateRaw,
+          timeZone: chefEvent.timeZone,
+        })
+  const eventDay =
+    eventStart && eventStart.isValid ? eventStart.startOf("day") : null
+  const eventTz = eventDay?.zoneName ?? chefEvent.timeZone ?? "America/Chicago"
+  const hasEventTakenPlace =
+    eventDay != null &&
+    eventDay < DateTime.now().setZone(eventTz).startOf("day")
+
+  const availableTickets =
+    typeof chefEvent.availableTickets === "number" ? chefEvent.availableTickets : undefined
+  const soldOut = availableTickets === 0
+  const canSendReceipt =
+    isConfirmed &&
+    Boolean(chefEvent.productId) &&
+    (hasEventTakenPlace || soldOut)
+
+  const emailHistory = chefEvent.emailHistory as
+    | Array<{ type?: string }>
+    | undefined
+  const alreadySentReceipt = emailHistory?.some((e) => e.type === "receipt")
+
+  const resetReceiptModal = () => {
+    setReceiptTipAmount("")
+    setReceiptTipMethod("")
+    setReceiptTipMethodOther("")
+    setReceiptDate("")
+    setReceiptNotes("")
+    setReceiptDuplicateConfirmed(false)
+  }
+
+  const handleSendReceipt = async () => {
+    const amountRaw = receiptTipAmount.trim()
+    const tipAmount =
+      amountRaw === "" ? undefined : Number.parseFloat(amountRaw)
+    if (amountRaw !== "" && (Number.isNaN(tipAmount!) || tipAmount! < 0)) {
+      toast.error("Invalid tip", { description: "Enter a valid non-negative amount or leave blank." })
+      return
+    }
+    let tipMethod: string | undefined
+    if (tipAmount != null && tipAmount > 0) {
+      if (receiptTipMethod === "other") {
+        const o = receiptTipMethodOther.trim()
+        if (!o) {
+          toast.error("Tip method required", { description: "Describe how gratuity was received." })
+          return
+        }
+        tipMethod = o
+      } else if (receiptTipMethod) {
+        tipMethod =
+          receiptTipMethod === "cash"
+            ? "Cash"
+            : receiptTipMethod.charAt(0).toUpperCase() + receiptTipMethod.slice(1)
+      } else {
+        toast.error("Tip method required", { description: "Select how gratuity was received." })
+        return
+      }
+    }
+
+    if (alreadySentReceipt && !receiptDuplicateConfirmed) {
+      toast.error("Confirmation needed", {
+        description: "A receipt was already sent. Check the box to send again.",
+      })
+      return
+    }
+
+    try {
+      await sendReceipt.mutateAsync({
+        chefEventId: id!,
+        notes: receiptNotes.trim() || undefined,
+        tipAmount,
+        tipMethod,
+        receiptDate: receiptDate || undefined,
+      })
+      toast.success("Receipt sent", {
+        description: "The host will receive the receipt by email.",
+      })
+      setShowReceiptModal(false)
+      resetReceiptModal()
+    } catch (e) {
+      console.error(e)
+      toast.error("Failed to send receipt", {
+        description: e instanceof Error ? e.message : "Please try again.",
+      })
+    }
   }
 
   return (
     <Container className="divide-y p-0">
       <div className="flex items-center justify-between px-6 py-4">
         <Heading level="h1">
-          Edit Chef Event - {(chefEvent as any).firstName} {(chefEvent as any).lastName}
+          Edit Chef Event - {chefEvent.firstName} {chefEvent.lastName}
         </Heading>
-
+        
         {isPending && (
           <div className="flex space-x-2">
             <Button variant="primary" size="small" onClick={() => setShowAcceptModal(true)}>
@@ -290,70 +330,82 @@ const ChefEventDetailPage = () => {
             </Button>
           </div>
         )}
-
+        
         {isConfirmed && chefEvent.productId && (
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-2">
             <Button
-              variant={showPaymentReminderButton ? 'primary' : 'secondary'}
+              variant={
+                availableTickets != null && availableTickets > 0
+                  ? "primary"
+                  : "secondary"
+              }
               size="small"
               onClick={handleSendPaymentReminder}
-              disabled={sendPaymentReminder.isPending || !showPaymentReminderButton}
+              disabled={
+                sendPaymentReminder.isPending ||
+                availableTickets == null ||
+                availableTickets <= 0
+              }
               title={
-                !showPaymentReminderButton
-                  ? `No tickets available (${availableTickets} remaining). The button will appear when tickets are available.`
-                  : `Send payment reminder for ${availableTickets} remaining ticket${availableTickets !== 1 ? 's' : ''}`
+                availableTickets == null || availableTickets <= 0
+                  ? "Payment reminders are only available while tickets remain."
+                  : `Send payment reminder for ${availableTickets} remaining ticket${availableTickets === 1 ? "" : "s"}`
               }
             >
               {sendPaymentReminder.isPending
-                ? 'Sending...'
-                : `Send Payment Reminder${availableTickets > 0 ? ` (${availableTickets})` : ''}`}
+                ? "Sending..."
+                : `Send Payment Reminder${availableTickets != null && availableTickets > 0 ? ` (${availableTickets})` : ""}`}
             </Button>
-            <Button
-              variant={showReceiptButton ? 'primary' : 'secondary'}
-              size="small"
-              onClick={() => setShowReceiptModal(true)}
-              disabled={sendReceipt.isPending || !showReceiptButton}
-              title={
-                !showReceiptButton
-                  ? 'Receipt can only be sent after event date has passed or all tickets have been purchased'
-                  : 'Send receipt to host'
-              }
-            >
-              Send Receipt
-            </Button>
+            {canSendReceipt ? (
+              <Button
+                variant="primary"
+                size="small"
+                onClick={() => {
+                  resetReceiptModal()
+                  setShowReceiptModal(true)
+                }}
+              >
+                Send Receipt
+              </Button>
+            ) : null}
             <Button variant="secondary" size="small" asChild>
-              <a href={`/products/${chefEvent.productId}`} target="_blank">
+              <a href={`/products/${chefEvent.productId}`} target="_blank" rel="noreferrer">
                 View Product
               </a>
             </Button>
           </div>
         )}
       </div>
-
+      
       <div className="p-6 space-y-6">
-        <ChefEventForm
+        <ChefEventForm 
+          key={`${chefEvent.id}-${chefEvent.updatedAt}-${chefEvent.eventMenuId ?? ""}`}
           initialData={chefEvent}
           onSubmit={handleUpdateChefEvent}
           isLoading={updateChefEvent.isPending}
-          onCancel={() => window.history.back()}
+          detailsTabExtra={isConfirmed ? (
+            <EmailManagementSection
+              chefEvent={chefEvent}
+              onEmailSent={() => {
+                toast.success("Email Sent", {
+                  description: `Event details sent successfully`,
+                  duration: 3000,
+                })
+              }}
+            />
+          ) : undefined}
+          marketingTabExtra={<AttributionDetails attribution={chefEvent.attribution} />}
+          menuTabExtra={
+            <MenuDetails
+              templateProductId={chefEvent.templateProductId}
+              eventMenuId={chefEvent.eventMenuId}
+              onCustomizeForEvent={handleCustomizeEventMenu}
+              onRevertToInitialMenu={() => setShowRevertMenuModal(true)}
+              isCustomizingForEvent={deriveChefEventMenu.isPending}
+              isRevertingToInitialMenu={revertChefEventMenu.isPending}
+            />
+          }
         />
-
-        {/* Email Management Section for confirmed events */}
-        {isConfirmed && (
-          <EmailManagementSection
-            chefEvent={chefEvent}
-            onEmailSent={(emailData) => {
-              // Refresh event data to show updated email history
-              // refetch() - will be available once we update the hooks
-              toast.success('Email Sent', {
-                description: `Event details sent successfully`,
-                duration: 3000,
-              });
-            }}
-          />
-        )}
-
-        <MenuDetails templateProductId={(chefEvent as any).templateProductId} />
       </div>
 
       {/* Accept Event Modal */}
@@ -366,17 +418,19 @@ const ChefEventDetailPage = () => {
             <FocusModal.Body>
               <div className="space-y-4">
                 <p>This will accept the event and create a product for ticket sales.</p>
-
+                
                 {/* Email Notification Control */}
                 <div className="flex items-center space-x-2">
                   <Checkbox
                     id="send-acceptance-email"
                     checked={sendAcceptanceEmail}
-                    onCheckedChange={(checked) => setSendAcceptanceEmail(checked === true)}
+                    onCheckedChange={(v) => setSendAcceptanceEmail(v === true)}
                   />
-                  <Label htmlFor="send-acceptance-email">Send acceptance email to customer</Label>
+                  <Label htmlFor="send-acceptance-email">
+                    Send acceptance email to customer
+                  </Label>
                 </div>
-
+                
                 <div>
                   <Label htmlFor="chef-notes">Chef Notes (Optional)</Label>
                   <Textarea
@@ -390,8 +444,134 @@ const ChefEventDetailPage = () => {
                   <Button variant="secondary" onClick={() => setShowAcceptModal(false)}>
                     Cancel
                   </Button>
-                  <Button variant="primary" onClick={handleAcceptEvent} disabled={acceptChefEvent.isPending}>
-                    {acceptChefEvent.isPending ? 'Accepting...' : 'Accept Event'}
+                  <Button 
+                    variant="primary"
+                    onClick={handleAcceptEvent}
+                    disabled={acceptChefEvent.isPending}
+                  >
+                    {acceptChefEvent.isPending ? "Accepting..." : "Accept Event"}
+                  </Button>
+                </div>
+              </div>
+            </FocusModal.Body>
+          </FocusModal.Content>
+        </FocusModal>
+      )}
+
+      {/* Send receipt modal */}
+      {showReceiptModal && (
+        <FocusModal
+          open
+          onOpenChange={(open) => {
+            setShowReceiptModal(open)
+            if (!open) resetReceiptModal()
+          }}
+        >
+          <FocusModal.Content>
+            <FocusModal.Header>
+              <FocusModal.Title>Send receipt to host</FocusModal.Title>
+            </FocusModal.Header>
+            <FocusModal.Body>
+              <div className="space-y-4">
+                <Text size="small" className="text-ui-fg-subtle">
+                  Sends a receipt email to the host ({chefEvent.email}). Optional gratuity can be
+                  included for their records.
+                </Text>
+                {alreadySentReceipt ? (
+                  <div className="rounded-md border border-ui-border-warning bg-ui-bg-subtle-hover p-3 space-y-2">
+                    <Text weight="plus" className="text-ui-fg-base">
+                      Receipt already sent
+                    </Text>
+                    <div className="flex items-center gap-2">
+                      <Checkbox
+                        id="receipt-dup-confirm"
+                        checked={receiptDuplicateConfirmed}
+                        onCheckedChange={(v) =>
+                          setReceiptDuplicateConfirmed(v === true)
+                        }
+                      />
+                      <Label htmlFor="receipt-dup-confirm" className="cursor-pointer">
+                        I understand and want to send another receipt email
+                      </Label>
+                    </div>
+                  </div>
+                ) : null}
+                <div>
+                  <Label htmlFor="receipt-date">Receipt date</Label>
+                  <Input
+                    id="receipt-date"
+                    type="date"
+                    value={receiptDate}
+                    onChange={(e) => setReceiptDate(e.target.value)}
+                  />
+                  <Text size="small" className="mt-1 text-ui-fg-subtle">
+                    Defaults to today if left blank.
+                  </Text>
+                </div>
+                <div>
+                  <Label htmlFor="receipt-tip-amount">Gratuity amount (optional)</Label>
+                  <Input
+                    id="receipt-tip-amount"
+                    type="number"
+                    min={0}
+                    step="0.01"
+                    placeholder="0.00"
+                    value={receiptTipAmount}
+                    onChange={(e) => setReceiptTipAmount(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="receipt-tip-method">Gratuity method</Label>
+                  <select
+                    id="receipt-tip-method"
+                    className="w-full rounded-md border border-ui-border-base bg-ui-bg-field px-2 py-1.5 text-sm"
+                    value={receiptTipMethod}
+                    onChange={(e) => setReceiptTipMethod(e.target.value)}
+                  >
+                    <option value="">None</option>
+                    <option value="cash">Cash</option>
+                    <option value="venmo">Venmo</option>
+                    <option value="zelle">Zelle</option>
+                    <option value="paypal">PayPal</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+                {receiptTipMethod === "other" ? (
+                  <div>
+                    <Label htmlFor="receipt-tip-other">Describe method</Label>
+                    <Input
+                      id="receipt-tip-other"
+                      value={receiptTipMethodOther}
+                      onChange={(e) => setReceiptTipMethodOther(e.target.value)}
+                      placeholder="e.g. check, Apple Pay"
+                    />
+                  </div>
+                ) : null}
+                <div>
+                  <Label htmlFor="receipt-notes">Internal notes (optional)</Label>
+                  <Textarea
+                    id="receipt-notes"
+                    value={receiptNotes}
+                    onChange={(e) => setReceiptNotes(e.target.value)}
+                    placeholder="Shown in email if provided"
+                  />
+                </div>
+                <div className="flex justify-end gap-2">
+                  <Button
+                    variant="secondary"
+                    onClick={() => {
+                      setShowReceiptModal(false)
+                      resetReceiptModal()
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    variant="primary"
+                    onClick={handleSendReceipt}
+                    disabled={sendReceipt.isPending}
+                  >
+                    {sendReceipt.isPending ? "Sending..." : "Send receipt"}
                   </Button>
                 </div>
               </div>
@@ -433,8 +613,12 @@ const ChefEventDetailPage = () => {
                   <Button variant="secondary" onClick={() => setShowRejectModal(false)}>
                     Cancel
                   </Button>
-                  <Button variant="danger" onClick={handleRejectEvent} disabled={rejectChefEvent.isPending}>
-                    {rejectChefEvent.isPending ? 'Rejecting...' : 'Reject Event'}
+                  <Button 
+                    variant="danger"
+                    onClick={handleRejectEvent}
+                    disabled={rejectChefEvent.isPending}
+                  >
+                    {rejectChefEvent.isPending ? "Rejecting..." : "Reject Event"}
                   </Button>
                 </div>
               </div>
@@ -443,132 +627,52 @@ const ChefEventDetailPage = () => {
         </FocusModal>
       )}
 
-      {/* Send Receipt Modal */}
-      {showReceiptModal && (
-        <FocusModal open onOpenChange={setShowReceiptModal}>
+      {/* Revert menu modal */}
+      {showRevertMenuModal && (
+        <FocusModal
+          open
+          onOpenChange={(open) => {
+            setShowRevertMenuModal(open)
+            if (!open) {
+              setDeleteDerivedMenuOnRevert(false)
+            }
+          }}
+        >
           <FocusModal.Content>
             <FocusModal.Header>
-              <FocusModal.Title>Send Receipt</FocusModal.Title>
+              <FocusModal.Title>Revert to initially selected menu</FocusModal.Title>
             </FocusModal.Header>
             <FocusModal.Body>
               <div className="space-y-4">
-                {hasReceiptBeenSent() && (
-                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                    <p className="text-yellow-800 text-sm font-medium">
-                      ⚠️ A receipt has already been sent for this event. Sending another receipt will update the tip information if provided.
-                    </p>
-                  </div>
-                )}
-                
-                <p className="text-gray-600">
-                  Send a receipt to the host. You can optionally include tip information received on the day of the event.
+                <p>
+                  This will make the initially selected menu the active selected menu for this event again.
                 </p>
-
-                {/* Receipt Date Input */}
-                <div>
-                  <Label htmlFor="receipt-date">Receipt Date</Label>
-                  <Input
-                    id="receipt-date"
-                    type="date"
-                    value={receiptDate}
-                    onChange={(e) => setReceiptDate(e.target.value)}
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    id="delete-derived-menu-on-revert"
+                    checked={deleteDerivedMenuOnRevert}
+                    onCheckedChange={(v) => setDeleteDerivedMenuOnRevert(v === true)}
                   />
-                  <p className="text-gray-500 text-sm mt-1">Date to display on the receipt (defaults to today if not set)</p>
+                  <Label htmlFor="delete-derived-menu-on-revert">
+                    Also delete the derived event menu
+                  </Label>
                 </div>
-
-                {/* Tip Amount Input */}
-                <div>
-                  <Label htmlFor="tip-amount">Tip Amount (Optional)</Label>
-                  <Input
-                    id="tip-amount"
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    placeholder="0.00"
-                    value={tipAmount}
-                    onChange={(e) => setTipAmount(e.target.value)}
-                  />
-                  <p className="text-gray-500 text-sm mt-1">Enter the tip amount if one was received</p>
-                </div>
-
-                {/* Tip Method - Cash Checkbox */}
-                {tipAmount && tipAmount.trim() !== '' && parseFloat(tipAmount) > 0 && (
-                  <div className="space-y-4">
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="cash-tip"
-                        checked={isCashTip}
-                        onCheckedChange={(checked) => {
-                          const isChecked = checked === true;
-                          setIsCashTip(isChecked);
-                          if (isChecked) {
-                            setTipMethod('');
-                            setCustomTipMethod('');
-                          }
-                        }}
-                      />
-                      <Label htmlFor="cash-tip">Cash</Label>
-                    </div>
-
-                    {/* Other Payment Methods Dropdown (only if not cash) */}
-                    {!isCashTip && (
-                      <div>
-                        <Label htmlFor="tip-method">Payment Method</Label>
-                        <Select
-                          value={tipMethod}
-                          onValueChange={(value) => {
-                            setTipMethod(value);
-                            if (value !== 'other') {
-                              setCustomTipMethod('');
-                            }
-                          }}
-                        >
-                          <Select.Trigger>
-                            <Select.Value placeholder="Select payment method" />
-                          </Select.Trigger>
-                          <Select.Content>
-                            <Select.Item value="venmo">Venmo</Select.Item>
-                            <Select.Item value="zelle">Zelle</Select.Item>
-                            <Select.Item value="paypal">PayPal</Select.Item>
-                            <Select.Item value="other">Other</Select.Item>
-                          </Select.Content>
-                        </Select>
-                      </div>
-                    )}
-
-                    {/* Custom Tip Method Input (only if "Other" selected) */}
-                    {!isCashTip && tipMethod === 'other' && (
-                      <div>
-                        <Label htmlFor="custom-tip-method">Custom Payment Method</Label>
-                        <Input
-                          id="custom-tip-method"
-                          type="text"
-                          placeholder="e.g., Cash App, Apple Pay"
-                          value={customTipMethod}
-                          onChange={(e) => setCustomTipMethod(e.target.value)}
-                        />
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                <div className="flex justify-end space-x-2 pt-4">
-                  <Button variant="secondary" onClick={() => {
-                    setShowReceiptModal(false);
-                    setTipAmount('');
-                    setIsCashTip(false);
-                    setTipMethod('');
-                    setCustomTipMethod('');
-                    setReceiptDate('');
-                  }}>
+                <div className="flex justify-end gap-2">
+                  <Button
+                    variant="secondary"
+                    onClick={() => {
+                      setShowRevertMenuModal(false)
+                      setDeleteDerivedMenuOnRevert(false)
+                    }}
+                  >
                     Cancel
                   </Button>
-                  <Button 
-                    variant="primary" 
-                    onClick={handleSendReceipt} 
-                    disabled={sendReceipt.isPending}
+                  <Button
+                    variant="primary"
+                    onClick={handleRevertEventMenu}
+                    disabled={revertChefEventMenu.isPending}
                   >
-                    {sendReceipt.isPending ? 'Sending...' : 'Send Receipt'}
+                    {revertChefEventMenu.isPending ? "Reverting..." : "Revert Menu"}
                   </Button>
                 </div>
               </div>
@@ -577,11 +681,15 @@ const ChefEventDetailPage = () => {
         </FocusModal>
       )}
     </Container>
-  );
-};
+  )
+}
 
 export const config = defineRouteConfig({
-  label: 'Chef Event Details',
-});
+  label: "Chef Event Details",
+})
 
-export default ChefEventDetailPage;
+export const handle = {
+  breadcrumb: (match: UIMatch<unknown>) => <ChefEventDetailBreadcrumb {...match} />,
+}
+
+export default ChefEventDetailPage
