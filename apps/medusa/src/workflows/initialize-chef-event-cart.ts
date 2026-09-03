@@ -86,11 +86,12 @@ const initializeChefEventCartStep = createStep(
       variants?: ProductVariantRow[] | null
     }
 
-    const { data: chefEvents } = (await query.graph({
+    const chefEventQueryResult = (await query.graph({
       entity: "chef_event",
       fields: ["id", "status", "partySize", "productId", "additionalCharges"],
       filters: { id: input.chef_event_id },
-    })) as { data?: ChefEventRow[] }
+    })) as unknown as { data?: ChefEventRow[] }
+    const { data: chefEvents } = chefEventQueryResult
     const chefEvent = chefEvents?.[0]
     if (!chefEvent) {
       throw new MedusaError(MedusaError.Types.NOT_FOUND, "Chef event not found")
