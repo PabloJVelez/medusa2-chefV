@@ -1,13 +1,13 @@
 import { SitemapUrl, buildSitemapUrlSetXML } from '@libs/util/xml/sitemap-builder';
 import { LoaderFunctionArgs } from 'react-router';
 
-const pages = ['/', '/products'];
+const pages = ['/', '/products', '/menus', '/how-it-works', '/service-areas', '/about', '/request'];
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const host = request.headers.get('host');
   const baseUrl = `https://${host}`;
   const urls: SitemapUrl[] = pages.map((handle) => ({
-    loc: `${baseUrl}/${handle}`,
+    loc: `${baseUrl}${handle}`,
     priority: 0.8,
     changefreq: 'daily',
   }));

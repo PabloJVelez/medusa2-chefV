@@ -20,7 +20,8 @@ import { useRootLoaderData } from './hooks/useRootLoaderData';
 
 export const getRootMeta: MetaFunction = ({ data }) => {
   const title = 'Chef Velez';
-  const description = 'Private chef experiences: cooking classes, plated dinners, and buffet-style events.';
+  const description =
+    'Private chef experiences in Carson City, Reno, and the Lake Tahoe area: cooking classes, plated dinners, and buffet-style events.';
   const ogTitle = title;
   const ogDescription = description;
   const ogImage = '';

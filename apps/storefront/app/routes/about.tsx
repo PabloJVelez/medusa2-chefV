@@ -23,9 +23,9 @@ export default function AboutChefRoute() {
               </h1>
               <p className="mx-auto text-md md:text-2xl !leading-normal">
                 Chef Velez is a private chef specializing in premium at-home culinary experiences—cooking classes,
-                plated dinners, and buffet-style events. With years of professional experience, Chef Velez crafts
-                unforgettable menus using fresh, seasonal ingredients and provides a seamless, restaurant-quality
-                experience in your home.
+                plated dinners, and buffet-style events. Based in Carson City and serving the Lake Tahoe area, Chef
+                Velez crafts unforgettable menus using fresh, seasonal ingredients and provides a seamless,
+                restaurant-quality experience in your home or vacation rental.
               </p>
             </div>
           }
@@ -42,8 +42,9 @@ export default function AboutChefRoute() {
           <div className="space-y-4 text-lg text-gray-700">
             <h2 className="font-italiana text-3xl text-gray-900">Philosophy</h2>
             <p>
-              Every event is a chance to create connection through food. From intimate dinners to interactive classes,
-              I design experiences that are warm, professional, and tailored to your tastes.
+              Every event is a chance to create connection through food. From intimate dinners to interactive classes, I
+              design experiences that are warm, professional, and tailored to your tastes throughout Carson City, Reno,
+              and the Lake Tahoe area.
             </p>
           </div>
           <div className="space-y-4 text-lg text-gray-700">
@@ -58,4 +59,3 @@ export default function AboutChefRoute() {
     </>
   );
 }
-
