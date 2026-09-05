@@ -1,6 +1,7 @@
 import { ActionList } from '@app/components/common/actions-list/ActionList';
 import { Container } from '@app/components/common/container';
 import Hero from '@app/components/sections/Hero';
+import { ButtonStyleVariant } from '@libs/types';
 import type { LoaderFunctionArgs, MetaFunction } from 'react-router';
 
 export const loader = async (_args: LoaderFunctionArgs) => {
@@ -89,7 +90,28 @@ const primaryAreas = [
   },
 ];
 
-const nearbyAreas = ['Reno', 'South Lake Tahoe', 'Incline Village', 'Tahoe City', 'Truckee'];
+const nearbyAreas = [
+  {
+    name: 'Reno',
+    description: 'Private dinners, small celebrations, and chef-led events considered for Reno homes and venues.',
+  },
+  {
+    name: 'South Lake Tahoe',
+    description: 'Vacation rental dinners, ski trip meals, and special occasion menus reviewed by request.',
+  },
+  {
+    name: 'Incline Village',
+    description: 'Lake Tahoe private chef experiences considered for homes, cabins, retreats, and intimate events.',
+  },
+  {
+    name: 'Tahoe City',
+    description: 'Seasonal private dining and group meal requests reviewed around timing, distance, and kitchen setup.',
+  },
+  {
+    name: 'Truckee',
+    description: 'Cabin dinners, retreat menus, and private group dining considered when scheduling allows.',
+  },
+];
 
 const faqItems = [
   {
@@ -121,14 +143,14 @@ export default function ServiceAreasRoute() {
 
       <Container className="!px-0 py-0 sm:!p-16">
         <Hero
-          className="min-h-[420px] !max-w-full bg-accent-50 sm:rounded-3xl p-6 sm:p-10 md:p-[88px] md:px-[88px]"
+          className="min-h-[360px] sm:min-h-[390px] lg:min-h-[420px] !max-w-full bg-accent-50 sm:rounded-3xl px-6 py-10 sm:p-10 md:p-16 lg:p-20"
           content={
-            <div className="text-center w-full space-y-8">
-              <p className="text-lg md:text-2xl font-italiana tracking-wider">SERVICE AREAS</p>
-              <h1 className="text-4xl md:text-7xl font-italiana tracking-wider [text-shadow:_1px_1px_2px_rgb(0_0_0_/_30%)]">
+            <div className="text-center w-full space-y-6 md:space-y-8">
+              <p className="text-base md:text-2xl font-italiana tracking-wider">SERVICE AREAS</p>
+              <h1 className="text-4xl md:text-6xl lg:text-7xl font-italiana tracking-wider [text-shadow:_1px_1px_2px_rgb(0_0_0_/_30%)]">
                 Private Chef in Carson City and Lake Tahoe
               </h1>
-              <p className="mx-auto text-md md:text-2xl !leading-normal max-w-4xl">
+              <p className="mx-auto text-base md:text-xl lg:text-2xl !leading-normal max-w-4xl">
                 Chef Luis Velez is based in Carson City, Nevada, and serves private dinners, cooking classes, and event
                 dining throughout Carson City, Reno, and the Lake Tahoe area.
               </p>
@@ -175,9 +197,9 @@ export default function ServiceAreasRoute() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {nearbyAreas.map((area) => (
-              <div key={area} className="bg-white rounded-lg border border-gray-100 p-5">
-                <h3 className="text-xl font-semibold text-primary-900">{area}</h3>
-                <p className="mt-2 text-primary-700">Private chef service considered for dinners and events.</p>
+              <div key={area.name} className="bg-white rounded-lg border border-gray-100 p-5">
+                <h3 className="text-xl font-semibold text-primary-900">{area.name}</h3>
+                <p className="mt-2 text-primary-700">{area.description}</p>
               </div>
             ))}
           </div>
@@ -200,14 +222,14 @@ export default function ServiceAreasRoute() {
 
       <Container className="pb-20 sm:!px-16">
         <div className="text-center bg-accent-50 rounded-2xl p-8 md:p-12">
-          <h2 className="font-italiana text-4xl md:text-5xl text-primary-900 mb-4">Planning a Private Dinner?</h2>
-          <p className="text-lg text-primary-700 max-w-3xl mx-auto mb-8">
+          <h2 className="font-italiana text-4xl md:text-5xl text-white mb-4">Planning a Private Dinner?</h2>
+          <p className="text-lg text-white/90 max-w-3xl mx-auto mb-8">
             Send the event date, location, guest count, and style of experience. Chef Luis will review availability and
             help shape the right menu for the occasion.
           </p>
           <ActionList
             actions={[
-              { label: 'Request Your Event', url: '/request' },
+              { label: 'Request Your Event', url: '/request', style_variant: ButtonStyleVariant.PRIMARY },
               { label: 'Browse Menus', url: '/menus' },
             ]}
             className="flex-col gap-4 sm:flex-row sm:justify-center"
