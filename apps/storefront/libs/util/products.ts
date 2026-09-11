@@ -322,10 +322,12 @@ export const getProductMeta: MetaFunction = ({ data, matches }) => {
   const ogDescription = description;
   const ogImage = product.thumbnail || product.images?.[0]?.url;
   const ogImageAlt = !!ogImage ? `${title} product thumbnail` : undefined;
+  const robots = isEventProduct(product) ? 'noindex, follow' : undefined;
 
   return [
     { title },
     { name: 'description', content: description },
+    { name: 'robots', content: robots },
     { property: 'og:title', content: ogTitle },
     { property: 'og:description', content: ogDescription },
     { property: 'og:image', content: ogImage },
