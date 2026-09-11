@@ -3,7 +3,7 @@ import { Container } from '@app/components/common/container';
 import { ProductListWithPagination } from '@app/components/product/ProductListWithPagination';
 import HomeIcon from '@heroicons/react/24/solid/HomeIcon';
 import { fetchProducts } from '@libs/util/server/products.server';
-import { LoaderFunctionArgs } from 'react-router';
+import { LoaderFunctionArgs, MetaFunction } from 'react-router';
 import { useLoaderData } from 'react-router';
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
@@ -13,6 +13,8 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 };
 
 export type ProductsIndexRouteLoader = typeof loader;
+
+export const meta: MetaFunction = () => [{ name: 'robots', content: 'noindex, follow' }];
 
 export default function ProductsIndexRoute() {
   const data = useLoaderData<ProductsIndexRouteLoader>();
