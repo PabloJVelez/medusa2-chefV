@@ -43,16 +43,14 @@ export const meta: MetaFunction<typeof loader> = () => {
 };
 
 const prizeDetails = [
-  "Grand prize: private chef dinner experience",
-  "Standard curated menu and standard groceries included",
+  "Grand prize: private chef dinner experience for up to 10 guests",
+  "Work with Chef Velez to plan the right menu for your dinner",
   "On-site cooking in your home or vacation rental",
   "Full service including post-event cleanup",
 ];
 
 const exclusions = [
   "Alcohol",
-  "Premium ingredient upgrades",
-  "Specialty rentals",
   "Extra guests or additional staff",
   "Travel outside the agreed service area",
 ];
@@ -150,8 +148,9 @@ export default function LandingPageRoute() {
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-relaxed text-white/90 md:text-2xl">
               Chef Luis Velez will bring the restaurant experience to one
-              winner's home or vacation rental, including a curated menu,
-              on-site cooking, full service, and post-event cleanup.
+              winner's home or vacation rental for up to 10 guests, including a
+              curated menu, on-site cooking, full service, and post-event
+              cleanup.
             </p>
             <div className="mt-6 flex max-w-2xl flex-wrap gap-3 text-sm font-semibold uppercase tracking-[0.12em] text-white">
               <span className="rounded-full border border-white/25 bg-white/10 px-4 py-2 backdrop-blur">
