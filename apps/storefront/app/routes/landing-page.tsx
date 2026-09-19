@@ -54,18 +54,19 @@ const exclusions = [
 const leadQuestions = [
   {
     icon: CalendarDaysIcon,
-    title: 'Occasion and Timing',
-    description: 'Birthday, anniversary, ski trip, family dinner, holiday gathering, or another reason to host.',
+    title: 'Dinner at Your Place',
+    description: 'Chef Velez cooks in your home or vacation rental, so the night feels private, relaxed, and personal.',
   },
   {
     icon: UsersIcon,
-    title: 'Guest Count',
-    description: 'Share how many guests you would love to host if your entry is selected.',
+    title: 'A Real Hosted Night',
+    description: 'The prize is a hosted private dinner experience with a curated menu, service, and cleanup.',
   },
   {
     icon: MapPinIcon,
-    title: 'Event Location',
-    description: 'Carson City, Carson Valley, South Lake Tahoe, Stateline, Zephyr Cove, and nearby areas.',
+    title: 'Local to Tahoe',
+    description:
+      'Open to eligible hosts in Lake Tahoe, Carson Valley, Carson City, Stateline, Zephyr Cove, and nearby areas.',
   },
 ];
 
@@ -90,6 +91,21 @@ const trustHighlights = [
   'No purchase necessary',
 ];
 
+const heroStats = [
+  {
+    value: 'Full Service',
+    label: 'Dinner, service, and post-event cleanup',
+  },
+  {
+    value: 'Local',
+    label: 'Lake Tahoe and Carson Valley area',
+  },
+  {
+    value: 'Free Entry',
+    label: 'No purchase necessary',
+  },
+];
+
 const inputClassName =
   'mt-2 block w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-primary-900 shadow-sm focus:border-accent-500 focus:outline-none focus:ring-2 focus:ring-accent-200';
 
@@ -100,58 +116,69 @@ export default function LandingPageRoute() {
     <>
       <link rel="preload" href="/assets/images/chef_scallops_home.jpg" as="image" />
 
-      <section className="relative -mt-[var(--mkt-header-height)] md:-mt-[var(--mkt-header-height-desktop)] min-h-[720px] overflow-hidden bg-primary-900 pt-[var(--mkt-header-height)] md:pt-[var(--mkt-header-height-desktop)]">
+      <section className="relative -mt-[var(--mkt-header-height)] md:-mt-[var(--mkt-header-height-desktop)] min-h-[760px] overflow-hidden bg-primary-900 pt-[var(--mkt-header-height)] md:pt-[var(--mkt-header-height-desktop)]">
         <div
           className="absolute inset-0 bg-cover bg-center"
           style={{
             backgroundImage:
-              'linear-gradient(90deg, rgba(15,23,42,0.88) 0%, rgba(15,23,42,0.58) 48%, rgba(15,23,42,0.22) 100%), url(/assets/images/chef_scallops_home.jpg)',
+              'linear-gradient(90deg, rgba(15,23,42,0.9) 0%, rgba(15,23,42,0.62) 52%, rgba(15,23,42,0.24) 100%), url(/assets/images/chef_scallops_home.jpg)',
           }}
         />
-        <Container className="relative z-10 flex min-h-[720px] items-center py-14">
+        <Container className="relative z-10 flex min-h-[760px] items-center py-14">
           <div className="max-w-3xl text-white">
             <p className="mb-5 inline-flex items-center rounded-full border border-white/30 bg-white/10 px-4 py-2 text-sm font-semibold uppercase tracking-[0.2em] text-white backdrop-blur">
-              Limited-Time Lake Tahoe Giveaway
+              Lake Tahoe Private Chef Giveaway
             </p>
             <h1 className="font-italiana text-5xl leading-tight text-white md:text-7xl lg:text-8xl">
               Win a Free Private Chef Dinner
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-relaxed text-white/90 md:text-2xl">
-              Chef Luis Velez will cook one group a full private dinner experience in their Lake Tahoe or Carson Valley
-              home or vacation rental.
+              Chef Luis Velez will bring the restaurant experience to one winner's home or vacation rental, including a
+              curated menu, on-site cooking, full service, and post-event cleanup.
             </p>
-            <div className="mt-6 grid max-w-2xl grid-cols-1 gap-3 text-sm font-semibold uppercase tracking-[0.12em] text-white sm:grid-cols-3">
-              <div className="rounded-lg border border-white/25 bg-white/10 px-4 py-3 backdrop-blur">
-                Grand prize
-              </div>
-              <div className="rounded-lg border border-white/25 bg-white/10 px-4 py-3 backdrop-blur">Private dinner</div>
-              <div className="rounded-lg border border-white/25 bg-white/10 px-4 py-3 backdrop-blur">
-                Drawing soon
-              </div>
+            <div className="mt-6 flex max-w-2xl flex-wrap gap-3 text-sm font-semibold uppercase tracking-[0.12em] text-white">
+              <span className="rounded-full border border-white/25 bg-white/10 px-4 py-2 backdrop-blur">
+                Grand Prize
+              </span>
+              <span className="rounded-full border border-white/25 bg-white/10 px-4 py-2 backdrop-blur">
+                Tahoe + Carson Valley
+              </span>
+              <span className="rounded-full border border-white/25 bg-white/10 px-4 py-2 backdrop-blur">
+                No Purchase Necessary
+              </span>
             </div>
             <div className="mt-8">
               <a
                 href="#enter"
-                className="inline-flex items-center justify-center rounded-full border border-white bg-white px-6 py-3 text-base font-semibold text-primary-900 transition-colors hover:bg-highlight-100"
+                className="inline-flex items-center justify-center rounded-full border border-white bg-white px-8 py-4 text-base font-semibold text-primary-900 shadow-xl transition-colors hover:bg-highlight-100"
               >
                 Enter Giveaway
               </a>
             </div>
-            <p className="mt-5 text-sm text-white/75">
-              No purchase necessary. A purchase does not increase your chance of winning.
-            </p>
+            <p className="mt-5 text-sm text-white/75">Drawing details and winner instructions will be sent by email.</p>
           </div>
+        </Container>
+      </section>
+
+      <section className="bg-accent-700 text-primary-900">
+        <Container className="grid grid-cols-1 gap-4 py-5 sm:!px-16 md:grid-cols-3">
+          {heroStats.map((stat) => (
+            <div key={stat.value} className="text-center md:border-r md:border-primary-900/20 md:last:border-r-0">
+              <p className="text-lg font-bold">{stat.value}</p>
+              <p className="mt-1 text-sm font-medium text-primary-900/75">{stat.label}</p>
+            </div>
+          ))}
         </Container>
       </section>
 
       <Container className="py-12 lg:py-20 sm:!px-16">
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
           <section className="space-y-6">
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-accent-700">Prize</p>
-            <h2 className="font-italiana text-4xl text-primary-900 md:text-6xl">A Full Private Dinner Night, Free</h2>
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-accent-700">Grand Prize</p>
+            <h2 className="font-italiana text-4xl text-primary-900 md:text-6xl">Your Dinner Is Handled</h2>
             <p className="text-lg leading-relaxed text-primary-700">
-              Chef Velez brings the restaurant experience to your home or vacation rental with a curated private dinner
-              for you and your guests.
+              If your entry is selected, Chef Velez handles the menu, cooking, service, and cleanup so you can enjoy the
+              table instead of managing the kitchen.
             </p>
             <div className="grid grid-cols-1 gap-3">
               {prizeDetails.map((detail) => (
@@ -181,9 +208,9 @@ export default function LandingPageRoute() {
 
       <Container className="bg-highlight-100 py-12 lg:py-20 sm:!px-16">
         <div className="mx-auto max-w-4xl text-center">
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-accent-700">Who Should Enter</p>
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-accent-700">Why Enter</p>
           <h2 className="mt-3 font-italiana text-4xl text-primary-900 md:text-6xl">
-            Planning Something Worth Hosting?
+            A Private Chef Night Without the Work
           </h2>
         </div>
         <div className="mt-10 grid grid-cols-1 gap-5 md:grid-cols-3">
@@ -203,7 +230,7 @@ export default function LandingPageRoute() {
             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-accent-700">Enter</p>
             <h2 className="font-italiana text-4xl text-primary-900 md:text-6xl">Enter in Under a Minute</h2>
             <p className="text-lg leading-relaxed text-primary-700">
-              Share where you would host, who you would invite, and what kind of occasion would make the night special.
+              Tell us where you would host and what kind of dinner night you have in mind. The form is short on purpose.
             </p>
             <div className="relative overflow-hidden rounded-lg">
               <Image
@@ -227,9 +254,9 @@ export default function LandingPageRoute() {
               <div className="flex items-start gap-3">
                 <ClockIcon className="mt-0.5 h-5 w-5 flex-shrink-0 text-accent-700" />
                 <div>
-                  <p className="font-semibold text-primary-900">Drawing details will be sent by email.</p>
+                  <p className="font-semibold text-primary-900">Do not miss the drawing email.</p>
                   <p className="mt-1 text-sm leading-relaxed text-primary-700">
-                    Enter now so you are on the list before the winner is selected.
+                    Enter now and watch your inbox for eligibility, timing, and winner details.
                   </p>
                 </div>
               </div>
