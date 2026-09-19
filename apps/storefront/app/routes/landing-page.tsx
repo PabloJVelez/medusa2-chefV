@@ -21,13 +21,12 @@ export const meta: MetaFunction<typeof loader> = () => {
     { title: 'Lake Tahoe Private Chef Giveaway - Chef Luis Velez' },
     {
       name: 'description',
-      content: 'Enter to win a private Chef Velez dinner for up to 10 guests in the Lake Tahoe and Carson Valley area.',
+      content: 'Enter to win a private Chef Velez dinner in the Lake Tahoe and Carson Valley area.',
     },
-    { property: 'og:title', content: 'Win a Private Chef Dinner for 10 - Chef Luis Velez' },
+    { property: 'og:title', content: 'Win a Free Private Chef Dinner - Chef Luis Velez' },
     {
       property: 'og:description',
-      content:
-        'Lake Tahoe and Carson Valley hosts can enter to win a private chef dinner experience for up to 10 guests.',
+      content: 'Lake Tahoe and Carson Valley hosts can enter to win a private chef dinner experience.',
     },
     { property: 'og:type', content: 'website' },
     {
@@ -38,7 +37,7 @@ export const meta: MetaFunction<typeof loader> = () => {
 };
 
 const prizeDetails = [
-  'Grand prize: private chef dinner for up to 10 guests',
+  'Grand prize: private chef dinner experience',
   'Standard curated menu and standard groceries included',
   'On-site cooking in your home or vacation rental',
   'Full service including post-event cleanup',
@@ -77,7 +76,7 @@ const timelineItems = [
   },
   {
     title: 'Grand Prize Drawing',
-    description: 'One eligible entrant receives a private Chef Velez dinner experience for up to 10 guests.',
+    description: 'One eligible entrant receives a private Chef Velez dinner experience.',
   },
   {
     title: 'Host Bonus Offers',
@@ -115,7 +114,7 @@ export default function LandingPageRoute() {
               Limited-Time Lake Tahoe Giveaway
             </p>
             <h1 className="font-italiana text-5xl leading-tight text-white md:text-7xl lg:text-8xl">
-              Win a Free Private Chef Dinner for 10
+              Win a Free Private Chef Dinner
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-relaxed text-white/90 md:text-2xl">
               Chef Luis Velez will cook one group a full private dinner experience in their Lake Tahoe or Carson Valley
@@ -125,9 +124,7 @@ export default function LandingPageRoute() {
               <div className="rounded-lg border border-white/25 bg-white/10 px-4 py-3 backdrop-blur">
                 Grand prize
               </div>
-              <div className="rounded-lg border border-white/25 bg-white/10 px-4 py-3 backdrop-blur">
-                Up to 10 guests
-              </div>
+              <div className="rounded-lg border border-white/25 bg-white/10 px-4 py-3 backdrop-blur">Private dinner</div>
               <div className="rounded-lg border border-white/25 bg-white/10 px-4 py-3 backdrop-blur">
                 Drawing soon
               </div>
