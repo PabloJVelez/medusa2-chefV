@@ -40,7 +40,7 @@ const prizeDetails = [
   'Private chef dinner for up to 10 guests',
   'Standard curated menu and standard groceries included',
   'On-site cooking in your home or vacation rental',
-  'Basic kitchen cleanup after dinner',
+  'Full service including post-event cleanup',
 ];
 
 const exclusions = [
@@ -60,7 +60,7 @@ const leadQuestions = [
   {
     icon: UsersIcon,
     title: 'Guest Count',
-    description: 'The campaign is designed to find groups that are actually planning a private dining event.',
+    description: 'Share how many guests you would love to host if your entry is selected.',
   },
   {
     icon: MapPinIcon,
@@ -89,7 +89,7 @@ const inputClassName =
 
 const labelClassName = 'text-sm font-semibold uppercase tracking-wide text-primary-700';
 
-export default function LakeTahoeGiveawayRoute() {
+export default function LandingPageRoute() {
   return (
     <>
       <link rel="preload" href="/assets/images/chef_scallops_home.jpg" as="image" />
@@ -141,8 +141,8 @@ export default function LakeTahoeGiveawayRoute() {
             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-accent-700">Prize</p>
             <h2 className="font-italiana text-4xl text-primary-900 md:text-6xl">A Full Private Dinner Night</h2>
             <p className="text-lg leading-relaxed text-primary-700">
-              The giveaway is built around a complete standard package, not a partial discount. The winner should feel
-              like they won a real private chef experience.
+              Chef Velez brings the restaurant experience to your home or vacation rental with a curated private dinner
+              for you and your guests.
             </p>
             <div className="grid grid-cols-1 gap-3">
               {prizeDetails.map((detail) => (
@@ -176,9 +176,6 @@ export default function LakeTahoeGiveawayRoute() {
           <h2 className="mt-3 font-italiana text-4xl text-primary-900 md:text-6xl">
             Planning Something Worth Hosting?
           </h2>
-          <p className="mt-5 text-lg leading-relaxed text-primary-700">
-            This giveaway is best for people with a real event, celebration, or group trip in the next few months.
-          </p>
         </div>
         <div className="mt-10 grid grid-cols-1 gap-5 md:grid-cols-3">
           {leadQuestions.map(({ icon: Icon, title, description }) => (
@@ -286,19 +283,6 @@ export default function LakeTahoeGiveawayRoute() {
                   <option>Just exploring</option>
                 </select>
               </label>
-              <label className="block">
-                <span className={labelClassName}>Budget Comfort</span>
-                <select className={inputClassName} name="budgetRange" defaultValue="" required>
-                  <option value="" disabled>
-                    Select range
-                  </option>
-                  <option>Under $750</option>
-                  <option>$750-$999</option>
-                  <option>$1,000-$1,499</option>
-                  <option>$1,500+</option>
-                  <option>Not sure yet</option>
-                </select>
-              </label>
             </div>
 
             <label className="mt-5 flex items-start gap-3 text-sm leading-relaxed text-primary-700">
@@ -321,7 +305,7 @@ export default function LakeTahoeGiveawayRoute() {
               Continue to Availability Request
             </button>
             <p className="mt-4 text-sm leading-relaxed text-primary-600">
-              No purchase necessary. Official rules and final paid-ad terms will be finalized before paid promotion.
+              No purchase necessary. A purchase does not increase your chance of winning.
             </p>
           </form>
         </div>
@@ -331,10 +315,10 @@ export default function LakeTahoeGiveawayRoute() {
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:items-start">
           <section>
             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-accent-700">How It Works</p>
-            <h2 className="mt-3 font-italiana text-4xl text-white md:text-6xl">Giveaway Funnel</h2>
+            <h2 className="mt-3 font-italiana text-4xl text-white md:text-6xl">How the Giveaway Works</h2>
             <p className="mt-5 text-lg leading-relaxed text-white/80">
-              The campaign is designed to find people with real events, then move qualified hosts into a fast
-              availability conversation.
+              Enter with your preferred event details, then watch for winner updates and availability follow-up from
+              Chef Velez.
             </p>
           </section>
           <div className="grid grid-cols-1 gap-4">
@@ -364,8 +348,8 @@ export default function LakeTahoeGiveawayRoute() {
             </div>
             <h2 className="mt-3 font-italiana text-4xl text-primary-900 md:text-5xl">You Do Not Need to Win to Host</h2>
             <p className="mt-4 text-lg leading-relaxed text-primary-700">
-              Qualified entrants may receive a host bonus on a future paid private event, such as a signature starter
-              course or dessert finale.
+              Entrants may receive a host bonus on a future private event, such as a signature starter course or dessert
+              finale.
             </p>
           </div>
           <Link
@@ -382,7 +366,7 @@ export default function LakeTahoeGiveawayRoute() {
           <p>No purchase necessary. A purchase does not increase your chance of winning.</p>
           <div className="flex items-center gap-2">
             <ClockIcon className="h-4 w-4" />
-            <span>Organic soft launch first. Final rules before paid ads.</span>
+            <span>Official rules and winner details coming soon.</span>
           </div>
         </div>
       </Container>
