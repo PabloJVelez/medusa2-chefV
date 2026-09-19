@@ -1,0 +1,391 @@
+import { Container } from '@app/components/common/container';
+import { Image } from '@app/components/common/images/Image';
+import type { LoaderFunctionArgs, MetaFunction } from 'react-router';
+import { Link } from 'react-router';
+import {
+  CalendarDaysIcon,
+  CheckCircleIcon,
+  ClockIcon,
+  MapPinIcon,
+  SparklesIcon,
+  UsersIcon,
+} from '@heroicons/react/24/outline';
+
+export const loader = async (_args: LoaderFunctionArgs) => {
+  return {};
+};
+
+export const meta: MetaFunction<typeof loader> = () => {
+  return [
+    { title: 'Lake Tahoe Private Chef Giveaway - Chef Luis Velez' },
+    {
+      name: 'description',
+      content: 'Enter to win a private Chef Velez dinner for up to 10 guests in the Lake Tahoe and Carson Valley area.',
+    },
+    { property: 'og:title', content: 'Win a Private Chef Dinner for 10 - Chef Luis Velez' },
+    {
+      property: 'og:description',
+      content:
+        'Lake Tahoe and Carson Valley hosts can enter to win a private chef dinner experience for up to 10 guests.',
+    },
+    { property: 'og:type', content: 'website' },
+    {
+      name: 'keywords',
+      content: 'Lake Tahoe private chef giveaway, Carson City private chef, Chef Luis Velez, private dinner Lake Tahoe',
+    },
+  ];
+};
+
+const prizeDetails = [
+  'Private chef dinner for up to 10 guests',
+  'Standard curated menu and standard groceries included',
+  'On-site cooking in your home or vacation rental',
+  'Basic kitchen cleanup after dinner',
+];
+
+const exclusions = [
+  'Alcohol',
+  'Premium ingredient upgrades',
+  'Specialty rentals',
+  'Extra guests or additional staff',
+  'Travel outside the agreed service area',
+];
+
+const leadQuestions = [
+  {
+    icon: CalendarDaysIcon,
+    title: 'Occasion and Timing',
+    description: 'Birthday, anniversary, ski trip, family dinner, holiday gathering, or another reason to host.',
+  },
+  {
+    icon: UsersIcon,
+    title: 'Guest Count',
+    description: 'The campaign is designed to find groups that are actually planning a private dining event.',
+  },
+  {
+    icon: MapPinIcon,
+    title: 'Event Location',
+    description: 'Carson City, Carson Valley, South Lake Tahoe, Stateline, Zephyr Cove, and nearby areas.',
+  },
+];
+
+const timelineItems = [
+  {
+    title: 'Enter the Giveaway',
+    description: 'Share your event details so Chef Velez can confirm the request fits the Tahoe service area.',
+  },
+  {
+    title: 'Winner Announced',
+    description: 'One eligible entrant receives the private chef dinner experience for up to 10 guests.',
+  },
+  {
+    title: 'Entrant Host Bonus',
+    description: 'Qualified entrants can still unlock a Tahoe Host Bonus on a future paid private event.',
+  },
+];
+
+const inputClassName =
+  'mt-2 block w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-primary-900 shadow-sm focus:border-accent-500 focus:outline-none focus:ring-2 focus:ring-accent-200';
+
+const labelClassName = 'text-sm font-semibold uppercase tracking-wide text-primary-700';
+
+export default function LakeTahoeGiveawayRoute() {
+  return (
+    <>
+      <link rel="preload" href="/assets/images/chef_scallops_home.jpg" as="image" />
+
+      <section className="relative -mt-[var(--mkt-header-height)] md:-mt-[var(--mkt-header-height-desktop)] min-h-[720px] overflow-hidden bg-primary-900 pt-[var(--mkt-header-height)] md:pt-[var(--mkt-header-height-desktop)]">
+        <div
+          className="absolute inset-0 bg-cover bg-center"
+          style={{
+            backgroundImage:
+              'linear-gradient(90deg, rgba(15,23,42,0.88) 0%, rgba(15,23,42,0.58) 48%, rgba(15,23,42,0.22) 100%), url(/assets/images/chef_scallops_home.jpg)',
+          }}
+        />
+        <Container className="relative z-10 flex min-h-[720px] items-center py-14">
+          <div className="max-w-3xl text-white">
+            <p className="mb-5 inline-flex items-center rounded-full border border-white/30 bg-white/10 px-4 py-2 text-sm font-semibold uppercase tracking-[0.2em] text-white backdrop-blur">
+              Lake Tahoe / Carson Valley Giveaway
+            </p>
+            <h1 className="font-italiana text-5xl leading-tight text-white md:text-7xl lg:text-8xl">
+              Win a Private Chef Dinner for 10
+            </h1>
+            <p className="mt-6 max-w-2xl text-lg leading-relaxed text-white/90 md:text-2xl">
+              Chef Luis Velez will cook one group a private dinner experience in their Lake Tahoe or Carson Valley home
+              or vacation rental.
+            </p>
+            <div className="mt-8 flex flex-col gap-4 sm:flex-row">
+              <a
+                href="#enter"
+                className="inline-flex items-center justify-center rounded-full border border-white bg-white px-6 py-3 text-base font-semibold text-primary-900 transition-colors hover:bg-highlight-100"
+              >
+                Enter Giveaway
+              </a>
+              <Link
+                to="/request"
+                className="inline-flex items-center justify-center rounded-full border border-white/60 px-6 py-3 text-base font-semibold text-white transition-colors hover:bg-white/10"
+              >
+                Request a Private Event
+              </Link>
+            </div>
+            <p className="mt-5 text-sm text-white/75">
+              No purchase necessary. A purchase does not increase your chance of winning.
+            </p>
+          </div>
+        </Container>
+      </section>
+
+      <Container className="py-12 lg:py-20 sm:!px-16">
+        <div className="grid grid-cols-1 gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
+          <section className="space-y-6">
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-accent-700">Prize</p>
+            <h2 className="font-italiana text-4xl text-primary-900 md:text-6xl">A Full Private Dinner Night</h2>
+            <p className="text-lg leading-relaxed text-primary-700">
+              The giveaway is built around a complete standard package, not a partial discount. The winner should feel
+              like they won a real private chef experience.
+            </p>
+            <div className="grid grid-cols-1 gap-3">
+              {prizeDetails.map((detail) => (
+                <div key={detail} className="flex items-start gap-3 rounded-lg border border-accent-100 bg-white p-4">
+                  <CheckCircleIcon className="mt-0.5 h-5 w-5 flex-shrink-0 text-accent-700" />
+                  <span className="text-primary-800">{detail}</span>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section className="rounded-lg border border-gray-200 bg-gray-50 p-6 lg:p-8">
+            <h3 className="text-2xl font-semibold text-primary-900">Not Included in the Standard Prize</h3>
+            <p className="mt-3 text-primary-700">
+              Optional upgrades can be arranged separately after eligibility and availability are confirmed.
+            </p>
+            <ul className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
+              {exclusions.map((item) => (
+                <li key={item} className="rounded-lg border border-gray-200 bg-white px-4 py-3 text-primary-700">
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </section>
+        </div>
+      </Container>
+
+      <Container className="bg-highlight-100 py-12 lg:py-20 sm:!px-16">
+        <div className="mx-auto max-w-4xl text-center">
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-accent-700">Who Should Enter</p>
+          <h2 className="mt-3 font-italiana text-4xl text-primary-900 md:text-6xl">
+            Planning Something Worth Hosting?
+          </h2>
+          <p className="mt-5 text-lg leading-relaxed text-primary-700">
+            This giveaway is best for people with a real event, celebration, or group trip in the next few months.
+          </p>
+        </div>
+        <div className="mt-10 grid grid-cols-1 gap-5 md:grid-cols-3">
+          {leadQuestions.map(({ icon: Icon, title, description }) => (
+            <section key={title} className="rounded-lg border border-white/70 bg-white p-6 shadow-sm">
+              <Icon className="h-8 w-8 text-accent-700" />
+              <h3 className="mt-4 text-xl font-semibold text-primary-900">{title}</h3>
+              <p className="mt-3 leading-relaxed text-primary-700">{description}</p>
+            </section>
+          ))}
+        </div>
+      </Container>
+
+      <Container id="enter" className="py-12 lg:py-20 sm:!px-16">
+        <div className="grid grid-cols-1 gap-10 lg:grid-cols-[0.95fr_1.05fr] lg:items-start">
+          <section className="space-y-6">
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-accent-700">Enter</p>
+            <h2 className="font-italiana text-4xl text-primary-900 md:text-6xl">Tell Us What You Would Host</h2>
+            <p className="text-lg leading-relaxed text-primary-700">
+              Share the basic event details so Chef Velez can confirm the right service area, timing, and host bonus
+              fit.
+            </p>
+            <div className="relative overflow-hidden rounded-lg">
+              <Image
+                src="/assets/images/chef_book_experience.jpg"
+                alt="Chef Luis Velez plating a private dining experience"
+                width={900}
+                height={560}
+                className="h-[360px] w-full object-cover"
+                fallbackSrc={['/assets/images/chef_experience.jpg', '/assets/images/plated_dinner.jpg']}
+              />
+            </div>
+          </section>
+
+          <form
+            action="/request"
+            method="get"
+            className="rounded-lg border border-gray-200 bg-white p-6 shadow-lg lg:p-8"
+          >
+            <input type="hidden" name="campaign" value="lake-tahoe-giveaway" />
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+              <label className="block">
+                <span className={labelClassName}>First Name</span>
+                <input className={inputClassName} name="firstName" autoComplete="given-name" required />
+              </label>
+              <label className="block">
+                <span className={labelClassName}>Last Name</span>
+                <input className={inputClassName} name="lastName" autoComplete="family-name" required />
+              </label>
+              <label className="block sm:col-span-2">
+                <span className={labelClassName}>Email</span>
+                <input className={inputClassName} name="email" type="email" autoComplete="email" required />
+              </label>
+              <label className="block sm:col-span-2">
+                <span className={labelClassName}>Phone</span>
+                <input className={inputClassName} name="phone" type="tel" autoComplete="tel" />
+              </label>
+              <label className="block sm:col-span-2">
+                <span className={labelClassName}>Event Location</span>
+                <input
+                  className={inputClassName}
+                  name="eventLocation"
+                  placeholder="City, neighborhood, or rental area"
+                  required
+                />
+              </label>
+              <label className="block">
+                <span className={labelClassName}>Occasion</span>
+                <select className={inputClassName} name="occasion" defaultValue="" required>
+                  <option value="" disabled>
+                    Select one
+                  </option>
+                  <option>Birthday</option>
+                  <option>Anniversary</option>
+                  <option>Family gathering</option>
+                  <option>Vacation rental dinner</option>
+                  <option>Holiday party</option>
+                  <option>Ski trip dinner</option>
+                  <option>Corporate retreat</option>
+                  <option>Proposal or celebration</option>
+                  <option>Other</option>
+                </select>
+              </label>
+              <label className="block">
+                <span className={labelClassName}>Guest Count</span>
+                <select className={inputClassName} name="guestCount" defaultValue="" required>
+                  <option value="" disabled>
+                    Select range
+                  </option>
+                  <option>2-5</option>
+                  <option>6-8</option>
+                  <option>9-10</option>
+                  <option>11+</option>
+                </select>
+              </label>
+              <label className="block">
+                <span className={labelClassName}>Timing</span>
+                <select className={inputClassName} name="eventTiming" defaultValue="" required>
+                  <option value="" disabled>
+                    Select timing
+                  </option>
+                  <option>Within 30 days</option>
+                  <option>31-60 days</option>
+                  <option>61-90 days</option>
+                  <option>More than 90 days</option>
+                  <option>Just exploring</option>
+                </select>
+              </label>
+              <label className="block">
+                <span className={labelClassName}>Budget Comfort</span>
+                <select className={inputClassName} name="budgetRange" defaultValue="" required>
+                  <option value="" disabled>
+                    Select range
+                  </option>
+                  <option>Under $750</option>
+                  <option>$750-$999</option>
+                  <option>$1,000-$1,499</option>
+                  <option>$1,500+</option>
+                  <option>Not sure yet</option>
+                </select>
+              </label>
+            </div>
+
+            <label className="mt-5 flex items-start gap-3 text-sm leading-relaxed text-primary-700">
+              <input
+                className="mt-1 rounded border-gray-300 text-primary-900 focus:ring-accent-500"
+                type="checkbox"
+                name="smsConsent"
+                value="yes"
+              />
+              <span>
+                Yes, text me Chef Velez offers and giveaway updates. Consent is not required to enter or purchase.
+                Message and data rates may apply.
+              </span>
+            </label>
+
+            <button
+              type="submit"
+              className="mt-6 inline-flex w-full items-center justify-center rounded-full border border-primary-900 bg-primary-900 px-6 py-3 text-base font-semibold text-white transition-colors hover:bg-primary-800"
+            >
+              Continue to Availability Request
+            </button>
+            <p className="mt-4 text-sm leading-relaxed text-primary-600">
+              No purchase necessary. Official rules and final paid-ad terms will be finalized before paid promotion.
+            </p>
+          </form>
+        </div>
+      </Container>
+
+      <Container className="bg-primary-900 py-12 text-white lg:py-20 sm:!px-16">
+        <div className="grid grid-cols-1 gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:items-start">
+          <section>
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-accent-700">How It Works</p>
+            <h2 className="mt-3 font-italiana text-4xl text-white md:text-6xl">Giveaway Funnel</h2>
+            <p className="mt-5 text-lg leading-relaxed text-white/80">
+              The campaign is designed to find people with real events, then move qualified hosts into a fast
+              availability conversation.
+            </p>
+          </section>
+          <div className="grid grid-cols-1 gap-4">
+            {timelineItems.map((item, index) => (
+              <section key={item.title} className="rounded-lg border border-white/15 bg-white/10 p-5">
+                <div className="flex items-start gap-4">
+                  <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-white text-sm font-bold text-primary-900">
+                    {index + 1}
+                  </span>
+                  <div>
+                    <h3 className="text-xl font-semibold text-white">{item.title}</h3>
+                    <p className="mt-2 leading-relaxed text-white/80">{item.description}</p>
+                  </div>
+                </div>
+              </section>
+            ))}
+          </div>
+        </div>
+      </Container>
+
+      <Container className="py-12 lg:py-20 sm:!px-16">
+        <div className="grid grid-cols-1 gap-8 rounded-lg border border-accent-100 bg-highlight-100 p-6 md:grid-cols-[1fr_auto] md:items-center lg:p-10">
+          <div>
+            <div className="flex items-center gap-3 text-accent-700">
+              <SparklesIcon className="h-7 w-7" />
+              <p className="text-sm font-semibold uppercase tracking-[0.2em]">Tahoe Host Bonus</p>
+            </div>
+            <h2 className="mt-3 font-italiana text-4xl text-primary-900 md:text-5xl">You Do Not Need to Win to Host</h2>
+            <p className="mt-4 text-lg leading-relaxed text-primary-700">
+              Qualified entrants may receive a host bonus on a future paid private event, such as a signature starter
+              course or dessert finale.
+            </p>
+          </div>
+          <Link
+            to="/request"
+            className="inline-flex items-center justify-center rounded-full border border-primary-900 bg-primary-900 px-6 py-3 text-base font-semibold text-white transition-colors hover:bg-primary-800"
+          >
+            Check Availability
+          </Link>
+        </div>
+      </Container>
+
+      <Container className="pb-14 sm:!px-16">
+        <div className="flex flex-col gap-3 border-t border-gray-200 pt-6 text-sm text-primary-600 md:flex-row md:items-center md:justify-between">
+          <p>No purchase necessary. A purchase does not increase your chance of winning.</p>
+          <div className="flex items-center gap-2">
+            <ClockIcon className="h-4 w-4" />
+            <span>Organic soft launch first. Final rules before paid ads.</span>
+          </div>
+        </div>
+      </Container>
+    </>
+  );
+}
