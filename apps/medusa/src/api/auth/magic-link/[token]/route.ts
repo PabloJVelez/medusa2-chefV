@@ -1,6 +1,74 @@
 import type { MedusaRequest, MedusaResponse } from '@medusajs/framework/http';
-import { verifyMagicLinkToken } from '../../../../modules/utils/magic-link';
+import { Modules } from '@medusajs/framework/utils';
+import { normalizeAdminUrl, verifyMagicLinkToken } from '../../../../modules/utils/magic-link';
 import ChefEventModuleService from '../../../../modules/chef-event/service';
+
+type AdminUser = {
+  id: string;
+  email: string;
+};
+
+type AuthIdentity = {
+  id: string;
+  app_metadata?: {
+    user_id?: string;
+  } | null;
+};
+
+function getMagicLinkAdminEmail(): string | null {
+  return (
+    process.env.CHEF_MAGIC_LINK_ADMIN_EMAIL ||
+    process.env.CHEF_NOTIFICATIONS_LIST?.split(',').map((email) => email.trim()).filter(Boolean)[0] ||
+    null
+  );
+}
+
+async function getOrCreateMagicLinkAdminAuthContext(req: MedusaRequest) {
+  const userService = req.scope.resolve(Modules.USER) as {
+    listUsers: (filters: { email: string }) => Promise<AdminUser[]>;
+    createUsers: (data: { email: string }) => Promise<AdminUser | AdminUser[]>;
+  };
+  const authService = req.scope.resolve(Modules.AUTH) as {
+    listAuthIdentities: (filters: { app_metadata: { user_id: string } }) => Promise<AuthIdentity[]>;
+    createAuthIdentities: (data: { app_metadata: { user_id: string } }) => Promise<AuthIdentity | AuthIdentity[]>;
+  };
+
+  const email = getMagicLinkAdminEmail();
+  if (!email) {
+    throw new Error('No chef admin email is configured for magic-link authentication.');
+  }
+
+  const users = await userService.listUsers({ email });
+  let user = users[0];
+  if (!user) {
+    const created = await userService.createUsers({ email });
+    user = Array.isArray(created) ? created[0] : created;
+  }
+
+  const authIdentities = await authService.listAuthIdentities({
+    app_metadata: {
+      user_id: user.id,
+    },
+  });
+  let authIdentity = authIdentities[0];
+  if (!authIdentity) {
+    const created = await authService.createAuthIdentities({
+      app_metadata: {
+        user_id: user.id,
+      },
+    });
+    authIdentity = Array.isArray(created) ? created[0] : created;
+  }
+
+  return {
+    actor_id: user.id,
+    actor_type: 'user',
+    auth_identity_id: authIdentity.id,
+    app_metadata: {
+      user_id: user.id,
+    },
+  };
+}
 
 /**
  * Magic Link Authentication Route
@@ -13,6 +81,8 @@ import ChefEventModuleService from '../../../../modules/chef-event/service';
  */
 export async function GET(req: MedusaRequest<{ token: string }>, res: MedusaResponse): Promise<void> {
   const { token } = req.params;
+  const getAdminUrl = () =>
+    normalizeAdminUrl(process.env.MEDUSA_ADMIN_URL || process.env.ADMIN_BACKEND_URL || 'http://localhost:9000');
 
   try {
     // Verify the magic link token
@@ -20,9 +90,8 @@ export async function GET(req: MedusaRequest<{ token: string }>, res: MedusaResp
 
     if (!eventId) {
       // Token is invalid or expired
-      const adminUrl = process.env.MEDUSA_ADMIN_URL || process.env.ADMIN_BACKEND_URL || 'http://localhost:9000';
       return res.redirect(
-        `${adminUrl}/app?error=invalid_token&message=${encodeURIComponent('This magic link is invalid or has expired. Please check your email for a newer link or contact support.')}`,
+        `${getAdminUrl()}?error=invalid_token&message=${encodeURIComponent('This magic link is invalid or has expired. Please check your email for a newer link or contact support.')}`,
       );
     }
 
@@ -31,26 +100,19 @@ export async function GET(req: MedusaRequest<{ token: string }>, res: MedusaResp
     const chefEvent = await chefEventModuleService.retrieveChefEvent(eventId);
 
     if (!chefEvent) {
-      const adminUrl = process.env.MEDUSA_ADMIN_URL || process.env.ADMIN_BACKEND_URL || 'http://localhost:9000';
       return res.redirect(
-        `${adminUrl}/app?error=event_not_found&message=${encodeURIComponent('The chef event could not be found.')}`,
+        `${getAdminUrl()}?error=event_not_found&message=${encodeURIComponent('The chef event could not be found.')}`,
       );
     }
 
-    // For magic link authentication, we'll create a temporary session
-    // Note: In production, you might want to require the chef to authenticate
-    // after clicking the magic link, but this provides direct access
-
-    // Option 1: Redirect with event ID in URL (requires admin authentication)
-    // This is more secure as it still requires the chef to be logged in
-    const adminUrl = process.env.MEDUSA_ADMIN_URL || process.env.ADMIN_BACKEND_URL || 'http://localhost:9000';
-    const redirectUrl = `${adminUrl}/app/chef-events/${chefEvent.id}?from_magic_link=true`;
+    // Create an Admin session before redirecting so the magic link behaves as passwordless access.
+    req.session.auth_context = await getOrCreateMagicLinkAdminAuthContext(req);
+    const redirectUrl = `${getAdminUrl()}/chef-events/${chefEvent.id}?from_magic_link=true`;
 
     res.redirect(redirectUrl);
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
-    const adminUrl = process.env.MEDUSA_ADMIN_URL || process.env.ADMIN_BACKEND_URL || 'http://localhost:9000';
 
-    res.redirect(`${adminUrl}/app?error=authentication_failed&message=${encodeURIComponent(errorMessage)}`);
+    res.redirect(`${getAdminUrl()}?error=authentication_failed&message=${encodeURIComponent(errorMessage)}`);
   }
 }
