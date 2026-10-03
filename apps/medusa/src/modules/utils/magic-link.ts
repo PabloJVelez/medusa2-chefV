@@ -68,13 +68,22 @@ export function verifyMagicLinkToken(token: string): string | null {
   }
 }
 
+export function normalizeBackendUrl(baseUrl: string): string {
+  return baseUrl.replace(/\/+$/, '').replace(/\/app$/, '');
+}
+
+export function normalizeAdminUrl(baseUrl: string): string {
+  const trimmedBaseUrl = baseUrl.replace(/\/+$/, '');
+  return trimmedBaseUrl.endsWith('/app') ? trimmedBaseUrl : `${trimmedBaseUrl}/app`;
+}
+
 /**
  * Generates the full magic link URL for email
  * @param eventId - The chef event ID
- * @param baseUrl - The admin backend URL
+ * @param baseUrl - The backend URL
  * @returns The complete magic link URL
  */
 export function generateMagicLinkUrl(eventId: string, baseUrl: string): string {
   const token = generateMagicLinkToken(eventId);
-  return `${baseUrl}/auth/magic-link/${token}`;
+  return `${normalizeBackendUrl(baseUrl)}/auth/magic-link/${token}`;
 }
