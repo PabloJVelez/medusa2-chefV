@@ -10,6 +10,7 @@ import type { MenuConfig } from '@unlockable/vite-plugin-unlock/medusa';
 const config: MenuConfig = {
   remove: ['/inventory', '/price-lists', '/products'],
   add: [
+    { icon: SquaresPlus, label: 'Social Gallery', to: '/social-gallery' },
     {
       icon: ListBullet,
       label: 'Menus',
@@ -26,7 +27,7 @@ const config: MenuConfig = {
       to: '/chef-events',
     },
   ],
-  order: ['/chef-events', '/orders', '/menus', '/experience-types', '/customers', '/promotions'],
+  order: ['/chef-events', '/orders', '/menus', '/experience-types', '/social-gallery', '/customers', '/promotions'],
 };
 
 export default config;
