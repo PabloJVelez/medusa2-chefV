@@ -21,7 +21,8 @@ RUN yarn install
 
 COPY --from=builder /app/out/full/ .
 
-RUN yarn turbo build --filter=medusa && \
+RUN yarn workspace medusa test:unit --runTestsByPath src/scripts/__tests__/preview-seed.unit.spec.ts src/modules/resend/__tests__/capture.unit.spec.ts && \
+    yarn turbo build --filter=medusa && \
     rm -rf node_modules/.cache .yarn/cache
 
 
