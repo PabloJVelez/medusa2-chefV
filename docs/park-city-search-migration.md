@@ -23,3 +23,7 @@ After deployment, inspect homepage, /service-areas, /about and /how-it-works HTM
 Booking query parameters remain functional; canonical URLs omit them. Existing product noindex behavior and sitemap exclusions remain unchanged. This PR does not change payment or booking logic.
 
 Record release date and verify Google-selected canonicals in URL Inspection. Compare successive 28-day windows after recrawl, separating Park City/Salt Lake City non-brand queries from branded searches. Track inquiries independently; GSC clicks are not leads. Do not claim conversion tracking or Google Business Profile setup is delivered by this PR.
+
+## Preview provider
+
+This project uses the NUC-managed GitHub Actions image previews, not Vercel. Both repository-root and storefront-root vercel.json set git.deploymentEnabled to false to suppress the legacy Vercel Git integration's automatic deployments. Existing Vercel deployment history/comments remain; disconnecting the linked project itself requires Vercel account access. Other branches adopt this setting after merge. Managed preview workflows are unchanged.

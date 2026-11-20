@@ -45,54 +45,36 @@ const serviceAreaSchema = {
 const primaryAreas = [
   {
     id: 'park-city',
-    eyebrow: 'Park City',
-    title: 'Private Chef for Park City Homes and Vacation Rentals',
+    title: 'Park City',
     description:
-      'Enjoy a personalized dinner at your vacation home after a day on the slopes, gather friends for a birthday, or share a chef-prepared meal during a retreat. Chef Luis brings private dining to your Park City gathering.',
-    details: [
-      'Vacation-rental meals',
-      'Ski vacation dinners',
-      'Retreat and celebration menus',
-      'Hands-on cooking classes',
-    ],
+      'Come home from the slopes to a chef-prepared meal, gather friends for a birthday, or settle in for a relaxed dinner during your mountain getaway. Make your vacation home part of the experience.',
   },
   {
     id: 'salt-lake-city',
-    eyebrow: 'Salt Lake City',
-    title: 'Private Chef in Salt Lake City',
+    title: 'Salt Lake City',
     description:
-      'Bring your guests together over a custom menu at home. Chef Luis serves Salt Lake City with private plated dinners, interactive cooking classes, and buffet-style events for celebrations and group gatherings.',
-    details: ['In-home plated dinners', 'Cooking classes', 'Buffet-style gatherings', 'Personalized celebration menus'],
+      'Turn an evening at home into an occasion. Bring family together, celebrate a milestone, or host friends over a personalized menu while Chef Luis takes care of the cooking.',
   },
 ];
 
-const nearbyAreas = [
+const experiences = [
   {
-    name: 'Around Park City',
-    description:
-      'Private chef experiences for homes, vacation rentals, and gatherings in Park City and surrounding areas.',
+    title: 'Private dinners',
+    description: 'A personalized plated menu for an intimate evening or special celebration.',
   },
   {
-    name: 'Around Salt Lake City',
-    description: 'Private dinners, cooking classes, and buffet-style events in Salt Lake City and surrounding areas.',
+    title: 'Vacation-rental meals',
+    description: 'Chef-prepared dining that lets your group spend more time enjoying the trip.',
   },
+  { title: 'Cooking classes', description: 'A hands-on culinary experience to share with friends or family.' },
+  { title: 'Buffet-style events', description: 'A welcoming spread for group gatherings and relaxed celebrations.' },
 ];
 
 const faqItems = [
   {
-    question: 'What areas does Chef Luis Velez serve?',
+    question: 'Can you cook at our vacation rental?',
     answer:
-      'Chef Luis serves Park City, Salt Lake City, and surrounding areas in Utah. Include your event location in your request so he can help plan the experience.',
-  },
-  {
-    question: 'Can I book a private chef for a Park City vacation rental?',
-    answer:
-      'Yes. Chef Luis offers vacation-rental meals for ski vacations, retreats, birthdays, anniversaries, and group gatherings in Park City and surrounding areas.',
-  },
-  {
-    question: 'What private chef services are available in Salt Lake City?',
-    answer:
-      'Private plated dinners, vacation-rental meals, cooking classes, and buffet-style events are available in Salt Lake City and surrounding areas.',
+      'Yes. Share the property details and kitchen setup with your request so Chef Luis can plan a meal that fits your stay.',
   },
   {
     question: 'How do I request a private chef experience?',
@@ -116,8 +98,8 @@ export default function ServiceAreasRoute() {
                 Private Chef in Park City and Salt Lake City
               </h1>
               <p className="mx-auto text-base md:text-xl lg:text-2xl !leading-normal max-w-4xl">
-                Chef Luis Velez serves private dinners, vacation-rental meals, cooking classes, and buffet-style events
-                throughout Park City, Salt Lake City, and surrounding areas.
+                Bring everyone together over a personalized meal. Chef Luis Velez creates memorable dining experiences
+                for gatherings at home and time away.
               </p>
             </div>
           }
@@ -134,46 +116,29 @@ export default function ServiceAreasRoute() {
           {primaryAreas.map((area) => (
             <section key={area.id} id={area.id} className="space-y-6 scroll-mt-28">
               <div className="space-y-3">
-                <p className="text-sm uppercase tracking-widest text-accent-700 font-semibold">{area.eyebrow}</p>
                 <h2 className="font-italiana text-4xl md:text-5xl text-primary-900">{area.title}</h2>
                 <p className="text-lg leading-relaxed text-primary-700">{area.description}</p>
               </div>
-              <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-primary-700">
-                {area.details.map((detail) => (
-                  <li key={detail} className="border border-accent-100 bg-white px-4 py-3 rounded-lg">
-                    {detail}
-                  </li>
-                ))}
-              </ul>
             </section>
           ))}
         </div>
       </Container>
 
       <Container className="py-12 lg:py-20 bg-gray-50 sm:!px-16">
-        <div className="grid grid-cols-1 lg:grid-cols-[0.85fr_1.15fr] gap-10 items-start">
-          <div className="space-y-4">
-            <p className="text-sm uppercase tracking-widest text-accent-700 font-semibold">Nearby Areas</p>
-            <h2 className="font-italiana text-4xl md:text-5xl text-primary-900">Serving Surrounding Areas</h2>
-            <p className="text-lg leading-relaxed text-primary-700">
-              Planning an event near Park City or Salt Lake City? Share the location and your preferred experience when
-              requesting a date so Chef Luis can help plan your gathering.
-            </p>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {nearbyAreas.map((area) => (
-              <div key={area.name} className="bg-white rounded-lg border border-gray-100 p-5">
-                <h3 className="text-xl font-semibold text-primary-900">{area.name}</h3>
-                <p className="mt-2 text-primary-700">{area.description}</p>
-              </div>
-            ))}
-          </div>
+        <h2 className="font-italiana text-4xl md:text-5xl text-primary-900 text-center mb-10">Find Your Experience</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {experiences.map((experience) => (
+            <section key={experience.title} className="bg-white rounded-lg border border-gray-100 p-6">
+              <h3 className="text-xl font-semibold text-primary-900">{experience.title}</h3>
+              <p className="mt-3 text-primary-700">{experience.description}</p>
+            </section>
+          ))}
         </div>
       </Container>
 
       <Container className="py-12 lg:py-20 sm:!px-16">
         <div className="text-center mb-10">
-          <h2 className="font-italiana text-4xl md:text-5xl text-primary-900">Service Area Questions</h2>
+          <h2 className="font-italiana text-4xl md:text-5xl text-primary-900">Planning Your Experience</h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {faqItems.map((faq) => (
@@ -192,6 +157,7 @@ export default function ServiceAreasRoute() {
             Send the event date, location, guest count, and style of experience. Chef Luis will review availability and
             help shape the right menu for the occasion.
           </p>
+          <p className="text-white/90 mb-6">Hosting nearby? Include your event location in your request.</p>
           <ActionList
             actions={[
               { label: 'Request Your Event', url: '/request', style_variant: ButtonStyleVariant.PRIMARY },
