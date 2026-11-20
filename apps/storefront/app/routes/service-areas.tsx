@@ -42,44 +42,35 @@ const serviceAreaSchema = {
   ],
 };
 
-const primaryAreas = [
-  {
-    id: 'park-city',
-    title: 'Park City',
-    description:
-      'Come home from the slopes to a chef-prepared meal, gather friends for a birthday, or settle in for a relaxed dinner during your mountain getaway. Make your vacation home part of the experience.',
-  },
-  {
-    id: 'salt-lake-city',
-    title: 'Salt Lake City',
-    description:
-      'Turn an evening at home into an occasion. Bring family together, celebrate a milestone, or host friends over a personalized menu while Chef Luis takes care of the cooking.',
-  },
-];
-
 const experiences = [
   {
     title: 'Private dinners',
-    description: 'A personalized plated menu for an intimate evening or special celebration.',
+    description: 'Choose a menu for your guests and let Chef Luis serve dinner course by course at your table.',
   },
   {
     title: 'Vacation-rental meals',
-    description: 'Chef-prepared dining that lets your group spend more time enjoying the trip.',
+    description: 'After a day on the mountain, come back to dinner at the rental and stay in for the night.',
   },
-  { title: 'Cooking classes', description: 'A hands-on culinary experience to share with friends or family.' },
-  { title: 'Buffet-style events', description: 'A welcoming spread for group gatherings and relaxed celebrations.' },
+  {
+    title: 'Cooking classes',
+    description: 'Get everyone in the kitchen. Cook alongside Chef Luis, then sit down to what you made together.',
+  },
+  {
+    title: 'Buffet-style events',
+    description: 'For a reunion or a party where people are mingling, Chef Luis prepares a buffet so guests can help themselves.',
+  },
 ];
 
 const faqItems = [
   {
     question: 'Can you cook at our vacation rental?',
     answer:
-      'Yes. Share the property details and kitchen setup with your request so Chef Luis can plan a meal that fits your stay.',
+      'Yes. If you know what appliances and cookware the rental has, include those details in your request.',
   },
   {
-    question: 'How do I request a private chef experience?',
+    question: 'What’s included in a private dinner?',
     answer:
-      'Browse the menus and send an event request with your date, location, guest count, and preferred experience. Chef Luis will follow up to discuss your menu and event details.',
+      'Chef Luis handles the ingredients, cooking, service, and kitchen cleanup. Let him know about any dietary needs when you send your request.',
   },
 ];
 
@@ -93,13 +84,12 @@ export default function ServiceAreasRoute() {
           className="min-h-[360px] sm:min-h-[390px] lg:min-h-[420px] !max-w-full bg-accent-50 sm:rounded-3xl px-6 py-10 sm:p-10 md:p-16 lg:p-20"
           content={
             <div className="text-center w-full space-y-6 md:space-y-8">
-              <p className="text-base md:text-2xl font-italiana tracking-wider">SERVICE AREAS</p>
               <h1 className="text-4xl md:text-6xl lg:text-7xl font-italiana tracking-wider [text-shadow:_1px_1px_2px_rgb(0_0_0_/_30%)]">
                 Private Chef in Park City and Salt Lake City
               </h1>
               <p className="mx-auto text-base md:text-xl lg:text-2xl !leading-normal max-w-4xl">
-                Bring everyone together over a personalized meal. Chef Luis Velez creates memorable dining experiences
-                for gatherings at home and time away.
+                Skip the restaurant reservation. Chef Luis Velez cooks at your home or vacation rental in either city
+                and the surrounding areas, so you can spend the evening with your guests.
               </p>
             </div>
           }
@@ -111,21 +101,8 @@ export default function ServiceAreasRoute() {
         />
       </Container>
 
-      <Container className="py-12 lg:py-20 sm:!px-16">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-          {primaryAreas.map((area) => (
-            <section key={area.id} id={area.id} className="space-y-6 scroll-mt-28">
-              <div className="space-y-3">
-                <h2 className="font-italiana text-4xl md:text-5xl text-primary-900">{area.title}</h2>
-                <p className="text-lg leading-relaxed text-primary-700">{area.description}</p>
-              </div>
-            </section>
-          ))}
-        </div>
-      </Container>
-
       <Container className="py-12 lg:py-20 bg-gray-50 sm:!px-16">
-        <h2 className="font-italiana text-4xl md:text-5xl text-primary-900 text-center mb-10">Find Your Experience</h2>
+        <h2 className="font-italiana text-4xl md:text-5xl text-primary-900 text-center mb-10">What Are You Hosting?</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {experiences.map((experience) => (
             <section key={experience.title} className="bg-white rounded-lg border border-gray-100 p-6">
@@ -138,7 +115,7 @@ export default function ServiceAreasRoute() {
 
       <Container className="py-12 lg:py-20 sm:!px-16">
         <div className="text-center mb-10">
-          <h2 className="font-italiana text-4xl md:text-5xl text-primary-900">Planning Your Experience</h2>
+          <h2 className="font-italiana text-4xl md:text-5xl text-primary-900">Before You Book</h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {faqItems.map((faq) => (
@@ -152,12 +129,11 @@ export default function ServiceAreasRoute() {
 
       <Container className="pb-20 sm:!px-16">
         <div className="text-center bg-accent-50 rounded-2xl p-8 md:p-12">
-          <h2 className="font-italiana text-4xl md:text-5xl text-white mb-4">Planning a Private Dinner?</h2>
+          <h2 className="font-italiana text-4xl md:text-5xl text-white mb-4">Tell Chef Luis What You’re Planning</h2>
           <p className="text-lg text-white/90 max-w-3xl mx-auto mb-8">
-            Send the event date, location, guest count, and style of experience. Chef Luis will review availability and
-            help shape the right menu for the occasion.
+            Share your date, event address, and how many people you’re hosting. Chef Luis will follow up about availability
+            and what you’d like to serve.
           </p>
-          <p className="text-white/90 mb-6">Hosting nearby? Include your event location in your request.</p>
           <ActionList
             actions={[
               { label: 'Request Your Event', url: '/request', style_variant: ButtonStyleVariant.PRIMARY },
