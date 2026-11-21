@@ -8,131 +8,69 @@ export const loader = async (_args: LoaderFunctionArgs) => {
   return {};
 };
 
-export const meta: MetaFunction<typeof loader> = () => {
-  return [
-    { title: 'Service Areas - Chef Luis Velez' },
-    {
-      name: 'description',
-      content:
-        'Chef Luis Velez is a private chef based in Carson City, Nevada, serving private dinners, cooking classes, and events across Carson City, Reno, and the Lake Tahoe area.',
-    },
-    { property: 'og:title', content: 'Service Areas - Chef Luis Velez' },
-    {
-      property: 'og:description',
-      content:
-        'Private chef services for Carson City, Reno, and Lake Tahoe events, vacation rentals, cabins, retreats, and intimate in-home dinners.',
-    },
-    { property: 'og:type', content: 'website' },
-    {
-      name: 'keywords',
-      content:
-        'private chef Carson City, private chef Lake Tahoe, personal chef Carson City NV, vacation rental chef Lake Tahoe, in-home chef Nevada',
-    },
-  ];
-};
+export const meta: MetaFunction<typeof loader> = () => [
+  { title: 'Private Chef Service Areas: Park City & Salt Lake City | Chef Luis Velez' },
+  {
+    name: 'description',
+    content:
+      'Chef Luis Velez serves Park City, Salt Lake City, and surrounding areas with private dinners, vacation-rental meals, cooking classes, and buffet-style events.',
+  },
+  { property: 'og:title', content: 'Park City & Salt Lake City Private Chef | Chef Luis Velez' },
+  {
+    property: 'og:description',
+    content:
+      'Personalized private dining for homes, vacation rentals, retreats, and celebrations in Park City, Salt Lake City, and surrounding areas.',
+  },
+  { property: 'og:type', content: 'website' },
+];
 
 const serviceAreaSchema = {
   '@context': 'https://schema.org',
   '@type': 'LocalBusiness',
   name: 'Chef Luis Velez',
   url: 'https://chefvelez.com/service-areas',
-  description:
-    'Private chef services based in Carson City, Nevada, serving Carson City, Reno, and the Lake Tahoe area.',
-  address: {
-    '@type': 'PostalAddress',
-    addressLocality: 'Carson City',
-    addressRegion: 'NV',
-    addressCountry: 'US',
-  },
+  description: 'Private chef serving Park City, Salt Lake City, and surrounding areas in Utah.',
   areaServed: [
-    { '@type': 'City', name: 'Carson City' },
-    { '@type': 'City', name: 'Reno' },
-    { '@type': 'Place', name: 'Lake Tahoe' },
-    { '@type': 'City', name: 'South Lake Tahoe' },
-    { '@type': 'City', name: 'Incline Village' },
-    { '@type': 'City', name: 'Tahoe City' },
-    { '@type': 'City', name: 'Truckee' },
+    { '@type': 'City', name: 'Park City', containedInPlace: { '@type': 'State', name: 'Utah' } },
+    { '@type': 'City', name: 'Salt Lake City', containedInPlace: { '@type': 'State', name: 'Utah' } },
   ],
   makesOffer: [
     { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Private plated dinners' } },
     { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Cooking classes' } },
     { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Buffet-style events' } },
-    { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Vacation rental private chef experiences' } },
+    { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Vacation-rental meals' } },
   ],
 };
 
-const primaryAreas = [
+const experiences = [
   {
-    id: 'carson-city',
-    eyebrow: 'Home Base',
-    title: 'Private Chef in Carson City, Nevada',
-    description:
-      'Chef Luis Velez is based in Carson City and creates at-home culinary experiences for private dinners, cooking classes, family gatherings, and small celebrations throughout the area.',
-    details: [
-      'In-home plated dinners',
-      'Hands-on cooking classes',
-      'Buffet-style gatherings',
-      'Custom menus for special occasions',
-    ],
+    title: 'Private dinners',
+    description: 'Choose a menu for your guests and let Chef Luis serve dinner course by course at your table.',
   },
   {
-    id: 'lake-tahoe',
-    eyebrow: 'High-Intent Travel Market',
-    title: 'Private Chef for Lake Tahoe Vacation Rentals and Events',
-    description:
-      'For Lake Tahoe guests, Chef Luis brings restaurant-quality dining to vacation homes, cabins, ski trips, retreats, anniversaries, birthdays, and intimate group dinners.',
-    details: [
-      'Vacation rental dinners',
-      'Cabin and ski trip meals',
-      'Retreat and celebration menus',
-      'Travel planning for Tahoe-area events',
-    ],
-  },
-];
-
-const nearbyAreas = [
-  {
-    name: 'Reno',
-    description: 'Private dinners, small celebrations, and chef-led events considered for Reno homes and venues.',
+    title: 'Vacation-rental meals',
+    description: 'After a day on the mountain, come back to dinner at the rental and stay in for the night.',
   },
   {
-    name: 'South Lake Tahoe',
-    description: 'Vacation rental dinners, ski trip meals, and special occasion menus reviewed by request.',
+    title: 'Cooking classes',
+    description: 'Get everyone in the kitchen. Cook alongside Chef Luis, then sit down to what you made together.',
   },
   {
-    name: 'Incline Village',
-    description: 'Lake Tahoe private chef experiences considered for homes, cabins, retreats, and intimate events.',
-  },
-  {
-    name: 'Tahoe City',
-    description: 'Seasonal private dining and group meal requests reviewed around timing, distance, and kitchen setup.',
-  },
-  {
-    name: 'Truckee',
-    description: 'Cabin dinners, retreat menus, and private group dining considered when scheduling allows.',
+    title: 'Buffet-style events',
+    description: 'For a reunion or a party where people are mingling, Chef Luis prepares a buffet so guests can help themselves.',
   },
 ];
 
 const faqItems = [
   {
-    question: 'Does Chef Luis Velez travel to Lake Tahoe?',
+    question: 'Can you cook at our vacation rental?',
     answer:
-      'Yes. Chef Luis is based in Carson City and serves Lake Tahoe-area private dinners, vacation rental events, retreats, and special occasions when scheduling and travel logistics align.',
+      'Yes. If you know what appliances and cookware the rental has, include those details in your request.',
   },
   {
-    question: 'Can I book a private chef for a Lake Tahoe vacation rental?',
+    question: 'What’s included in a private dinner?',
     answer:
-      'Yes. Vacation rental dinners are a strong fit for plated dinners, family gatherings, ski trip meals, anniversaries, birthdays, and relaxed group celebrations.',
-  },
-  {
-    question: 'What areas does Chef Luis serve from Carson City?',
-    answer:
-      'Chef Luis primarily serves Carson City and nearby Nevada communities, with Lake Tahoe, Reno, Incline Village, Tahoe City, Truckee, and South Lake Tahoe considered for private events.',
-  },
-  {
-    question: 'Are travel fees required for Lake Tahoe events?',
-    answer:
-      'Travel needs depend on the exact location, party size, date, and kitchen setup. Share the event address or neighborhood in the request so Chef Luis can confirm availability and any travel details.',
+      'Chef Luis handles the ingredients, cooking, service, and kitchen cleanup. Let him know about any dietary needs when you send your request.',
   },
 ];
 
@@ -146,13 +84,12 @@ export default function ServiceAreasRoute() {
           className="min-h-[360px] sm:min-h-[390px] lg:min-h-[420px] !max-w-full bg-accent-50 sm:rounded-3xl px-6 py-10 sm:p-10 md:p-16 lg:p-20"
           content={
             <div className="text-center w-full space-y-6 md:space-y-8">
-              <p className="text-base md:text-2xl font-italiana tracking-wider">SERVICE AREAS</p>
               <h1 className="text-4xl md:text-6xl lg:text-7xl font-italiana tracking-wider [text-shadow:_1px_1px_2px_rgb(0_0_0_/_30%)]">
-                Private Chef in Carson City and Lake Tahoe
+                Private Chef in Park City and Salt Lake City
               </h1>
               <p className="mx-auto text-base md:text-xl lg:text-2xl !leading-normal max-w-4xl">
-                Chef Luis Velez is based in Carson City, Nevada, and serves private dinners, cooking classes, and event
-                dining throughout Carson City, Reno, and the Lake Tahoe area.
+                Skip the restaurant reservation. Chef Luis Velez cooks at your home or vacation rental in either city
+                and the surrounding areas, so you can spend the evening with your guests.
               </p>
             </div>
           }
@@ -164,51 +101,21 @@ export default function ServiceAreasRoute() {
         />
       </Container>
 
-      <Container className="py-12 lg:py-20 sm:!px-16">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-          {primaryAreas.map((area) => (
-            <section key={area.id} id={area.id} className="space-y-6 scroll-mt-28">
-              <div className="space-y-3">
-                <p className="text-sm uppercase tracking-widest text-accent-700 font-semibold">{area.eyebrow}</p>
-                <h2 className="font-italiana text-4xl md:text-5xl text-primary-900">{area.title}</h2>
-                <p className="text-lg leading-relaxed text-primary-700">{area.description}</p>
-              </div>
-              <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-primary-700">
-                {area.details.map((detail) => (
-                  <li key={detail} className="border border-accent-100 bg-white px-4 py-3 rounded-lg">
-                    {detail}
-                  </li>
-                ))}
-              </ul>
+      <Container className="py-12 lg:py-20 bg-gray-50 sm:!px-16">
+        <h2 className="font-italiana text-4xl md:text-5xl text-primary-900 text-center mb-10">What Are You Hosting?</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {experiences.map((experience) => (
+            <section key={experience.title} className="bg-white rounded-lg border border-gray-100 p-6">
+              <h3 className="text-xl font-semibold text-primary-900">{experience.title}</h3>
+              <p className="mt-3 text-primary-700">{experience.description}</p>
             </section>
           ))}
         </div>
       </Container>
 
-      <Container className="py-12 lg:py-20 bg-gray-50 sm:!px-16">
-        <div className="grid grid-cols-1 lg:grid-cols-[0.85fr_1.15fr] gap-10 items-start">
-          <div className="space-y-4">
-            <p className="text-sm uppercase tracking-widest text-accent-700 font-semibold">Nearby Areas</p>
-            <h2 className="font-italiana text-4xl md:text-5xl text-primary-900">Available by Request</h2>
-            <p className="text-lg leading-relaxed text-primary-700">
-              Each event is reviewed for timing, distance, kitchen setup, and menu fit. Share the event location when
-              requesting a date so Chef Luis can confirm the details.
-            </p>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {nearbyAreas.map((area) => (
-              <div key={area.name} className="bg-white rounded-lg border border-gray-100 p-5">
-                <h3 className="text-xl font-semibold text-primary-900">{area.name}</h3>
-                <p className="mt-2 text-primary-700">{area.description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </Container>
-
       <Container className="py-12 lg:py-20 sm:!px-16">
         <div className="text-center mb-10">
-          <h2 className="font-italiana text-4xl md:text-5xl text-primary-900">Service Area Questions</h2>
+          <h2 className="font-italiana text-4xl md:text-5xl text-primary-900">Before You Book</h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {faqItems.map((faq) => (
@@ -222,10 +129,10 @@ export default function ServiceAreasRoute() {
 
       <Container className="pb-20 sm:!px-16">
         <div className="text-center bg-accent-50 rounded-2xl p-8 md:p-12">
-          <h2 className="font-italiana text-4xl md:text-5xl text-white mb-4">Planning a Private Dinner?</h2>
+          <h2 className="font-italiana text-4xl md:text-5xl text-white mb-4">Tell Chef Luis What You’re Planning</h2>
           <p className="text-lg text-white/90 max-w-3xl mx-auto mb-8">
-            Send the event date, location, guest count, and style of experience. Chef Luis will review availability and
-            help shape the right menu for the occasion.
+            Share your date, event address, and how many people you’re hosting. Chef Luis will follow up about availability
+            and what you’d like to serve.
           </p>
           <ActionList
             actions={[
